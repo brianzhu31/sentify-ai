@@ -1,4 +1,4 @@
-# market-sentiment-app
+# market-sentinel
 
 A web application aimed at providing real-time market sentiment analysis to assist investors in making informed decisions. It will fetch and analyze news articles related to specific companies, and use LLMs/NLP to generate sentiment scores and summaries to gauge the current market perception.
 
