@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Environment variables
+.env
+
+# Output files
+app_output.json
+relevant_articles.json
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
