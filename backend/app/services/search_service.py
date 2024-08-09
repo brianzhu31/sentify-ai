@@ -138,7 +138,7 @@ def format_analysis(analysis_data: dict, news_articles: dict) -> dict:
 
     overall_score = total_score/total_weight if total_weight != 0 else 0
 
-    formatted_output["score"] = overall_score
+    formatted_output["score"] = round(overall_score)
 
     return formatted_output
 
