@@ -1,12 +1,22 @@
-def get_relevant_articles_prompt(company_name: str, article_previews: str):
+import re
+
+
+def clean_text(text: str) -> str:
+    text = re.sub(r"\s+", " ", text)
+    text = text.strip()
+    text = re.sub(r"\n+", " ", text)
+    return text
+
+
+def get_relevant_articles_prompt(company_name: str, article_previews: str) -> list:
     return [
         {
             "role": "system",
-                    "content": "You are a highly skilled financial expert.",
+            "content": "You are a highly skilled financial expert.",
         },
         {
             "role": "user",
-                    "content": f"""
+            "content": f"""
 I have a collection of news article previews about {company_name}. For each preview, it has an index number, a title, and excerpt. I need you to:
 
 1. Remember the preview's index number.
@@ -25,7 +35,9 @@ Here are the article previews:\n{article_previews}
     ]
 
 
-def get_analysis_prompt(company_name: str, articles_content: str, relevant_articles: list):
+def get_analysis_prompt(
+    company_name: str, articles_content: str, relevant_articles: list
+) -> list:
     return [
         {
             "role": "system",

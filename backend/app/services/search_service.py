@@ -5,8 +5,7 @@ import requests
 from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
-from app.util.prompt import get_relevant_articles_prompt, get_analysis_prompt
-from app.util.text import clean_text
+from app.util.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
 
 load_dotenv()
 
@@ -145,9 +144,13 @@ def format_analysis(analysis_data: dict, news_articles: dict) -> dict:
 
 def get_company_analysis_data(company_name: str, ticker: str, days_ago: int) -> dict:
     raw_news_data = get_news(company_name, ticker, days_ago)
+    with open("raw_news_data.json", "w", encoding="utf-8") as json_file:
+        json.dump(raw_news_data, json_file, indent=4)
     relevant_news_articles = get_relevant_articles(company_name, raw_news_data)
     filtered_articles_content = create_filtered_articles_content(
         raw_news_data, relevant_news_articles)
+    with open("filtered_articles_content.txt", "w", encoding="utf-8") as file:
+        file.write(filtered_articles_content)
     analysis_data = get_analysis(
         company_name, filtered_articles_content, relevant_news_articles)
     with open("relevant_articles.json", "w", encoding="utf-8") as json_file:

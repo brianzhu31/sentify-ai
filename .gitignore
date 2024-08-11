@@ -12,7 +12,9 @@ instance/
 
 # Output files
 app_output.json
+raw_news_data.json
 relevant_articles.json
+filtered_articles_content.txt
 
 # macOS
 .DS_Store
