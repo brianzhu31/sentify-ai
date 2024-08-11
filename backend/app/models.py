@@ -1,13 +1,18 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, JSON, ARRAY
+from sqlalchemy import Column, Integer, String, JSON, ARRAY, DateTime
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.dialects.postgresql import ARRAY
 
 db = SQLAlchemy()
 
 
 class User(db.Model):
-    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    id = Column(String(80), primary_key=True, nullable=False)
     email = Column(String(254), unique=True, nullable=False)
-    search_ids = Column(ARRAY(Integer), nullable=True)
+    search_ids = Column(MutableList.as_mutable(ARRAY(Integer)), nullable=True, default=list)
+    search_count = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
 class Search(db.Model):
@@ -18,3 +23,5 @@ class Search(db.Model):
     negative_summaries = Column(ARRAY(JSON), nullable=False)
     top_sources = Column(ARRAY(JSON), nullable=False)
     score = Column(Integer, nullable=False)
+    created_by = Column(String(80), nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
