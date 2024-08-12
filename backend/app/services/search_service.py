@@ -5,7 +5,7 @@ import requests
 from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
-from app.util.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
+from app.utils.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
 
 load_dotenv()
 
