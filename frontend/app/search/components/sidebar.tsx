@@ -10,7 +10,7 @@ import { Menu } from "@/components/admin-panel/menu";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
 import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
 import { createClient } from "@/utils/supabase/client";
-import { useUserSession } from "@/app/context/user-session-context";
+import { useUserSession } from "@/context/user-session-context";
 
 export function Sidebar() {
   const { user, session } = useUserSession();

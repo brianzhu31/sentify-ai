@@ -1,6 +1,6 @@
 "use client";
 
-import { UserSessionProvider } from "../context/user-session-context";
+import { UserSessionProvider } from "@/context/user-session-context";
 import { Sidebar } from "./components/sidebar";
 
 export default function Search() {
