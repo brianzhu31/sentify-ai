@@ -1,21 +1,51 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import axios from "axios";
+import jwt from 'jsonwebtoken';
+
+const apiUrl = process.env.BASE_URL!;
 
 export async function signUp(formData: FormData) {
   const supabase = createClient();
 
-  const data = {
+  const signUpData = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const { data, error } = await supabase.auth.signUp(signUpData);
 
   if (error) {
     redirect("/error");
+  }
+
+  let accessToken: string = "";
+  if (data && data.session) {
+    accessToken = data.session.access_token;
+  }
+
+  try {
+    const response = await axios.post(
+      `${apiUrl}/api/auth/register`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error: any) {
+    const decodedToken = jwt.decode(accessToken)
+    if (decodedToken){
+      const userId = decodedToken["sub"] as string;
+      deleteUser(userId);
+    }
+    revalidatePath("/error", "layout");
+    redirect("/error")
   }
 
   revalidatePath("/search", "layout");
@@ -25,12 +55,12 @@ export async function signUp(formData: FormData) {
 export async function login(formData: FormData) {
   const supabase = createClient();
 
-  const data = {
+  const loginData = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const { error } = await supabase.auth.signInWithPassword(loginData);
 
   if (error) {
     return error.message; // Return the error message
@@ -38,7 +68,6 @@ export async function login(formData: FormData) {
 
   revalidatePath("/search", "layout");
   redirect("/search");
-  return null;
 }
 
 export async function logout() {
@@ -52,4 +81,12 @@ export async function logout() {
 
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+async function deleteUser(userId: any) {
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase.auth.admin.deleteUser(
+    userId,
+  );
 }

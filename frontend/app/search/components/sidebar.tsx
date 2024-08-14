@@ -10,22 +10,12 @@ import { Menu } from "@/components/admin-panel/menu";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
 import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
 import { createClient } from "@/utils/supabase/client";
+import { useUserSession } from "@/app/context/user-session-context";
 
 export function Sidebar() {
-  const [user, setUser] = useState<any>(null);
+  const { user, session } = useUserSession();
   const sidebar = useStore(useSidebarToggle, (state) => state);
   const supabase = createClient();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    console.log(user)
-    fetchUser();
-  }, []);
 
   if (!sidebar) return null;
 

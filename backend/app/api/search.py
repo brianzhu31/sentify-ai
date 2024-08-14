@@ -1,7 +1,7 @@
 from flask import jsonify, request, Blueprint, g
 from services.search_service import get_company_analysis_data
 from models import db, Search, User
-from app.utils.validation import token_required
+from utils.validation import token_required
 
 search_bp = Blueprint("search", __name__)
 
