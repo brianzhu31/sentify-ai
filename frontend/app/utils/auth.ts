@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import axios from "axios";
 import jwt from 'jsonwebtoken';
 
-const apiUrl = process.env.BASE_URL!;
+const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export async function signUp(formData: FormData) {
   const supabase = createClient();

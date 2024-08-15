@@ -5,11 +5,11 @@ from flask_cors import CORS
 from models import db
 from supabase import create_client, Client
 
-load_dotenv()
+load_dotenv(".env.local")
 
 SUPABASE_URI = os.getenv("SUPABASE_URI")
-url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-key = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+url = os.getenv("PUBLIC_SUPABASE_URL")
+key = os.getenv("PUBLIC_SUPABASE_ANON_KEY")
 supabase: Client = create_client(url, key)
 
 app = Flask(__name__)

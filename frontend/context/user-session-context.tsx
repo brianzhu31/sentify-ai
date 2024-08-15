@@ -23,6 +23,7 @@ export const UserSessionProvider = ({ children }: { children: React.ReactNode })
 
     const fetchSession = async () => {
       const { data, error } = await supabase.auth.getSession();
+      console.log(data)
       setSession(data);
     };
 

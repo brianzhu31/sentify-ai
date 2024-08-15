@@ -7,7 +7,7 @@ from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
 from app.utils.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
 
-load_dotenv()
+load_dotenv(".env.local")
 
 NEWSCATCHER_KEY = os.getenv("NEWSCATCHER_KEY")
 OPENAI_KEY = os.getenv("OPENAI_KEY")

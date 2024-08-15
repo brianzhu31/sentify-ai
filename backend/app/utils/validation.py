@@ -5,10 +5,10 @@ from functools import wraps
 from flask import request, jsonify, g
 import time
 
-load_dotenv()
+load_dotenv(".env.local")
 
 JWT_SECRET = os.getenv("JWT_SECRET")
-NEXT_PUBLIC_SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+PUBLIC_SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL")
 
 
 def verify_jwt(token: str) -> dict:
@@ -26,7 +26,7 @@ def verify_jwt(token: str) -> dict:
         exp = decoded_token["exp"]
 
         if (
-            iss.startswith(NEXT_PUBLIC_SUPABASE_URL)
+            iss.startswith(PUBLIC_SUPABASE_URL)
             and role == "authenticated"
             and time.time() < exp
         ):
