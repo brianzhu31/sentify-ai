@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { signUp } from "@/app/utils/auth";
+import { signUp } from "@/utils/auth";
 
 export default function SignUpForm() {
   const [email, setEmail] = useState("");
