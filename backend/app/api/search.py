@@ -9,7 +9,7 @@ search_bp = Blueprint("search", __name__)
 @search_bp.route("/search_company", methods=["POST"])
 @token_required
 def search_company():
-    user_id = g.user['sub']
+    user_id = g.user["sub"]
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"message": "User not found."}), 404
@@ -28,19 +28,19 @@ def search_company():
         negative_summaries=analysis_data["negative"],
         top_sources=analysis_data["top_sources"],
         score=analysis_data["score"],
-        created_by=user_id
+        created_by=user_id,
     )
     try:
         db.session.add(new_search)
         db.session.commit()
-        
+
         new_search_id = new_search.id
 
         user.search_ids.append(new_search_id)
         user.search_count += 1
 
         db.session.commit()
-        
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": str(e)}), 400
@@ -49,8 +49,8 @@ def search_company():
 
 @search_bp.route("/search_history", methods=["GET"])
 @token_required
-def get_searches():
-    user_id = g.user['sub']
+def get_search_history():
+    user_id = g.user["sub"]
     user = User.query.get(user_id)
     if user is None:
         return jsonify({"message": "User not found."}), 404
@@ -59,12 +59,19 @@ def get_searches():
 
     list_of_search_contents = [
         {
-            "search_id": search.id,
-            "company_name": search.company_name,
-            "ticker": search.ticker,
-            "created_at": search.created_at
+            "group_label": "Search History",
+            "menus": [
+                {
+                    "search_id": search.id,
+                    "ticker": search.ticker,
+                    "href": f"/search/{search.id}",
+                    "label": search.company_name,
+                    "created_at": search.created_at,
+                    "submenus": [],
+                }
+                for search in searches
+            ],
         }
-        for search in searches
     ]
-    
+
     return jsonify(list_of_search_contents), 200
