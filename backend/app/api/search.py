@@ -32,7 +32,6 @@ def search_company():
     )
     try:
         db.session.add(new_search)
-        db.session.commit()
 
         new_search_id = new_search.id
 
@@ -57,21 +56,20 @@ def get_search_history():
 
     searches = Search.query.filter(Search.id.in_(user.search_ids)).all()
 
-    list_of_search_contents = [
-        {
-            "group_label": "Search History",
-            "menus": [
-                {
-                    "search_id": search.id,
-                    "ticker": search.ticker,
-                    "href": f"/search/{search.id}",
-                    "label": search.company_name,
-                    "created_at": search.created_at,
-                    "submenus": [],
-                }
-                for search in searches
-            ],
-        }
-    ]
+    search_content = {
+        "label": "Search History",
+        "searches": [
+            {
+                "search_id": search.id,
+                "ticker": search.ticker,
+                "href": f"/search/{search.id}",
+                "label": search.company_name,
+                "created_at": search.created_at,
+                "active": False,
+                "sub_fields": []
+            }
+            for search in searches
+        ],
+    }
 
-    return jsonify(list_of_search_contents), 200
+    return jsonify(search_content), 200
