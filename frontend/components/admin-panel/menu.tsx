@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { useUserSession } from "@/context/user-session-context";
 
 import { cn } from "@/lib/utils";
-import { getMenuList } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CollapseMenuButton } from "@/components/admin-panel/collapse-menu-button";
@@ -18,9 +17,8 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Search } from "lucide-react";
-import { logout } from "@/app/utils/auth";
+import { logout } from "@/utils/auth";
 import { fetchMenuList } from "@/lib/menu-list";
-import axios from "axios";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -29,13 +27,12 @@ interface MenuProps {
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export function Menu({ isOpen }: MenuProps) {
-  const pathname = usePathname();
-  const { user, session } = useUserSession();
+  const { session } = useUserSession();
   const [menuList, setMenuList] = useState<any[]>([]);
 
   const handleLogout = async (e: any) => {
     e.preventDefault();
-    const loginError = await logout();
+    await logout();
   };
 
   useEffect(() => {
