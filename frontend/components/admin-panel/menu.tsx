@@ -1,15 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Ellipsis, LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useUserSession } from "@/context/user-session-context";
-
+import { SearchHistoryData, SearchItem } from "@/types";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CollapseMenuButton } from "@/components/admin-panel/collapse-menu-button";
 import {
   Tooltip,
   TooltipTrigger,
@@ -18,39 +14,19 @@ import {
 } from "@/components/ui/tooltip";
 import { Search } from "lucide-react";
 import { logout } from "@/utils/auth";
-import { fetchMenuList } from "@/lib/menu-list";
+
 
 interface MenuProps {
   isOpen: boolean | undefined;
+  searchHistory: SearchHistoryData;
 }
 
-const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+export function Menu({ isOpen, searchHistory }: MenuProps) {
 
-export function Menu({ isOpen }: MenuProps) {
-  const { session } = useUserSession();
-  const [menuList, setMenuList] = useState<any[]>([]);
-
-  const handleLogout = async (e: any) => {
+  const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     await logout();
   };
-
-  useEffect(() => {
-    if (!session) {
-      return;
-    }
-
-    const getMenuList = async () => {
-      try {
-        const data = await fetchMenuList(session.session.access_token);
-        setMenuList(data);
-      } catch (err) {
-        console.log('Error fetching menu list:', err);
-      }
-    };
-
-    getMenuList();
-  }, [session]);
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
@@ -88,17 +64,18 @@ export function Menu({ isOpen }: MenuProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          {menuList.map(({ group_label, menus }, index) => (
-            <li className={cn("w-full", group_label ? "pt-5" : "")} key={index}>
-              {(isOpen && group_label) || isOpen === undefined ? (
-                <p className="text-m font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
-                  {group_label}
-                </p>
-              ) : (
-                <p className="pb-2"></p>
-              )}
-              {menus.map(({ href, label, active, submenus }, index) =>
-                submenus.length === 0 ? (
+          <li className={cn("w-full", searchHistory.label ? "pt-5" : "")}>
+            {(isOpen && searchHistory.label) || isOpen === undefined ? (
+              <p className="text-m font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
+                {searchHistory.label}
+              </p>
+            ) : (
+              <p className="pb-2"></p>
+            )}
+            {searchHistory &&
+              searchHistory.searches &&
+              searchHistory.searches.map(
+                ({ href, label, active}, index) => (
                   <div className="w-full" key={index}>
                     <TooltipProvider disableHoverableContent>
                       <Tooltip delayDuration={100}>
@@ -135,19 +112,9 @@ export function Menu({ isOpen }: MenuProps) {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                ) : (
-                  <div className="w-full" key={index}>
-                    <CollapseMenuButton
-                      label={label}
-                      active={active}
-                      submenus={submenus}
-                      isOpen={isOpen}
-                    />
-                  </div>
                 )
               )}
-            </li>
-          ))}
+          </li>
           <li className="w-full grow flex items-end">
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>

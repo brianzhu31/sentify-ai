@@ -1,21 +1,20 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { PanelsTopLeft } from "lucide-react";
+import { SearchHistoryData } from "@/types"
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/useStore";
-import { Button } from "@/components/ui/button";
 import { Menu } from "@/components/admin-panel/menu";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
 import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
-import { createClient } from "@/utils/supabase/client";
 import { useUserSession } from "@/context/user-session-context";
 
-export function Sidebar() {
-  const { user, session } = useUserSession();
+interface SidebarProps {
+  searchHistory: SearchHistoryData;
+}
+
+export function Sidebar({ searchHistory }: SidebarProps) {
+  const { user } = useUserSession();
   const sidebar = useStore(useSidebarToggle, (state) => state);
-  const supabase = createClient();
 
   if (!sidebar) return null;
 
@@ -38,7 +37,7 @@ export function Sidebar() {
         >
           {user ? user.email : ""}
         </p>
-        <Menu isOpen={sidebar?.isOpen} />
+        <Menu isOpen={sidebar?.isOpen} searchHistory={searchHistory}/>
       </div>
     </aside>
   );

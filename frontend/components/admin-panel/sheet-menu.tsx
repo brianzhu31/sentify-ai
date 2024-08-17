@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { SearchHistoryData } from "@/types";
 import { useUserSession } from "@/context/user-session-context";
 import { MenuIcon, PanelsTopLeft } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Menu } from "@/components/admin-panel/menu";
 import {
@@ -13,7 +13,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 
-export function SheetMenu() {
+interface SheetMenuProps {
+  searchHistory: SearchHistoryData;
+}
+
+export function SheetMenu({ searchHistory }: SheetMenuProps) {
   const { user } = useUserSession();
   return (
     <Sheet>
@@ -29,7 +33,7 @@ export function SheetMenu() {
           </SheetTitle>
         </SheetHeader>
         <SheetDescription></SheetDescription>
-        <Menu isOpen />
+        <Menu isOpen searchHistory={searchHistory}/>
       </SheetContent>
     </Sheet>
   );

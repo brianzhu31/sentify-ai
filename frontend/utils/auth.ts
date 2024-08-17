@@ -38,7 +38,7 @@ export async function signUp(formData: FormData) {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     const decodedToken = jwt.decode(accessToken)
     if (decodedToken){
       const userId = decodedToken["sub"] as string;
@@ -83,10 +83,10 @@ export async function logout() {
   redirect("/");
 }
 
-async function deleteUser(userId: any) {
+async function deleteUser(userId: string) {
   const supabase = createServiceClient();
 
-  const { data, error } = await supabase.auth.admin.deleteUser(
+  await supabase.auth.admin.deleteUser(
     userId,
   );
 }
