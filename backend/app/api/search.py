@@ -2,6 +2,7 @@ from flask import jsonify, request, Blueprint, g
 from services.search_service import get_company_analysis_data
 from models import db, Search, User
 from utils.validation import token_required
+from utils.codec import int_to_base64
 
 search_bp = Blueprint("search", __name__)
 
@@ -63,13 +64,13 @@ def get_search_history():
             {
                 "search_id": search.id,
                 "ticker": search.ticker,
-                "href": f"/search/{search.id}",
+                "href": f"/search/{int_to_base64(search.id)}",
                 "label": search.company_name,
                 "created_at": search.created_at,
                 "active": False,
                 "sub_fields": []
             }
-            for search in searches
+            for search in reversed(searches)
         ],
     }
 
