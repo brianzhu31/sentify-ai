@@ -32,6 +32,7 @@ def search_company():
     )
     try:
         db.session.add(new_search)
+        db.session.commit()
 
         new_search_id = new_search.id
 
