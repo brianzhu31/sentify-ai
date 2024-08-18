@@ -4,7 +4,6 @@ import { SearchItem, SearchHistoryData } from "@/types";
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 const isSearchIdInPathname = (pathname: string, href: string): boolean => {
-  console.log(pathname, href)
   return pathname === href;
 };
 
