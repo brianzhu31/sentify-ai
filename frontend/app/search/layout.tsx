@@ -3,13 +3,14 @@
 import { SearchHistoryData } from "@/types";
 import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 import { UserSessionProvider } from "@/context/user-session-context";
 import { useUserSession } from "@/context/user-session-context";
 import { Sidebar } from "./components/sidebar";
-import { SheetMenu } from "@/components/admin-panel/sheet-menu";
+import { SheetMenu } from "./components/sheet-menu";
 import { Spinner } from "@/components/ui/spinner";
+import { UserDropdown } from "./components/user-dropdown";
 import { fetchSearchHistory } from "./actions/fetch-search-history";
-import { usePathname } from "next/navigation";
 
 interface SearchLayoutProps {
   children: ReactNode;
@@ -23,13 +24,13 @@ export default function SearchLayout({ children }: SearchLayoutProps) {
   );
 }
 
-function SearchLayoutContent({ children }: { children: ReactNode }) {
+const SearchLayoutContent = ({ children }: { children: ReactNode }) => {
   const [searchHistory, setSearchHistory] = useState<SearchHistoryData>({
     label: "",
     searches: [],
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const pathName = usePathname();
+  const pathname = usePathname();
   const { session } = useUserSession();
 
   useEffect(() => {
@@ -39,7 +40,7 @@ function SearchLayoutContent({ children }: { children: ReactNode }) {
 
     const getSearchHistory = async () => {
       try {
-        const data = await fetchSearchHistory(pathName, session.access_token);
+        const data = await fetchSearchHistory(pathname, session.access_token);
         setSearchHistory(data);
       } catch (err) {
         console.log("Error fetching search history:", err);
@@ -49,7 +50,7 @@ function SearchLayoutContent({ children }: { children: ReactNode }) {
     };
 
     getSearchHistory();
-  }, [session, pathName]);
+  }, [session, pathname]);
 
   return (
     <div className="flex min-h-screen">
@@ -66,6 +67,9 @@ function SearchLayoutContent({ children }: { children: ReactNode }) {
           <Spinner className={cn("size-24")} strokeWidth={0.6}></Spinner>
         </div>
       )}
+      <div className="absolute top-0 right-0 mt-4 mr-8">
+        <UserDropdown></UserDropdown>
+      </div>
     </div>
   );
-}
+};

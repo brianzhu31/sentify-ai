@@ -1,12 +1,21 @@
 "use client";
 
-import { SearchHistoryData } from "@/types"
+import Link from "next/link";
+import { SearchHistoryData } from "@/types";
+import { useUserSession } from "@/context/user-session-context";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/useStore";
-import { Menu } from "@/components/admin-panel/menu";
+import { SearchHistoryContent } from "./search-history";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
-import { SidebarToggle } from "@/components/admin-panel/sidebar-toggle";
-import { useUserSession } from "@/context/user-session-context";
+import { SidebarToggle } from "./sidebar-toggle";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 interface SidebarProps {
   searchHistory: SearchHistoryData;
@@ -26,18 +35,56 @@ export function Sidebar({ searchHistory }: SidebarProps) {
       )}
     >
       <SidebarToggle isOpen={sidebar?.isOpen} setIsOpen={sidebar?.setIsOpen} />
-      <div className="relative h-full flex flex-col px-3 py-4 overflow-y-auto shadow-md dark:shadow-zinc-800">
-        <p
-          className={cn(
-            "text-m pl-7 whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
-            sidebar?.isOpen === false
-              ? "-translate-x-96 opacity-0 hidden"
-              : "translate-x-0 opacity-100"
-          )}
-        >
-          {user ? user.email : ""}
-        </p>
-        <Menu isOpen={sidebar?.isOpen} searchHistory={searchHistory}/>
+      <div className="relative h-full flex flex-col px-3 shadow-md dark:shadow-zinc-800">
+        <div className={sidebar?.isOpen ? "py-4 border-b" : ""}>
+          <p
+            className={cn(
+              "text-m text-center font-semibold whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
+              sidebar?.isOpen === false
+                ? "-translate-x-96 opacity-0 hidden"
+                : "translate-x-0 opacity-100"
+            )}
+          >
+            Market Sentry
+          </p>
+        </div>
+        {sidebar?.isOpen && (
+          <SearchHistoryContent searchHistory={searchHistory} />
+        )}
+        <div className="mt-auto p-2 border-t">
+          <TooltipProvider disableHoverableContent>
+            <Tooltip delayDuration={100}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-10 mb-1"
+                  asChild
+                >
+                  <Link href="/search">
+                    <span
+                      className={cn(sidebar?.isOpen === false ? "" : "mr-4")}
+                    >
+                      <Search size={18} />
+                    </span>
+                    <p
+                      className={cn(
+                        "max-w-[200px] truncate",
+                        sidebar?.isOpen === false
+                          ? "-translate-x-96 opacity-0"
+                          : "translate-x-0 opacity-100"
+                      )}
+                    >
+                      New Search
+                    </p>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              {sidebar?.isOpen === false && (
+                <TooltipContent side="right">New Search</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
     </aside>
   );

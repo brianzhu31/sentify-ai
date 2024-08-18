@@ -3,8 +3,19 @@ import { SearchItem, SearchHistoryData } from "@/types";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
+const isSearchIdInPathname = (pathname: string, searchId: number): boolean => {
+  const match = pathname.match(/\/search\/(\d+)$/);
+
+  if (match) {
+    const extractedId = match[1];
+    return extractedId === searchId.toString();
+  }
+
+  return false;
+};
+
 export const fetchSearchHistory = async (
-  pathName: string,
+  pathname: string,
   accessToken: string
 ): Promise<SearchHistoryData> => {
   try {
@@ -20,7 +31,7 @@ export const fetchSearchHistory = async (
       ...response.data,
       searches: response.data.searches.map((search: SearchItem) => ({
         ...search,
-        active: pathName.includes(search.search_id.toString()),
+        active: isSearchIdInPathname(pathname, search.search_id),
       })),
     };
   } catch (err) {
