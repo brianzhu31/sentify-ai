@@ -3,15 +3,9 @@ import { SearchItem, SearchHistoryData } from "@/types";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
-const isSearchIdInPathname = (pathname: string, searchId: number): boolean => {
-  const match = pathname.match(/\/search\/(\d+)$/);
-
-  if (match) {
-    const extractedId = match[1];
-    return extractedId === searchId.toString();
-  }
-
-  return false;
+const isSearchIdInPathname = (pathname: string, href: string): boolean => {
+  console.log(pathname, href)
+  return pathname === href;
 };
 
 export const fetchSearchHistory = async (
@@ -31,7 +25,7 @@ export const fetchSearchHistory = async (
       ...response.data,
       searches: response.data.searches.map((search: SearchItem) => ({
         ...search,
-        active: isSearchIdInPathname(pathname, search.search_id),
+        active: isSearchIdInPathname(pathname, search.href),
       })),
     };
   } catch (err) {
