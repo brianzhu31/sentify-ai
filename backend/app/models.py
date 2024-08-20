@@ -25,3 +25,12 @@ class Search(db.Model):
     score = Column(Integer, nullable=False)
     created_by = Column(String(80), nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class Company(db.Model):
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    company_name = Column(String(80), nullable=False)
+    ticker = Column(String(6), nullable=False)
+    aliases = Column(ARRAY(String(80)), nullable=False)
+    exchange = Column(String(10), nullable=False)
+    currency = Column(String(10), nullable=False)
