@@ -23,3 +23,9 @@ export type SessionAuthData = {
   access_token: string;
   refresh_token: string;
 }
+
+export type CompanySelection = {
+  company_name: string,
+  ticker: string,
+  alias: string
+}

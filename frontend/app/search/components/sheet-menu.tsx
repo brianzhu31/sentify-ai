@@ -40,7 +40,7 @@ export function SheetMenu({ searchHistory }: SheetMenuProps) {
       <SheetContent className="sm:w-72 px-3 h-full flex flex-col" side="left">
         <SheetHeader className="flex items-center justify-center">
           <SheetTitle className="text-base font-semibold text-center">
-            {user ? user.email : ""}
+            Market Sentry
           </SheetTitle>
         </SheetHeader>
         <SheetDescription></SheetDescription>

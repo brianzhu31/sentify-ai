@@ -56,10 +56,12 @@ const SearchLayoutContent = ({ children }: { children: ReactNode }) => {
     <div className="flex min-h-screen">
       {!loading ? (
         <>
-          <div className="m-4">
+          <div className="block lg:hidden m-4">
             <SheetMenu searchHistory={searchHistory}></SheetMenu>
           </div>
-          {searchHistory && <Sidebar searchHistory={searchHistory} />}
+          <div className="hidden lg:block">
+            {searchHistory && <Sidebar searchHistory={searchHistory} />}
+          </div>
           <div className="flex-1">{children}</div>
         </>
       ) : (
