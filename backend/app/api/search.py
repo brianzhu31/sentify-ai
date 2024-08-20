@@ -12,39 +12,43 @@ search_bp = Blueprint("search", __name__)
 def search_company():
     user_id = g.user["sub"]
     user = User.query.get(user_id)
+
     if user is None:
         return jsonify({"message": "User not found."}), 404
-    search_count = user.search_count
-    if search_count >= 10:
+
+    if user.search_count >= 10:
         return jsonify({"message": "Daily search limit reached."}), 429
 
     company_name = request.json.get("company_name")
     ticker = request.json.get("ticker")
     days_ago = request.json.get("days_ago")
+
     analysis_data = get_company_analysis_data(company_name, ticker, days_ago)
+
     new_search = Search(
         company_name=company_name,
         ticker=ticker,
-        positive_summaries=analysis_data["positive"],
-        negative_summaries=analysis_data["negative"],
-        top_sources=analysis_data["top_sources"],
-        score=analysis_data["score"],
+        positive_summaries=analysis_data.get("positive", []),
+        negative_summaries=analysis_data.get("negative", []),
+        top_sources=analysis_data.get("top_sources", []),
+        score=analysis_data.get("score", 0),
         created_by=user_id,
     )
+
     try:
-        db.session.add(new_search)
-        db.session.commit()
-
-        new_search_id = new_search.id
-
-        user.search_ids.append(new_search_id)
-        user.search_count += 1
+        with db.session.begin_nested():
+            db.session.add(new_search)
+            db.session.flush()
+            
+            user.search_ids.append(new_search.id)
+            user.search_count += 1
 
         db.session.commit()
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": str(e)}), 400
+        return jsonify({"message": f"An error occurred: {str(e)}"}), 400
+
     return jsonify(analysis_data), 200
 
 
@@ -56,7 +60,7 @@ def get_search_history():
     if user is None:
         return jsonify({"message": "User not found."}), 404
 
-    searches = Search.query.filter(Search.id.in_(user.search_ids)).all()
+    searches = Search.query.filter(Search.id.in_(user.search_ids)).order_by(Search.created_at.desc()).all()
 
     search_content = {
         "label": "Search History",
@@ -70,7 +74,7 @@ def get_search_history():
                 "active": False,
                 "sub_fields": []
             }
-            for search in reversed(searches)
+            for search in searches
         ],
     }
 
