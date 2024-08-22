@@ -18,8 +18,6 @@ export const fetchSearchHistory = async (
       },
     });
 
-    console.log("fetch");
-
     return {
       ...response.data,
       searches: response.data.searches.map((search: SearchItem) => ({

@@ -1,52 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CompanyPartial } from "@/types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { CompanySelection } from "@/types";
-
-const companies: CompanySelection[] = [
-  {
-    company_name: "Amazon.com Inc",
-    alias: "Amazon",
-    ticker: "AMZN",
-  },
-  {
-    company_name: "Microsoft Corp",
-    alias: "Microsoft",
-    ticker: "MSFT",
-  },
-  {
-    company_name: "Tesla Inc",
-    alias: "Tesla",
-    ticker: "TSLA",
-  },
-  {
-    company_name: "Alphabet Inc",
-    alias: "Google",
-    ticker: "GOOG",
-  },
-  {
-    company_name: "Netflix Inc",
-    alias: "Netflix",
-    ticker: "NFLX",
-  },
-  {
-    company_name: "Apple Inc",
-    alias: "Apple",
-    ticker: "AAPL",
-  },
-  {
-    company_name: "Nvidia Corp",
-    alias: "Nvidia",
-    ticker: "NVDA",
-  }
-];
+import Image from "next/image";
+import { Scrollbar } from "@radix-ui/react-scroll-area";
+import { useCompanies } from "@/context/companies-context";
 
 export function SearchBar() {
+  const { companies } = useCompanies();
   const [query, setQuery] = useState<string>("");
-  const [filteredCompanies, setFilteredCompanies] = useState<CompanySelection[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<CompanySelection | undefined>(undefined);
+  const [filteredCompanies, setFilteredCompanies] = useState<CompanyPartial[]>(
+    []
+  );
+  const [selectedCompany, setSelectedCompany] = useState<
+    CompanyPartial | undefined
+  >(undefined);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -54,18 +24,20 @@ export function SearchBar() {
     setSelectedCompany(undefined);
 
     if (value) {
-      const filtered = companies
-        .filter(
-          (company) =>
-            
-            company.company_name.toLowerCase().startsWith(value.toLowerCase()) ||
-            company.alias.toLowerCase().startsWith(value.toLowerCase()) ||
-            company.ticker.toLowerCase().startsWith(value.toLowerCase()) ||
-            `${company.company_name} (${company.ticker})`.toLowerCase().startsWith(value.toLowerCase())
-        )
-        setFilteredCompanies(filtered);
+      const filtered = companies.filter(
+        (company) =>
+          company.company_name.toLowerCase().startsWith(value.toLowerCase()) ||
+          company.aliases.some((alias) =>
+            alias.toLowerCase().startsWith(value.toLowerCase())
+          ) ||
+          company.ticker.toLowerCase().startsWith(value.toLowerCase()) ||
+          `${company.company_name} (${company.ticker})`
+            .toLowerCase()
+            .startsWith(value.toLowerCase())
+      );
+      setFilteredCompanies(filtered);
     } else {
-        setFilteredCompanies([]);
+      setFilteredCompanies([]);
     }
   };
 
@@ -76,7 +48,7 @@ export function SearchBar() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && filteredCompanies.length > 0) {
+    if (e.key === "Enter" && filteredCompanies.length > 0) {
       const firstCompany = filteredCompanies[0];
       setQuery(`${firstCompany.company_name} (${firstCompany.ticker})`);
       setSelectedCompany(firstCompany);
@@ -85,27 +57,42 @@ export function SearchBar() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative lg:w-[50%] md:w-[65%] w-[80%]">
       <Input
         type="text"
         value={query}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder="Search"
-        className={cn("h-12 w-[800px] rounded-2xl")}
+        className={cn(
+          "h-12 rounded-lg",
+          "border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-black",
+          "text-gray-900 placeholder-gray-500 transition-shadow shadow-sm focus:shadow-lg"
+        )}
       />
       {query && filteredCompanies.length > 0 && (
-        <ul className="absolute z-10 w-full bg-white border rounded-2xl shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
           {filteredCompanies.map((company) => (
-            <li
+            <div
               key={company.ticker}
               onClick={() => handleSelectItem(company)}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
+              className="px-4 py-2 hover:bg-gray-200 cursor-pointer flex items-center space-x-3 transition-colors"
             >
-              {company.company_name} ({company.ticker})
-            </li>
+              <div className="rounded-full overflow-hidden w-7 h-7">
+                <Image
+                  src={`/icons/small/${company.ticker}.svg`}
+                  alt={`${company.ticker} icon`}
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+              </div>
+              <p className="text-gray-800 text-sm font-medium">
+                {company.company_name} ({company.ticker})
+              </p>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

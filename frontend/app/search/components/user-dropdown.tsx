@@ -38,10 +38,10 @@ export function UserDropdown() {
           <DropdownMenuItem className="cursor-pointer">
             Settings
           </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+            Log out
+          </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
-          Log out
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

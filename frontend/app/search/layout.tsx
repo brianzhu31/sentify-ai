@@ -1,11 +1,12 @@
 "use client";
 
-import { SearchHistoryData } from "@/types";
+import { SearchHistoryData, CompanyPartial } from "@/types";
 import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { UserSessionProvider } from "@/context/user-session-context";
 import { useUserSession } from "@/context/user-session-context";
+import AppProviders from "@/context/app-providers";
 import { Sidebar } from "./components/sidebar";
 import { SheetMenu } from "./components/sheet-menu";
 import { Spinner } from "@/components/ui/spinner";
@@ -18,9 +19,9 @@ interface SearchLayoutProps {
 
 export default function SearchLayout({ children }: SearchLayoutProps) {
   return (
-    <UserSessionProvider>
+    <AppProviders>
       <SearchLayoutContent>{children}</SearchLayoutContent>
-    </UserSessionProvider>
+    </AppProviders>
   );
 }
 
@@ -52,23 +53,21 @@ const SearchLayoutContent = ({ children }: { children: ReactNode }) => {
     getSearchHistory();
   }, [session, pathname]);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center flex-1">
+        <Spinner className={cn("size-24")} strokeWidth={0.6}></Spinner>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen">
-      {!loading ? (
-        <>
-          <div className="block lg:hidden m-4">
-            <SheetMenu searchHistory={searchHistory}></SheetMenu>
-          </div>
-          <div className="hidden lg:block">
-            {searchHistory && <Sidebar searchHistory={searchHistory} />}
-          </div>
-          <div className="flex-1">{children}</div>
-        </>
-      ) : (
-        <div className="flex items-center justify-center flex-1">
-          <Spinner className={cn("size-24")} strokeWidth={0.6}></Spinner>
-        </div>
-      )}
+      <SheetMenu searchHistory={searchHistory}></SheetMenu>
+      <div className="hidden lg:block">
+        {searchHistory && <Sidebar searchHistory={searchHistory} />}
+      </div>
+      <div className="flex-1">{children}</div>
       <div className="absolute top-0 right-0 mt-4 mr-8">
         <UserDropdown></UserDropdown>
       </div>

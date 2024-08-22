@@ -24,8 +24,16 @@ export type SessionAuthData = {
   refresh_token: string;
 }
 
-export type CompanySelection = {
-  company_name: string,
-  ticker: string,
-  alias: string
+export type CompanyPartial = {
+  company_name: string;
+  ticker: string;
+  aliases: string[];
+}
+
+export type CompanyFull = {
+  company_name: string;
+  ticker: string;
+  aliases: string[];
+  exchange: string;
+  currency: string;
 }

@@ -32,7 +32,7 @@ export function SheetMenu({ searchHistory }: SheetMenuProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger className="lg:hidden" asChild>
+      <SheetTrigger className="lg:hidden absolute top-4 left-4" asChild>
         <Button className="h-8" variant="outline" size="icon">
           <MenuIcon size={20} />
         </Button>
