@@ -5,8 +5,8 @@ import { CompanyPartial } from "@/types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { Scrollbar } from "@radix-ui/react-scroll-area";
 import { useCompanies } from "@/context/companies-context";
+import { DaysSelect } from "./days-select";
 
 export function SearchBar() {
   const { companies } = useCompanies();
@@ -57,43 +57,46 @@ export function SearchBar() {
   };
 
   return (
-    <div className="relative lg:w-[50%] md:w-[65%] w-[80%]">
-      <Input
-        type="text"
-        value={query}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        placeholder="Search"
-        className={cn(
-          "h-12 rounded-lg",
-          "border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-black",
-          "text-gray-900 placeholder-gray-500 transition-shadow shadow-sm focus:shadow-lg"
-        )}
-      />
-      {query && filteredCompanies.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
-          {filteredCompanies.map((company) => (
-            <div
-              key={company.ticker}
-              onClick={() => handleSelectItem(company)}
-              className="px-4 py-2 hover:bg-gray-200 cursor-pointer flex items-center space-x-3 transition-colors"
-            >
-              <div className="rounded-full overflow-hidden w-7 h-7">
-                <Image
-                  src={`/icons/small/${company.ticker}.svg`}
-                  alt={`${company.ticker} icon`}
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                />
+    <div className="flex gap-2 lg:w-[60%] md:w-[75%] w-[85%]">
+      <div className="relative w-full">
+        <Input
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Search"
+          className={cn(
+            "h-12 rounded-lg",
+            "border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-black",
+            "text-gray-900 placeholder-gray-500 transition-shadow shadow-sm focus:shadow-lg"
+          )}
+        />
+        {query && filteredCompanies.length > 0 && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+            {filteredCompanies.map((company) => (
+              <div
+                key={company.ticker}
+                onClick={() => handleSelectItem(company)}
+                className="px-4 py-2 hover:bg-gray-200 cursor-pointer flex items-center space-x-3 transition-colors"
+              >
+                <div className="rounded-full overflow-hidden w-7 h-7">
+                  <Image
+                    src={`/icons/small/${company.ticker}.svg`}
+                    alt={`${company.ticker} icon`}
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
+                </div>
+                <p className="text-gray-800 text-sm font-medium">
+                  {company.company_name} ({company.ticker})
+                </p>
               </div>
-              <p className="text-gray-800 text-sm font-medium">
-                {company.company_name} ({company.ticker})
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
+      <DaysSelect />
     </div>
   );
 }
