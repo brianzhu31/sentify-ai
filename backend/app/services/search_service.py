@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
 from app.utils.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
+from app.exceptions.errors import InsufficientArticlesError
 
 load_dotenv(".env.local")
 
@@ -17,12 +18,14 @@ client = OpenAI(
 )
 
 
-def get_news(company_name: str, ticker: str, days_ago: int) -> dict:
+def get_news(keywords: list, days_ago: int) -> dict:
     newscatcherapi = NewsCatcherApiClient(x_api_key=NEWSCATCHER_KEY)
 
+    search_query = " OR ".join(f'"{keyword}"' for keyword in keywords)
+
     news_articles = newscatcherapi.get_search(
-        q=f'"{company_name}" OR "{ticker}"', lang="en", from_=f"{days_ago} days ago",
-        to_rank=500, page_size=100
+        q=search_query, lang="en", from_=f"{days_ago} days ago",
+        to_rank=1000, page_size=100
     )
 
     return news_articles
@@ -142,20 +145,29 @@ def format_analysis(analysis_data: dict, news_articles: dict) -> dict:
     return formatted_output
 
 
-def get_company_analysis_data(company_name: str, ticker: str, days_ago: int) -> dict:
-    raw_news_data = get_news(company_name, ticker, days_ago)
+def get_company_analysis_data(company_name: str, keywords: list, days_ago: int) -> dict:
+    raw_news_data = get_news(keywords, days_ago)
+
     with open("raw_news_data.json", "w", encoding="utf-8") as json_file:
         json.dump(raw_news_data, json_file, indent=4)
+
     relevant_news_articles = get_relevant_articles(company_name, raw_news_data)
+    with open("relevant_articles.json", "w", encoding="utf-8") as json_file:
+        json.dump(relevant_news_articles, json_file, indent=4)
+
+    if len(relevant_news_articles) < 10:
+        raise InsufficientArticlesError(f"Insufficient data information about {company_name}. Please try increasing the time frame.")
+
     filtered_articles_content = create_filtered_articles_content(
         raw_news_data, relevant_news_articles)
     with open("filtered_articles_content.txt", "w", encoding="utf-8") as file:
         file.write(filtered_articles_content)
+
     analysis_data = get_analysis(
         company_name, filtered_articles_content, relevant_news_articles)
-    with open("relevant_articles.json", "w", encoding="utf-8") as json_file:
-        json.dump(relevant_news_articles, json_file, indent=4)
+
     with open("app_output.json", "w", encoding="utf-8") as json_file:
         json.dump(analysis_data, json_file, indent=4)
+
     formatted_analysis = format_analysis(analysis_data, raw_news_data)
     return formatted_analysis

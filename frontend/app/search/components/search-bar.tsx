@@ -5,23 +5,33 @@ import { CompanyPartial } from "@/types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCompanies } from "@/context/companies-context";
+import { useUserSession } from "@/context/user-session-context";
 import { DaysSelect } from "./days-select";
+import { searchCompany } from "../actions/search-company";
+import { toast } from "sonner";
 
-export function SearchBar() {
+interface SearchBarProps {
+  setLoading: (loading: boolean) => void;
+}
+
+const defaultDaysValue = 7;
+
+export function SearchBar({ setLoading }: SearchBarProps) {
+  const { session } = useUserSession();
   const { companies } = useCompanies();
+  const router = useRouter();
   const [query, setQuery] = useState<string>("");
+  const [daysAgo, setDaysAgo] = useState<number>(defaultDaysValue);
   const [filteredCompanies, setFilteredCompanies] = useState<CompanyPartial[]>(
     []
   );
-  const [selectedCompany, setSelectedCompany] = useState<
-    CompanyPartial | undefined
-  >(undefined);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
-    setSelectedCompany(undefined);
 
     if (value) {
       const filtered = companies.filter(
@@ -41,18 +51,37 @@ export function SearchBar() {
     }
   };
 
+  const getSearchResponse = async (ticker: string) => {
+    if (session?.access_token) {
+      try {
+        setLoading(true);
+        const response = await searchCompany(
+          ticker,
+          daysAgo,
+          session.access_token
+        );
+        router.push(`/search/${response.search_id_b64}`);
+      } catch (err) {
+        toast.warning("ERROR");
+        setLoading(false);
+      }
+    } else {
+      console.error("Missing ticker or access token.");
+    }
+  };
+
   const handleSelectItem = (company: any) => {
     setQuery(`${company.company_name} (${company.ticker})`);
-    setSelectedCompany(company);
     setFilteredCompanies([]);
+    getSearchResponse(company.ticker);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && filteredCompanies.length > 0) {
       const firstCompany = filteredCompanies[0];
       setQuery(`${firstCompany.company_name} (${firstCompany.ticker})`);
-      setSelectedCompany(firstCompany);
       setFilteredCompanies([]);
+      getSearchResponse(firstCompany.ticker);
     }
   };
 
@@ -96,7 +125,7 @@ export function SearchBar() {
           </div>
         )}
       </div>
-      <DaysSelect />
+      <DaysSelect defaultValue={defaultDaysValue} setDaysAgo={setDaysAgo}/>
     </div>
   );
 }

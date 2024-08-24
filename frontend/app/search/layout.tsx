@@ -4,7 +4,6 @@ import { SearchHistoryData, CompanyPartial } from "@/types";
 import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { UserSessionProvider } from "@/context/user-session-context";
 import { useUserSession } from "@/context/user-session-context";
 import AppProviders from "@/context/app-providers";
 import { Sidebar } from "./components/sidebar";
