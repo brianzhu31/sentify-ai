@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 export default function SearchIdPage() {
   const { session } = useUserSession();
   const pathname = usePathname();
-  const [searchData, setSearchData] = useState<any>({});  
+  const [searchData, setSearchData] = useState<any>({});
 
   useEffect(() => {
     if (!session) {
@@ -18,11 +18,15 @@ export default function SearchIdPage() {
     const getSearchData = async () => {
       try {
         const searchIdB64 = pathname.split('/').pop();
-        const numberId = parseInt(atob(searchIdB64));
-        const response = await fetchSearchData(numberId, session.access_token);
-        setSearchData(response);
+        if (searchIdB64) {
+          const numberId = parseInt(atob(searchIdB64));
+          const response = await fetchSearchData(numberId, session.access_token);
+          setSearchData(response);
+        } else {
+          throw new Error("Invalid URL: searchIdB64 is undefined");
+        }
       } catch (err) {
-        console.log("Error fetching search data:", err);
+        throw err;
       }
     };
 
