@@ -53,7 +53,7 @@ def token_required(f):
 
         decoded_token = verify_jwt(token)
         if not decoded_token:
-            return jsonify({"message": "Token is invalid or expired!"}), 401
+            return jsonify({"message": "Invalid or outdated sesion. Please refresh the page."}), 401
 
         g.user = decoded_token
 

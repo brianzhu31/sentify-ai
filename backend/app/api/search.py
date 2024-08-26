@@ -3,7 +3,6 @@ from services.search_service import get_company_analysis_data
 from models import db, Search, User, Company
 from utils.validation import token_required
 from utils.codec import int_to_base64
-from exceptions.errors import InsufficientArticlesError
 
 search_bp = Blueprint("search", __name__)
 
@@ -30,21 +29,18 @@ def search_company():
         keywords = company.aliases + [company_name, ticker]
         company_id = company.id
 
-        try:
-            analysis_data = get_company_analysis_data(company_name, keywords, days_ago)
+        analysis_data = get_company_analysis_data(company_name, keywords, days_ago)
 
-            new_search = Search(
-                company_name=company_name,
-                ticker=ticker,
-                positive_summaries=analysis_data.get("positive", []),
-                negative_summaries=analysis_data.get("negative", []),
-                top_sources=analysis_data.get("top_sources", []),
-                score=analysis_data.get("score", 0),
-                created_by=user_id,
-            )
+        new_search = Search(
+            company_name=company_name,
+            ticker=ticker,
+            positive_summaries=analysis_data.get("positive", []),
+            negative_summaries=analysis_data.get("negative", []),
+            top_sources=analysis_data.get("top_sources", []),
+            score=analysis_data.get("score", 0),
+            created_by=user_id,
+        )
 
-        except InsufficientArticlesError as e:
-            raise InsufficientArticlesError
     else:
         return jsonify({"message": f"No company found with ticker {ticker}"})
 

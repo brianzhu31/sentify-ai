@@ -9,20 +9,18 @@ import {
 } from "@/components/ui/select"
 
 interface DaysSelectProps {
-  defaultValue: number;
   setDaysAgo: (daysAgo: number) => void;
 }
 
-export function DaysSelect({ defaultValue, setDaysAgo }: DaysSelectProps) {
-
+export function DaysSelect({ setDaysAgo }: DaysSelectProps) {
   const handleChangeDays = (value: number) => {
     setDaysAgo(value);
   }
 
   return (
-    <Select defaultValue={defaultValue} onValueChange={handleChangeDays}>
+    <Select onValueChange={handleChangeDays}>
       <SelectTrigger className="w-[160px] h-12">
-        <SelectValue/>
+        <SelectValue placeholder="Data From" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

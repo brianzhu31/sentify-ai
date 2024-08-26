@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
 from app.utils.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
-from app.exceptions.errors import InsufficientArticlesError
+from app.exceptions.errors import *
 
 load_dotenv(".env.local")
 
@@ -19,16 +19,17 @@ client = OpenAI(
 
 
 def get_news(keywords: list, days_ago: int) -> dict:
-    newscatcherapi = NewsCatcherApiClient(x_api_key=NEWSCATCHER_KEY)
+    try:
+        newscatcherapi = NewsCatcherApiClient(x_api_key=NEWSCATCHER_KEY)
+        search_query = " OR ".join(f'"{keyword}"' for keyword in keywords)
+        news_articles = newscatcherapi.get_search(
+            q=search_query, lang="en", from_=f"{days_ago} days ago",
+            to_rank=1000, page_size=100
+        )
 
-    search_query = " OR ".join(f'"{keyword}"' for keyword in keywords)
-
-    news_articles = newscatcherapi.get_search(
-        q=search_query, lang="en", from_=f"{days_ago} days ago",
-        to_rank=1000, page_size=100
-    )
-
-    return news_articles
+        return news_articles
+    except:
+        raise APIError("Error fetching data from external API.")
 
 
 def get_relevant_articles(company_name: str, news_articles: dict) -> dict:
@@ -69,18 +70,21 @@ def create_filtered_articles_content(news_articles: dict, relevant_articles: dic
 
 
 def get_analysis(company_name: str, filtered_articles: str, relevant_articles: list) -> dict:
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={"type": "json_object"},
-        temperature=0.2,
-        top_p=0.9,
-        messages=get_analysis_prompt(
-            company_name, filtered_articles, relevant_articles)
-    )
-    output = response.choices[0].message.content
-    json_output = json.loads(output)
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            temperature=0.2,
+            top_p=0.9,
+            messages=get_analysis_prompt(
+                company_name, filtered_articles, relevant_articles)
+        )
+        output = response.choices[0].message.content
+        json_output = json.loads(output)
 
-    return json_output
+        return json_output
+    except:
+        raise APIError("Error generating output.")
 
 
 def format_analysis(analysis_data: dict, news_articles: dict) -> dict:
@@ -151,12 +155,17 @@ def get_company_analysis_data(company_name: str, keywords: list, days_ago: int) 
     with open("raw_news_data.json", "w", encoding="utf-8") as json_file:
         json.dump(raw_news_data, json_file, indent=4)
 
+    if raw_news_data["total_hits"] < 20:
+        raise InsufficientArticlesError(
+            f"Insufficient data information about {company_name.rstrip('.')}. Please try increasing the time frame.")
+
     relevant_news_articles = get_relevant_articles(company_name, raw_news_data)
     with open("relevant_articles.json", "w", encoding="utf-8") as json_file:
         json.dump(relevant_news_articles, json_file, indent=4)
 
     if len(relevant_news_articles) < 10:
-        raise InsufficientArticlesError(f"Insufficient data information about {company_name}. Please try increasing the time frame.")
+        raise InsufficientArticlesError(
+            f"Insufficient data information about {company_name.rstrip('.')}. Please try increasing the time frame.")
 
     filtered_articles_content = create_filtered_articles_content(
         raw_news_data, relevant_news_articles)

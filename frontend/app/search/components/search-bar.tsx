@@ -1,72 +1,89 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { CompanyPartial } from "@/types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useCompanies } from "@/context/companies-context";
 import { useUserSession } from "@/context/user-session-context";
 import { DaysSelect } from "./days-select";
 import { searchCompany } from "../actions/search-company";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SearchBarProps {
   setLoading: (loading: boolean) => void;
 }
-
-const defaultDaysValue = 7;
 
 export function SearchBar({ setLoading }: SearchBarProps) {
   const { session } = useUserSession();
   const { companies } = useCompanies();
   const router = useRouter();
   const [query, setQuery] = useState<string>("");
-  const [daysAgo, setDaysAgo] = useState<number>(defaultDaysValue);
+  const [daysAgo, setDaysAgo] = useState<number | null>(null);
   const [filteredCompanies, setFilteredCompanies] = useState<CompanyPartial[]>(
     []
   );
+  const { toast } = useToast();
+
+  const createFiltered = (value: string) => {
+    const filtered = companies.filter(
+      (company) =>
+        company.company_name.toLowerCase().startsWith(value.toLowerCase()) ||
+        company.aliases.some((alias) =>
+          alias.toLowerCase().startsWith(value.toLowerCase())
+        ) ||
+        company.ticker.toLowerCase().startsWith(value.toLowerCase()) ||
+        `${company.company_name} (${company.ticker})`
+          .toLowerCase()
+          .startsWith(value.toLowerCase())
+    );
+    setFilteredCompanies(filtered)
+  }
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setQuery(value);
 
     if (value) {
-      const filtered = companies.filter(
-        (company) =>
-          company.company_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          company.aliases.some((alias) =>
-            alias.toLowerCase().startsWith(value.toLowerCase())
-          ) ||
-          company.ticker.toLowerCase().startsWith(value.toLowerCase()) ||
-          `${company.company_name} (${company.ticker})`
-            .toLowerCase()
-            .startsWith(value.toLowerCase())
-      );
-      setFilteredCompanies(filtered);
+      createFiltered(value);
     } else {
       setFilteredCompanies([]);
     }
   };
 
+  const handleInputClick = (event: React.MouseEvent<HTMLElement>) => {
+    createFiltered(query);
+  }
+
   const getSearchResponse = async (ticker: string) => {
-    if (session?.access_token) {
-      try {
-        setLoading(true);
-        const response = await searchCompany(
-          ticker,
-          daysAgo,
-          session.access_token
-        );
-        router.push(`/search/${response.search_id_b64}`);
-      } catch (err) {
-        toast.warning("ERROR");
-        setLoading(false);
-      }
+    if (daysAgo === null) {
+      toast({
+        variant: "error",
+        description: "Please select a time frame.",
+      });
     } else {
-      console.error("Missing ticker or access token.");
+      if (session?.access_token) {
+        try {
+          setLoading(true);
+          const response = await searchCompany(
+            ticker,
+            daysAgo,
+            session.access_token
+          );
+          router.push(`/search/${response.search_id_b64}`);
+        } catch (err: any) {
+          setLoading(false);
+          console.log('error__', err)
+          toast({
+            variant: "error",
+            description: err.response.data.message,
+          });
+        }
+      } else {
+        console.error("Missing ticker or access token.");
+      }
     }
   };
 
@@ -92,6 +109,7 @@ export function SearchBar({ setLoading }: SearchBarProps) {
           type="text"
           value={query}
           onChange={handleInputChange}
+          onClick={handleInputClick}
           onKeyDown={handleKeyDown}
           placeholder="Search"
           className={cn(
@@ -125,7 +143,7 @@ export function SearchBar({ setLoading }: SearchBarProps) {
           </div>
         )}
       </div>
-      <DaysSelect defaultValue={defaultDaysValue} setDaysAgo={setDaysAgo}/>
+      <DaysSelect setDaysAgo={setDaysAgo} />
     </div>
   );
 }
