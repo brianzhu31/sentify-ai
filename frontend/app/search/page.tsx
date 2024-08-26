@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import { SearchBar } from "./components/search-bar";
-import { Spinner } from "@/components/ui/spinner";
+import { Loading } from "./components/loading";
 
 export default function SearchPage() {
   const [loading, setLoading] = useState<boolean>(false);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center flex-1">
-        <Spinner className={cn("size-24")} strokeWidth={0.6}></Spinner>
-      </div>
-    )
+      <Loading loading={loading} />
+    );
   }
 
   return (
