@@ -64,7 +64,7 @@ def search_company():
         "search_id": search_id,
         "search_id_b64": search_id_b64,
         "company_id": company_id,
-        "analysis": analysis_data
+        "analysis": analysis_data,
     }
 
     return json_output, 200
@@ -86,7 +86,7 @@ def get_search_by_id(search_id: int):
         "top_sources": search.top_sources,
         "score": search.score,
         "created_by": search.created_by,
-        "created_at": search.created_at
+        "created_at": search.created_at,
     }
 
     return jsonify(search_data), 200
@@ -100,8 +100,19 @@ def get_search_history():
     if user is None:
         return jsonify({"message": "User not found."}), 404
 
-    searches = Search.query.filter(Search.id.in_(
-        user.search_ids)).order_by(Search.created_at.desc()).all()
+    page = request.args.get("page", default=1, type=int)
+    limit = request.args.get("limit", default=30, type=int)
+    
+    if limit > 50:
+        limit = 50
+
+    searches_query = (
+        Search.query.filter(Search.id.in_(user.search_ids))
+        .order_by(Search.created_at.desc())
+        .paginate(page=page, per_page=limit)
+    )
+
+    searches = searches_query.items
 
     search_content = {
         "label": "Search History",
@@ -112,11 +123,11 @@ def get_search_history():
                 "href": f"/search/{int_to_base64(search.id)}",
                 "label": search.company_name,
                 "created_at": search.created_at,
-                "active": False,
                 "sub_fields": []
             }
             for search in searches
         ],
+        "has_more": searches_query.has_next,
     }
 
     return jsonify(search_content), 200

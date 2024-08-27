@@ -17,11 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
-interface SidebarProps {
-  searchHistory: SearchHistoryData;
-}
-
-export function Sidebar({ searchHistory }: SidebarProps) {
+export function Sidebar() {
   const { user } = useUserSession();
   const sidebar = useStore(useSidebarToggle, (state) => state);
 
@@ -49,7 +45,7 @@ export function Sidebar({ searchHistory }: SidebarProps) {
           </p>
         </div>
         {sidebar?.isOpen && (
-          <SearchHistoryContent searchHistory={searchHistory} />
+          <SearchHistoryContent />
         )}
         <div className="mt-auto p-2 border-t">
           <TooltipProvider disableHoverableContent>

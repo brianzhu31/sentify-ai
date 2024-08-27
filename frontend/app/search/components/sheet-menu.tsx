@@ -17,11 +17,7 @@ import {
 import { MenuIcon } from "lucide-react";
 import { Search } from "lucide-react";
 
-interface SheetMenuProps {
-  searchHistory: SearchHistoryData;
-}
-
-export function SheetMenu({ searchHistory }: SheetMenuProps) {
+export function SheetMenu() {
   const { user } = useUserSession();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
@@ -44,7 +40,7 @@ export function SheetMenu({ searchHistory }: SheetMenuProps) {
           </SheetTitle>
         </SheetHeader>
         <SheetDescription></SheetDescription>
-        <SearchHistoryContent searchHistory={searchHistory} />
+        <SearchHistoryContent />
         <Button
           variant="outline"
           className="w-full justify-start h-10 mb-1"

@@ -2,18 +2,46 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { SearchHistoryData, SearchItem } from "@/types";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { useUserSession } from "@/context/user-session-context";
+import { useSearchHistory } from "@/context/search-history-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import InfiniteScroll from "./infinite-scroll";
+import { Loader2 } from "lucide-react";
 import { SearchEditDropdown } from "./search-edit-dropdown";
 import { formatDateInUserTimezone } from "@/utils/time";
+import { fetchSearchHistory } from "../actions/fetch-search-history";
 
-interface MenuProps {
-  searchHistory: SearchHistoryData;
-}
+export function SearchHistoryContent() {
+  const pathname = usePathname();
+  const { session } = useUserSession();
+  const { searchHistory, setSearchHistory, pageNumber, setPageNumber } = useSearchHistory();
+  const [loading, setLoading] = useState<boolean>(false);
 
-export function SearchHistoryContent({ searchHistory }: MenuProps) {
+  if (!session) {
+    return null;
+  }
+
+  const fetchMoreSearchHistory = async () => {
+    if (searchHistory.has_more) {
+      setLoading(true);
+
+      setTimeout(async () => {
+        const data = await fetchSearchHistory(session.access_token, pageNumber);
+        setSearchHistory({
+          label: data.label,
+          searches: [...searchHistory.searches, ...data.searches],
+          has_more: data.has_more,
+        });
+        setPageNumber(pageNumber + 1);
+        setLoading(false);
+      }, 500);
+    }
+  };
+
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
       <nav className="mt-4 h-full w-full">
@@ -25,10 +53,10 @@ export function SearchHistoryContent({ searchHistory }: MenuProps) {
             {searchHistory &&
               searchHistory.searches &&
               searchHistory.searches.map(
-                ({ href, ticker, active, created_at }, index) => (
+                ({ href, ticker, created_at }, index) => (
                   <div className="w-full pr-2" key={index}>
                     <Button
-                      variant={active ? "secondary" : "ghost"}
+                      variant={href === pathname ? "secondary" : "ghost"}
                       className="w-full justify-start h-10 mb-1"
                       asChild
                     >
@@ -60,6 +88,18 @@ export function SearchHistoryContent({ searchHistory }: MenuProps) {
                   </div>
                 )
               )}
+            <InfiniteScroll
+              hasMore={searchHistory.has_more}
+              isLoading={loading}
+              next={fetchMoreSearchHistory}
+              threshold={0}
+            >
+              {searchHistory.has_more && (
+                <div className="flex justify-center">
+                  <Loader2 className="mt-2 mb-4 h-4 w-4 animate-spin" />
+                </div>
+              )}
+            </InfiniteScroll>
           </li>
         </ul>
       </nav>

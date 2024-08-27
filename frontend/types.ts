@@ -4,12 +4,12 @@ export type SearchItem = {
   href: string;
   label: string;
   created_at: string;
-  active: boolean;
 };
 
 export type SearchHistoryData = {
   label: string;
   searches: SearchItem[];
+  has_more: boolean;
 };
 
 export type UserAuthData = {
