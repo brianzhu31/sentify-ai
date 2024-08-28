@@ -38,7 +38,7 @@ export async function signUp(formData: FormData) {
         },
       }
     );
-  } catch (error) {
+  } catch (err) {
     const decodedToken = jwt.decode(accessToken)
     if (decodedToken){
       const userId = decodedToken["sub"] as string;
@@ -63,7 +63,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(loginData);
 
   if (error) {
-    return error.message; // Return the error message
+    return error.message;
   }
 
   revalidatePath("/search", "layout");

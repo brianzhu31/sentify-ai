@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
@@ -19,7 +21,6 @@ export const searchCompany = async (
     );
     return response.data
   } catch (err) {
-    console.error('ERROR searching company',err);
     throw err;
   }
 };

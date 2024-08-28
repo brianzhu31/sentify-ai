@@ -1,0 +1,48 @@
+"use server";
+
+import { createClient } from "@/utils/supabase/server";
+import { UserAuthData, SessionAuthData } from "@/types";
+
+export const fetchUser = async (): Promise<UserAuthData> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      console.log("user error", error)
+      throw error;
+    }
+
+    const user = data.user;
+
+    const userData: UserAuthData = {
+      email: user.user_metadata.email ?? "",
+      email_verified: user.user_metadata.email_verified ?? false,
+      phone_verified: user.user_metadata.phone_verified ?? false,
+      sub: user.id ?? "",
+    };
+    return userData;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const fetchSession = async (): Promise<SessionAuthData> => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.log("session error", error)
+      throw error;
+    }
+
+    const session = data.session;
+
+    const sessionData: SessionAuthData = {
+      access_token: session?.access_token ?? "",
+      refresh_token: session?.refresh_token ?? "",
+    };
+    return sessionData;
+  } catch (err) {
+    throw err;
+  }
+};

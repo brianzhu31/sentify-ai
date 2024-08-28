@@ -19,7 +19,7 @@ export function SearchHistoryContent() {
   const pathname = usePathname();
   const { session } = useUserSession();
   const { searchHistory, setSearchHistory, pageNumber, setPageNumber } = useSearchHistory();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
 
   if (!session) {
     return null;
@@ -27,7 +27,7 @@ export function SearchHistoryContent() {
 
   const fetchMoreSearchHistory = async () => {
     if (searchHistory.has_more) {
-      setLoading(true);
+      setLoadingMore(true);
 
       setTimeout(async () => {
         const data = await fetchSearchHistory(session.access_token, pageNumber);
@@ -37,7 +37,7 @@ export function SearchHistoryContent() {
           has_more: data.has_more,
         });
         setPageNumber(pageNumber + 1);
-        setLoading(false);
+        setLoadingMore(false);
       }, 500);
     }
   };
@@ -90,7 +90,7 @@ export function SearchHistoryContent() {
               )}
             <InfiniteScroll
               hasMore={searchHistory.has_more}
-              isLoading={loading}
+              isLoading={loadingMore}
               next={fetchMoreSearchHistory}
               threshold={0}
             >

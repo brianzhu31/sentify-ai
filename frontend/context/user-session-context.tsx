@@ -2,7 +2,7 @@
 
 import { UserAuthData, SessionAuthData } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { fetchUser, fetchSession } from "./actions/fetch-user-session";
 
 interface UserSessionContextProps {
   user: UserAuthData | undefined;
@@ -22,58 +22,17 @@ export const UserSessionProvider = ({
   const [session, setSession] = useState<SessionAuthData | undefined>(
     undefined
   );
-  const supabase = createClient();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser();
-        if (error) throw error;
+    const fetchUserAndSession = async () => {
+      const userData = await fetchUser();
+      const sessionData = await fetchSession();
+      setUser(userData);
+      setSession(sessionData);
+    }
 
-        const user = data.user;
-
-        if (user) {
-          const userData: UserAuthData = {
-            email: user.user_metadata.email ?? "",
-            email_verified: user.user_metadata.email_verified ?? false,
-            phone_verified: user.user_metadata.phone_verified ?? false,
-            sub: user.id ?? "",
-          };
-          setUser(userData);
-        } else {
-          setUser(undefined); // Or provide default values as necessary
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        setUser(undefined);
-      }
-    };
-
-    const fetchSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-
-        const session = data.session;
-
-        if (session) {
-          const sessionData: SessionAuthData = {
-            access_token: session?.access_token ?? "",
-            refresh_token: session?.refresh_token ?? "",
-          };
-          setSession(sessionData);
-        } else {
-          setSession(undefined);
-        }
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        setSession(undefined);
-      }
-    };
-
-    fetchUser();
-    fetchSession();
-  }, [supabase.auth]);
+    fetchUserAndSession();
+  }, []);
 
   return (
     <UserSessionContext.Provider value={{ user, session }}>

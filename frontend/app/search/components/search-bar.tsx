@@ -39,8 +39,8 @@ export function SearchBar({ setLoading }: SearchBarProps) {
           .toLowerCase()
           .startsWith(value.toLowerCase())
     );
-    setFilteredCompanies(filtered)
-  }
+    setFilteredCompanies(filtered);
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -55,7 +55,7 @@ export function SearchBar({ setLoading }: SearchBarProps) {
 
   const handleInputClick = (event: React.MouseEvent<HTMLElement>) => {
     createFiltered(query);
-  }
+  };
 
   const getSearchResponse = async (ticker: string) => {
     if (daysAgo === null) {
@@ -75,11 +75,17 @@ export function SearchBar({ setLoading }: SearchBarProps) {
           router.push(`/search/${response.search_id_b64}`);
         } catch (err: any) {
           setLoading(false);
-          console.log('error__', err)
-          toast({
-            variant: "error",
-            description: err.response.data.message,
-          });
+          if (err.response && err.response.data && err.response.data.message) {
+            toast({
+              variant: "error",
+              description: err.response.data.message,
+            });
+          } else {
+            toast({
+              variant: "error",
+              description: err.message || "An unexpected error occurred",
+            });
+          }
         }
       } else {
         console.error("Missing ticker or access token.");
@@ -87,7 +93,7 @@ export function SearchBar({ setLoading }: SearchBarProps) {
     }
   };
 
-  const handleSelectItem = (company: any) => {
+  const handleSelectItem = (company: CompanyPartial) => {
     setQuery(`${company.company_name} (${company.ticker})`);
     setFilteredCompanies([]);
     getSearchResponse(company.ticker);

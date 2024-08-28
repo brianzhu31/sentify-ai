@@ -1,3 +1,5 @@
+"use server";
+
 import axios from "axios";
 import { SearchItem, SearchHistoryData } from "@/types";
 
@@ -14,14 +16,8 @@ export const fetchSearchHistory = async (
       }
     });
 
-    return {
-      ...response.data,
-      searches: response.data.searches.map((search: SearchItem) => ({
-        ...search
-      })),
-    };
+    return response.data;
   } catch (err) {
-    console.error(err);
     throw err;
   }
 };

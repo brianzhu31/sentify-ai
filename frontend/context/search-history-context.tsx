@@ -1,7 +1,5 @@
-// context/SearchHistoryContext.tsx
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { SearchHistoryData } from '@/types'; // Adjust the import based on your directory structure
+import { SearchHistoryData } from '@/types';
 
 interface SearchHistoryContextType {
   searchHistory: SearchHistoryData;

@@ -37,3 +37,30 @@ export type CompanyFull = {
   exchange: string;
   currency: string;
 }
+
+export type SearchData = {
+  company_name: string;
+  created_at: string;
+  created_by: string;
+  id: number;
+  negative_summaries: {
+    source: {
+      link: string;
+      title: string;
+    };
+    summary: string;
+  }[];
+  positive_summaries: {
+    source: {
+      link: string;
+      title: string;
+    };
+    summary: string;
+  }[];
+  score: number;
+  ticker: string;
+  top_sources: {
+    article_link: string;
+    article_title: string;
+  }[];
+};
