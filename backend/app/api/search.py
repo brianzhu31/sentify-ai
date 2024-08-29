@@ -2,7 +2,7 @@ from flask import jsonify, request, Blueprint, g
 from services.search_service import get_company_analysis_data
 from models import db, Search, User, Company
 from utils.validation import token_required
-from utils.codec import int_to_base64
+from uuid import UUID
 
 search_bp = Blueprint("search", __name__)
 
@@ -55,24 +55,20 @@ def search_company():
         db.session.rollback()
         return jsonify({"message": f"An error occurred: {str(e)}"}), 400
 
-    search_id = new_search.id
-    search_id_b64 = int_to_base64(search_id)
-
     json_output = {
+        "search_id": new_search.id,
         "company_name": new_search.company_name,
         "ticker": new_search.ticker,
-        "search_id": search_id,
-        "search_id_b64": search_id_b64,
-        "company_id": company_id,
-        "analysis": analysis_data,
+        "href": f"/search/{new_search.id}",
+        "created_at": new_search.created_at,
     }
 
     return json_output, 200
 
 
-@search_bp.route("/delete/<int:search_id>", methods=["DELETE"])
+@search_bp.route("/delete/<uuid:search_id>", methods=["DELETE"])
 @token_required
-def delete_search(search_id: int):
+def delete_search(search_id: UUID):
     user_id = g.user["sub"]
     user = User.query.get(user_id)
     if user is None:
@@ -81,7 +77,7 @@ def delete_search(search_id: int):
     search = Search.query.get(search_id)
     if search is None:
         return jsonify({"message": "Search not found."}), 404
-    
+
     if search.created_by != user_id:
         return jsonify({"message": "Unauthorized deletion attempt."}), 403
 
@@ -95,12 +91,17 @@ def delete_search(search_id: int):
 
     except Exception:
         db.session.rollback()
-        return jsonify({"message": f"An error occurred with deleting search {search_id}."}), 400
+        return (
+            jsonify(
+                {"message": f"An error occurred with deleting search {search_id}."}
+            ),
+            400,
+        )
 
 
-@search_bp.route("/get_search/<int:search_id>", methods=["GET"])
+@search_bp.route("/get_search/<uuid:search_id>", methods=["GET"])
 @token_required
-def get_search_by_id(search_id: int):
+def get_search_by_id(search_id: UUID):
     search = Search.query.get(search_id)
     if search is None:
         return jsonify({"message": "Search not found."}), 404
@@ -130,7 +131,7 @@ def get_search_history():
 
     page = request.args.get("page", default=1, type=int)
     limit = request.args.get("limit", default=30, type=int)
-    
+
     if limit > 50:
         limit = 50
 
@@ -147,11 +148,10 @@ def get_search_history():
         "searches": [
             {
                 "search_id": search.id,
+                "company_name": search.company_name,
                 "ticker": search.ticker,
-                "href": f"/search/{int_to_base64(search.id)}",
-                "label": search.company_name,
+                "href": f"/search/{search.id}",
                 "created_at": search.created_at,
-                "sub_fields": []
             }
             for search in searches
         ],

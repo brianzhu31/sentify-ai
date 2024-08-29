@@ -6,7 +6,7 @@ import { SearchData } from "@/types";
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export const fetchSearchData = async (
-  search_id: number,
+  search_id: string,
   accessToken: string
 ): Promise<SearchData> => {
   try {

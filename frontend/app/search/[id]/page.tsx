@@ -24,16 +24,18 @@ export default function SearchIdPage() {
     const getSearchData = async () => {
       try {
         setLoading(true);
-        const searchIdB64 = pathname.split("/").pop();
-        if (searchIdB64) {
-          const numberId = parseInt(atob(searchIdB64));
+        const searchId = pathname.split("/").pop();
+        if (searchId) {
           const response = await fetchSearchData(
-            numberId,
+            searchId,
             session.access_token
           );
           setSearchData(response);
         } else {
-          throw new Error("Invalid URL: searchIdB64 is undefined");
+          toast({
+            variant: "error",
+            description: `Search ${searchId} not found!`,
+          });
         }
       } catch (err: any) {
         setLoading(false);

@@ -4,7 +4,7 @@ import axios from "axios";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
-export const deleteSearch = async (accessToken: string, searchId: number) => {
+export const deleteSearch = async (accessToken: string, searchId: string) => {
   try {
     const response = await axios.delete(`${apiUrl}/api/search/delete/${searchId}`, {
       headers: {

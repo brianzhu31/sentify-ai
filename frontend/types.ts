@@ -1,8 +1,8 @@
 export type SearchItem = {
-  search_id: number;
+  search_id: string;
   ticker: string;
   href: string;
-  label: string;
+  company_name: string;
   created_at: string;
 };
 

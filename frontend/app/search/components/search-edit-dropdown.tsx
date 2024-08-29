@@ -22,7 +22,7 @@ import { useSearchHistory } from "@/context/search-history-context";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SearchEditDropdownProps {
-  searchId: number;
+  searchId: string;
 }
 
 export function SearchEditDropdown({ searchId }: SearchEditDropdownProps) {
@@ -47,8 +47,7 @@ export function SearchEditDropdown({ searchId }: SearchEditDropdownProps) {
       const updatedSearches = searchHistory.searches.filter(search => search.search_id !== searchId);
       setSearchHistory({ ...searchHistory, searches: updatedSearches });
 
-      const searchIdB64 = btoa(String(searchId));
-      if (pathname === `/search/${searchIdB64}`) {
+      if (pathname === `/search/${searchId}`) {
         router.replace("/search");
       }
       else {
