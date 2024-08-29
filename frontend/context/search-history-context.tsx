@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { createContext, useState, useContext, ReactNode } from 'react';
 import { SearchHistoryData } from '@/types';
 
 interface SearchHistoryContextType {
@@ -22,7 +22,7 @@ interface SearchHistoryProviderProps {
   children: ReactNode;
 }
 
-export const SearchHistoryProvider: React.FC<SearchHistoryProviderProps> = ({ children }) => {
+export const SearchHistoryProvider = ({ children }: SearchHistoryProviderProps) => {
   const [searchHistory, setSearchHistory] = useState<SearchHistoryData>({
     label: '',
     searches: [],

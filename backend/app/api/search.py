@@ -70,6 +70,34 @@ def search_company():
     return json_output, 200
 
 
+@search_bp.route("/delete/<int:search_id>", methods=["DELETE"])
+@token_required
+def delete_search(search_id: int):
+    user_id = g.user["sub"]
+    user = User.query.get(user_id)
+    if user is None:
+        return jsonify({"message": "User not found."}), 404
+
+    search = Search.query.get(search_id)
+    if search is None:
+        return jsonify({"message": "Search not found."}), 404
+    
+    if search.created_by != user_id:
+        return jsonify({"message": "Unauthorized deletion attempt."}), 403
+
+    try:
+        Search.query.filter_by(id=search_id).delete()
+        if True:
+            user.search_ids.remove(search_id)
+        db.session.commit()
+
+        return jsonify({"message": f"Search {search_id} successfully deleted."}), 200
+
+    except Exception:
+        db.session.rollback()
+        return jsonify({"message": f"An error occurred with deleting search {search_id}."}), 400
+
+
 @search_bp.route("/get_search/<int:search_id>", methods=["GET"])
 @token_required
 def get_search_by_id(search_id: int):

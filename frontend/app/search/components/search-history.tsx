@@ -53,7 +53,7 @@ export function SearchHistoryContent() {
             {searchHistory &&
               searchHistory.searches &&
               searchHistory.searches.map(
-                ({ href, ticker, created_at }, index) => (
+                ({ search_id, href, ticker, created_at }, index) => (
                   <div className="w-full pr-2" key={index}>
                     <Button
                       variant={href === pathname ? "secondary" : "ghost"}
@@ -82,7 +82,7 @@ export function SearchHistoryContent() {
                             {formatDateInUserTimezone(created_at)}
                           </p>
                         </div>
-                        <SearchEditDropdown />
+                        <SearchEditDropdown searchId={search_id} />
                       </Link>
                     </Button>
                   </div>

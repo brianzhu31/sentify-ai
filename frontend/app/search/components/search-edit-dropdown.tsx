@@ -1,5 +1,7 @@
 import { useUserSession } from "@/context/user-session-context";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,16 +15,58 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Share2Icon, TrashIcon, DrawingPinIcon, DrawingPinFilledIcon } from "@radix-ui/react-icons";
+import { Share2Icon, TrashIcon, DrawingPinIcon } from "@radix-ui/react-icons";
 import { Ellipsis } from "lucide-react";
+import { deleteSearch } from "../actions/edit-search";
+import { useSearchHistory } from "@/context/search-history-context";
+import { useToast } from "@/components/ui/use-toast";
 
-export function SearchEditDropdown() {
-  const { user } = useUserSession();
+interface SearchEditDropdownProps {
+  searchId: number;
+}
+
+export function SearchEditDropdown({ searchId }: SearchEditDropdownProps) {
+  const { session } = useUserSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { searchHistory, setSearchHistory } = useSearchHistory();
+  const { toast } = useToast();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const handleDelete = async (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    // await deleteSearch();
+  if (!session) {
+    return null;
+  }
+
+  const handleDelete = async () => {
+    try {
+      const response = await deleteSearch(session.access_token, searchId);
+      toast({
+        description: response.message,
+      });
+
+      const updatedSearches = searchHistory.searches.filter(search => search.search_id !== searchId);
+      setSearchHistory({ ...searchHistory, searches: updatedSearches });
+
+      const searchIdB64 = btoa(String(searchId));
+      if (pathname === `/search/${searchIdB64}`) {
+        router.replace("/search");
+      }
+      else {
+        router.refresh();
+      }
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.message) {
+        toast({
+          variant: "error",
+          description: err.response.data.message,
+        });
+      } else {
+        toast({
+          variant: "error",
+          description: err.message || "An unexpected error occurred",
+        });
+      }
+    }
   };
 
   return (
@@ -49,7 +93,10 @@ export function SearchEditDropdown() {
           </TooltipProvider>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-32 absolute left-0 -translate-x-1" onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuContent
+        className="w-32 absolute left-0 -translate-x-1"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DropdownMenuGroup>
           <DropdownMenuItem className="cursor-pointer">
             <div className="flex items-center gap-3">
@@ -64,7 +111,7 @@ export function SearchEditDropdown() {
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3" onClick={handleDelete}>
               <TrashIcon></TrashIcon>
               <p>Delete</p>
             </div>

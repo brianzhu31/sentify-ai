@@ -27,9 +27,10 @@ export const UserSessionProvider = ({
     const fetchUserAndSession = async () => {
       const userData = await fetchUser();
       const sessionData = await fetchSession();
+      console.log(sessionData);
       setUser(userData);
       setSession(sessionData);
-    }
+    };
 
     fetchUserAndSession();
   }, []);
