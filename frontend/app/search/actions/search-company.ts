@@ -1,6 +1,7 @@
 "use server";
 
 import axios from "axios";
+import { SearchItem } from "@/types";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
@@ -8,7 +9,7 @@ export const searchCompany = async (
   ticker: string,
   days_ago: number,
   accessToken: string
-): Promise<any> => {
+): Promise<SearchItem> => {
   try {
     const response = await axios.post(
       `${apiUrl}/api/search/search_company`,

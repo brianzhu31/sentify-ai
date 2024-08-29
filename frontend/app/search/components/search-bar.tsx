@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CompanyPartial } from "@/types";
+import { CompanyPartial, SearchItem } from "@/types";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCompanies } from "@/context/companies-context";
 import { useUserSession } from "@/context/user-session-context";
+import { useSearchHistory } from "@/context/search-history-context";
 import { DaysSelect } from "./days-select";
 import { searchCompany } from "../actions/search-company";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,6 +20,7 @@ interface SearchBarProps {
 export function SearchBar({ setLoading }: SearchBarProps) {
   const { session } = useUserSession();
   const { companies } = useCompanies();
+  const { searchHistory, setSearchHistory } = useSearchHistory();
   const router = useRouter();
   const [query, setQuery] = useState<string>("");
   const [daysAgo, setDaysAgo] = useState<number | null>(null);
@@ -53,7 +55,7 @@ export function SearchBar({ setLoading }: SearchBarProps) {
     }
   };
 
-  const handleInputClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleInputClick = () => {
     createFiltered(query);
   };
 
@@ -72,7 +74,11 @@ export function SearchBar({ setLoading }: SearchBarProps) {
             daysAgo,
             session.access_token
           );
-          router.push(`/search/${response.search_id_b64}`);
+
+          const newSearchHistoryEntry: SearchItem = response;
+          setSearchHistory({ ...searchHistory, searches: [newSearchHistoryEntry, ...searchHistory.searches] });
+
+          router.push(`/search/${response.search_id}`);
         } catch (err: any) {
           setLoading(false);
           if (err.response && err.response.data && err.response.data.message) {
@@ -87,8 +93,6 @@ export function SearchBar({ setLoading }: SearchBarProps) {
             });
           }
         }
-      } else {
-        console.error("Missing ticker or access token.");
       }
     }
   };

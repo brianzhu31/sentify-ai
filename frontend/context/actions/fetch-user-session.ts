@@ -8,7 +8,6 @@ export const fetchUser = async (): Promise<UserAuthData> => {
   try {
     const { data, error } = await supabase.auth.getUser();
     if (error) {
-      console.log("user error", error)
       throw error;
     }
 
@@ -31,7 +30,6 @@ export const fetchSession = async (): Promise<SessionAuthData> => {
   try {
     const { data, error } = await supabase.auth.getSession();
     if (error) {
-      console.log("session error", error)
       throw error;
     }
 
