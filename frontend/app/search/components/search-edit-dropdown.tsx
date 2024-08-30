@@ -43,27 +43,21 @@ export function SearchEditDropdown({ searchId }: SearchEditDropdownProps) {
         description: response.message,
       });
 
-      const updatedSearches = searchHistory.searches.filter(search => search.search_id !== searchId);
+      const updatedSearches = searchHistory.searches.filter(
+        (search) => search.search_id !== searchId
+      );
       setSearchHistory({ ...searchHistory, searches: updatedSearches });
 
       if (pathname === `/search/${searchId}`) {
         router.replace("/search");
-      }
-      else {
+      } else {
         router.refresh();
       }
     } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.message) {
-        toast({
-          variant: "error",
-          description: err.response.data.message,
-        });
-      } else {
-        toast({
-          variant: "error",
-          description: err.message || "An unexpected error occurred",
-        });
-      }
+      toast({
+        variant: "error",
+        description: err.message || "An unexpected error occurred",
+      });
     }
   };
 

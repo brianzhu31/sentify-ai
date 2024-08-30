@@ -20,8 +20,12 @@ export const fetchUser = async (): Promise<UserAuthData> => {
       sub: user.id ?? "",
     };
     return userData;
-  } catch (err) {
-    throw err;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
 };
 
@@ -40,7 +44,11 @@ export const fetchSession = async (): Promise<SessionAuthData> => {
       refresh_token: session?.refresh_token ?? "",
     };
     return sessionData;
-  } catch (err) {
-    throw err;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
 };

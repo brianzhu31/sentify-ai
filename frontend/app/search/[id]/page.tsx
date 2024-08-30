@@ -39,17 +39,10 @@ export default function SearchIdPage() {
         }
       } catch (err: any) {
         setLoading(false);
-        if (err.response && err.response.data && err.response.data.message) {
-          toast({
-            variant: "error",
-            description: err.response.data.message,
-          });
-        } else {
-          toast({
-            variant: "error",
-            description: err.message || "An unexpected error occurred",
-          });
-        }
+        toast({
+          variant: "error",
+          description: err.message || "An unexpected error occurred",
+        });
       } finally {
         setLoading(false);
       }

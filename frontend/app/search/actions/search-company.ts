@@ -21,7 +21,11 @@ export const searchCompany = async (
       }
     );
     return response.data
-  } catch (err) {
-    throw err;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
 };

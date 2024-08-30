@@ -31,17 +31,10 @@ export const CompaniesProvider = ({ children }: { children: ReactNode }) => {
         const data = await fetchAllCompaniesPartial(apiUrl);
         setCompanies(data);
       } catch (err: any) {
-        if (err.response && err.response.data && err.response.data.message) {
-          toast({
-            variant: "error",
-            description: err.response.data.message,
-          });
-        } else {
-          toast({
-            variant: "error",
-            description: err.message || "An unexpected error occurred",
-          });
-        }
+        toast({
+          variant: "error",
+          description: err.message || "An unexpected error occurred",
+        });
       }
     };
 

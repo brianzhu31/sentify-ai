@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { SearchItem, SearchHistoryData } from "@/types";
+import { SearchHistoryData } from "@/types";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
@@ -17,7 +17,11 @@ export const fetchSearchHistory = async (
     });
 
     return response.data;
-  } catch (err) {
-    throw err;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
 };
