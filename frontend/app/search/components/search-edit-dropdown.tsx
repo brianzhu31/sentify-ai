@@ -1,7 +1,6 @@
 import { useUserSession } from "@/context/user-session-context";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,12 +96,6 @@ export function SearchEditDropdown({ searchId }: SearchEditDropdownProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">
-            <div className="flex items-center gap-3">
-              <DrawingPinIcon></DrawingPinIcon>
-              <p>Pin</p>
-            </div>
-          </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">
             <div className="flex items-center gap-3">
               <Share2Icon></Share2Icon>
