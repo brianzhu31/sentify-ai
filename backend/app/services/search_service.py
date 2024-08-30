@@ -63,7 +63,7 @@ def create_filtered_articles_content(news_articles: dict, relevant_articles: dic
         article_title = article["title"]
         if i in set_of_relevant_articles and article_title not in set_of_article_titles:
             article_content = clean_text(article["summary"])[:4500]
-            filtered_articles_content += f"<Article {i}>\nArticle title: {article_title}\nArticle content:\n{article_content}\n</Article {i}>\n\n"
+            filtered_articles_content += f"<Article_{i}>\nArticle title: {article_title}\nArticle content:\n{article_content}\n</Article_{i}>\n\n"
             set_of_article_titles.add(article_title)
 
     return filtered_articles_content
@@ -145,6 +145,7 @@ def format_analysis(analysis_data: dict, news_articles: dict) -> dict:
     overall_score = total_score/total_weight if total_weight != 0 else 0
 
     formatted_output["score"] = round(overall_score)
+    formatted_output["overall_summary"] = analysis_data.get("overall_summary", "")
 
     return formatted_output
 
@@ -163,7 +164,7 @@ def get_company_analysis_data(company_name: str, keywords: list, days_ago: int) 
     with open("relevant_articles.json", "w", encoding="utf-8") as json_file:
         json.dump(relevant_news_articles, json_file, indent=4)
 
-    if len(relevant_news_articles) < 10:
+    if len(relevant_news_articles) < 7:
         raise InsufficientArticlesError(
             f"Insufficient data information about {company_name.rstrip('.')}. Please try increasing the time frame.")
 
