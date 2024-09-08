@@ -8,7 +8,7 @@ import uuid
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class UserModel(db.Model):
     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False)
     email = Column(String(254), unique=True, nullable=False)
     plan = Column(String(20), nullable=False, default="Basic")
@@ -17,7 +17,7 @@ class User(db.Model):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
-class Search(db.Model):
+class SearchModel(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     company_name = Column(String(80), nullable=False)
     ticker = Column(String(6), nullable=False)
@@ -32,7 +32,7 @@ class Search(db.Model):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
-class Company(db.Model):
+class CompanyModel(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     company_name = Column(String(80), nullable=False)
     ticker = Column(String(6), unique=True, nullable=False)

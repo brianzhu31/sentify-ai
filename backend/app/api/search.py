@@ -1,6 +1,6 @@
 from flask import jsonify, request, Blueprint, g
 from services.search_service import get_company_analysis_data
-from models import db, Search, User, Company
+from models import db, SearchModel, UserModel, CompanyModel
 from utils.validation import token_required
 from uuid import UUID
 from datetime import datetime, timedelta
@@ -12,7 +12,7 @@ search_bp = Blueprint("search", __name__)
 @token_required
 def search_company():
     user_id = g.user["sub"]
-    user = User.query.get(user_id)
+    user = UserModel.query.get(user_id)
 
     if user is None:
         return jsonify({"message": "User not found."}), 404
@@ -23,7 +23,7 @@ def search_company():
     ticker = request.json.get("ticker")
     days_ago = request.json.get("days_ago")
 
-    company = Company.query.filter_by(ticker=ticker).one_or_none()
+    company = CompanyModel.query.filter_by(ticker=ticker).one_or_none()
 
     if company:
         company_name = company.company_name
@@ -34,7 +34,7 @@ def search_company():
         created_at = datetime.utcnow()
         data_from = created_at - timedelta(days=days_ago)
 
-        new_search = Search(
+        new_search = SearchModel(
             company_name=company_name,
             ticker=ticker,
             overall_summary=analysis_data.get("overall_summary", ""),
@@ -77,11 +77,11 @@ def search_company():
 @token_required
 def delete_search(search_id: UUID):
     user_id = g.user["sub"]
-    user = User.query.get(user_id)
+    user = UserModel.query.get(user_id)
     if user is None:
         return jsonify({"message": "User not found."}), 404
 
-    search = Search.query.get(search_id)
+    search = SearchModel.query.get(search_id)
     if search is None:
         return jsonify({"message": f"Search {search_id} not found."}), 404
 
@@ -89,7 +89,7 @@ def delete_search(search_id: UUID):
         return jsonify({"message": "Unauthorized deletion attempt."}), 403
 
     try:
-        Search.query.filter_by(id=search_id).delete()
+        SearchModel.query.filter_by(id=search_id).delete()
         user.search_ids.remove(search_id)
         db.session.commit()
 
@@ -103,11 +103,11 @@ def delete_search(search_id: UUID):
 @search_bp.route("/get_search/<uuid:search_id>", methods=["GET"])
 @token_required
 def get_search_by_id(search_id: UUID):
-    search = Search.query.get(search_id)
+    search = SearchModel.query.get(search_id)
     if search is None:
         return jsonify({"message": f"Search {search_id} not found."}), 404
     
-    company = Company.query.filter_by(ticker=search.ticker).one_or_none()
+    company = CompanyModel.query.filter_by(ticker=search.ticker).one_or_none()
     if company is None:
         return jsonify({"message": "Company not found."}), 404
 
@@ -137,7 +137,7 @@ def get_search_by_id(search_id: UUID):
 @token_required
 def get_search_history():
     user_id = g.user["sub"]
-    user = User.query.get(user_id)
+    user = UserModel.query.get(user_id)
     if user is None:
         return jsonify({"message": "User not found."}), 404
 
@@ -148,8 +148,8 @@ def get_search_history():
         limit = 50
 
     searches_query = (
-        Search.query.filter(Search.id.in_(user.search_ids))
-        .order_by(Search.created_at.desc())
+        SearchModel.query.filter(SearchModel.id.in_(user.search_ids))
+        .order_by(SearchModel.created_at.desc())
         .paginate(page=page, per_page=limit)
     )
 

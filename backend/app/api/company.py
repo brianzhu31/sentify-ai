@@ -1,13 +1,12 @@
-from flask import jsonify, request, Blueprint
-from models import db, Company
-import requests
+from flask import jsonify, Blueprint
+from models import CompanyModel
 
 company_bp = Blueprint("company", __name__)
 
 
 @company_bp.route("/all/full", methods=["GET"])
 def get_all_companies_full():
-    companies = Company.query.all()
+    companies = CompanyModel.query.all()
 
     company_list = [
         {
@@ -26,7 +25,7 @@ def get_all_companies_full():
 
 @company_bp.route("/all/partial", methods=["GET"])
 def get_all_companies_partial():
-    companies = Company.query.all()
+    companies = CompanyModel.query.all()
 
     company_list = [
         {
@@ -43,7 +42,7 @@ def get_all_companies_partial():
 
 @company_bp.route("/search/<int:company_id>", methods=["GET"])
 def get_company_by_id(company_id: int):
-    company = Company.query.get(company_id)
+    company = CompanyModel.query.get(company_id)
 
     if company is None:
         return jsonify({"message": "Company not found."}), 404

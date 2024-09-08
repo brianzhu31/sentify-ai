@@ -1,6 +1,5 @@
 from flask import jsonify, request, Blueprint, g
-from config import supabase
-from models import db, User
+from models import db, UserModel
 from utils.validation import token_required
 
 auth_bp = Blueprint("auth", __name__)
@@ -14,7 +13,7 @@ def register_user():
     user_id = user["sub"]
     email = user["email"]
 
-    new_user = User(
+    new_user = UserModel(
         id=user_id,
         email=email,
     )
