@@ -5,7 +5,7 @@ import requests
 from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from openai import OpenAI
-from app.utils.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
+from backend.app.lib.inference.prompt import get_relevant_articles_prompt, get_analysis_prompt, clean_text
 from app.exceptions.errors import *
 
 load_dotenv(".env.local")
@@ -29,7 +29,7 @@ def get_news(keywords: list, days_ago: int) -> dict:
 
         return news_articles
     except:
-        raise APIError("Error fetching data from external API.")
+        raise ExternalAPIError("Error fetching data from external API.")
 
 
 def get_relevant_articles(company_name: str, news_articles: dict) -> dict:
@@ -84,7 +84,7 @@ def get_analysis(company_name: str, filtered_articles: str, relevant_articles: l
 
         return json_output
     except:
-        raise APIError("Error generating output.")
+        raise ExternalAPIError("Error generating output.")
 
 
 def format_analysis(analysis_data: dict, news_articles: dict) -> dict:

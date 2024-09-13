@@ -1,7 +1,7 @@
 from flask import jsonify, request, Blueprint, g
 from services.search_service import get_company_analysis_data
 from models import db, SearchModel, UserModel, CompanyModel
-from utils.validation import token_required
+from backend.app.lib.validation import token_required
 from uuid import UUID
 from datetime import datetime, timedelta
 
