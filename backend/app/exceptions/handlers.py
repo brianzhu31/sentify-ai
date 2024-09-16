@@ -1,6 +1,6 @@
 from flask import jsonify, Blueprint
 from config import app
-from app.exceptions.errors import *
+from exceptions.errors import *
 
 errors_bp = Blueprint("errors", __name__)
 
@@ -13,5 +13,5 @@ def handle_insufficient_articles_error(e):
     return jsonify({"message": str(e)}), 422
 
 @app.errorhandler(ExternalAPITimeoutError)
-def handle_insufficient_articles_error(e):
+def handle_external_api_timeout_error(e):
     return jsonify({"message": str(e)}), 408

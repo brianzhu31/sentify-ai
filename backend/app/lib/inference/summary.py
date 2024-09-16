@@ -62,30 +62,37 @@ async def compress_base_summary(
     inference_output = await call_model_api_async(session, url, body, headers)
 
     try:
-        json_output = json.loads(inference_output["choices"][0]["message"]["content"])
+        json_output = json.loads(
+            inference_output["choices"][0]["message"]["content"])
     except (KeyError, IndexError, json.JSONDecodeError):
         json_output = {}
 
     return json_output
 
 
-def generate_overall_summaries(company_name: str, article_summaries: str):
-    client = OpenAI(api_key=OPENAI_KEY)
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={"type": "json_object"},
-        temperature=0.2,
-        top_p=0.9,
-        max_tokens=4096,
-        messages=[
+async def generate_sentiment_summaries(
+    session: aiohttp.ClientSession, company_name: str, article_summaries: str
+):
+    url = "https://api.openai.com/v1/chat/completions"
+    body = {
+        "model": "gpt-4o-mini",
+        "response_format": {"type": "json_object"},
+        "temperature": 0.2,
+        "top_p": 0.9,
+        "messages": [
             {
                 "role": "user",
                 "content": sentiment_summary_prompt(company_name, article_summaries),
             }
         ],
-    )
+    }
+
+    headers = {"Authorization": f"Bearer {OPENAI_KEY}"}
+
+    inference_output = await call_model_api_async(session, url, body, headers)
+
     try:
-        json_output = json.loads(response.choices[0].message.content)
+        json_output = json.loads(inference_output["choices"][0]["message"]["content"])
     except (KeyError, IndexError, json.JSONDecodeError):
         json_output = {}
 

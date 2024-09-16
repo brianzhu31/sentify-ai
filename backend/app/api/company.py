@@ -1,5 +1,5 @@
 from flask import jsonify, Blueprint
-from models import CompanyModel
+from models import Company as CompanyModel
 
 company_bp = Blueprint("company", __name__)
 

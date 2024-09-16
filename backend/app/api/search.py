@@ -1,7 +1,8 @@
 from flask import jsonify, request, Blueprint, g
-from services.search_service import get_company_analysis_data
 from models import db, SearchModel, UserModel, CompanyModel
-from backend.app.lib.validation import token_required
+from entities.article import Article, ArticleCollection
+from lib.news import get_news
+from lib.validation import token_required
 from uuid import UUID
 from datetime import datetime, timedelta
 
@@ -27,12 +28,14 @@ def search_company():
 
     if company:
         company_name = company.company_name
-        keywords = company.aliases + [company_name, ticker]
 
-        analysis_data = get_company_analysis_data(company_name, keywords, days_ago)
+        article_collection = ArticleCollection(
+            ticker=ticker, days_ago=days_ago)
 
         created_at = datetime.utcnow()
         data_from = created_at - timedelta(days=days_ago)
+
+        analysis_data = article_collection.full_analysis()
 
         new_search = SearchModel(
             company_name=company_name,
@@ -40,7 +43,7 @@ def search_company():
             overall_summary=analysis_data.get("overall_summary", ""),
             positive_summaries=analysis_data.get("positive", []),
             negative_summaries=analysis_data.get("negative", []),
-            top_sources=analysis_data.get("top_sources", []),
+            sources=analysis_data.get("sources", []),
             score=analysis_data.get("score", 0),
             days_range=days_ago,
             created_by=user_id,
@@ -106,7 +109,7 @@ def get_search_by_id(search_id: UUID):
     search = SearchModel.query.get(search_id)
     if search is None:
         return jsonify({"message": f"Search {search_id} not found."}), 404
-    
+
     company = CompanyModel.query.filter_by(ticker=search.ticker).one_or_none()
     if company is None:
         return jsonify({"message": "Company not found."}), 404
@@ -125,7 +128,7 @@ def get_search_by_id(search_id: UUID):
             "overall_summary": search.overall_summary,
             "positive_summaries": search.positive_summaries,
             "negative_summaries": search.negative_summaries,
-            "top_sources": search.top_sources,
+            "sources": search.sources,
             "score": search.score
         }
     }

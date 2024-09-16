@@ -1,6 +1,6 @@
 from flask import jsonify, request, Blueprint, g
-from models import db, UserModel
-from backend.app.lib.validation import token_required
+from models import db, User as UserModel
+from lib.validation import token_required
 
 auth_bp = Blueprint("auth", __name__)
 
