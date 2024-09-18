@@ -1,10 +1,14 @@
 from flask import jsonify, request, Blueprint, g
-from models import db, SearchModel, UserModel, CompanyModel
-from entities.article import Article, ArticleCollection
-from lib.news import get_news
+from entities.search import Search
+from entities.company import Company
+from entities.user import User
 from lib.validation import token_required
+from exceptions.errors import (
+    SearchLimitError,
+    InvalidRequestError,
+    PermissionDeniedError,
+)
 from uuid import UUID
-from datetime import datetime, timedelta
 
 search_bp = Blueprint("search", __name__)
 
@@ -13,64 +17,27 @@ search_bp = Blueprint("search", __name__)
 @token_required
 def search_company():
     user_id = g.user["sub"]
-    user = UserModel.query.get(user_id)
+    user = User.get_by_id(user_id=user_id)
 
-    if user is None:
-        return jsonify({"message": "User not found."}), 404
-
-    if user.plan == "Basic" and user.daily_search_count >= 10:
-        return jsonify({"message": "Daily search limit reached."}), 429
+    if not user.can_perform_search():
+        raise SearchLimitError("Daily search limit reached.")
 
     ticker = request.json.get("ticker")
     days_ago = request.json.get("days_ago")
 
-    company = CompanyModel.query.filter_by(ticker=ticker).one_or_none()
+    if not (isinstance(days_ago, int) and days_ago > 0):
+        return InvalidRequestError("days_ago must be a valid positive integer.")
 
-    if company:
-        company_name = company.company_name
+    company = Company.get_by_ticker(ticker=ticker)
 
-        article_collection = ArticleCollection(
-            ticker=ticker, days_ago=days_ago)
-
-        created_at = datetime.utcnow()
-        data_from = created_at - timedelta(days=days_ago)
-
-        analysis_data = article_collection.full_analysis()
-
-        new_search = SearchModel(
-            company_name=company_name,
-            ticker=ticker,
-            overall_summary=analysis_data.get("overall_summary", ""),
-            positive_summaries=analysis_data.get("positive", []),
-            negative_summaries=analysis_data.get("negative", []),
-            sources=analysis_data.get("sources", []),
-            score=analysis_data.get("score", 0),
-            days_range=days_ago,
-            created_by=user_id,
-            data_from=data_from,
-            created_at=created_at
-        )
-
-    else:
-        return jsonify({"message": f"No company found with ticker {ticker}"})
-
-    try:
-        db.session.add(new_search)
-        db.session.commit()
-        user.search_ids.append(new_search.id)
-        user.daily_search_count += 1
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"message": f"An error occurred: {str(e)}"}), 400
+    search = user.create_search(ticker=company.ticker, days_ago=days_ago)
 
     json_output = {
-        "search_id": new_search.id,
-        "company_name": new_search.company_name,
-        "ticker": new_search.ticker,
-        "href": f"/search/{new_search.id}",
-        "created_at": new_search.created_at,
+        "search_id": search.id,
+        "company_name": search.company_name,
+        "ticker": search.ticker,
+        "href": f"/search/{search.id}",
+        "created_at": search.created_at,
     }
 
     return json_output, 200
@@ -80,69 +47,45 @@ def search_company():
 @token_required
 def delete_search(search_id: UUID):
     user_id = g.user["sub"]
-    user = UserModel.query.get(user_id)
-    if user is None:
-        return jsonify({"message": "User not found."}), 404
+    user = User.get_by_id(user_id=user_id)
 
-    search = SearchModel.query.get(search_id)
-    if search is None:
-        return jsonify({"message": f"Search {search_id} not found."}), 404
+    search = Search.get_by_id(search_id=search_id)
 
-    if search.created_by != user_id:
-        return jsonify({"message": "Unauthorized deletion attempt."}), 403
+    if not search.check_permission(user.id):
+        raise PermissionDeniedError("Unauthorized deletion attempt.")
 
     try:
-        SearchModel.query.filter_by(id=search_id).delete()
-        user.search_ids.remove(search_id)
-        db.session.commit()
-
+        user.delete_search(search_id=search.id)
         return jsonify({"message": f"Search {search_id} successfully deleted."}), 200
-
     except Exception:
-        db.session.rollback()
-        return jsonify({"message": f"An error occurred with deleting search {search_id}."}), 400
+        pass
 
 
 @search_bp.route("/get_search/<uuid:search_id>", methods=["GET"])
 @token_required
 def get_search_by_id(search_id: UUID):
-    search = SearchModel.query.get(search_id)
-    if search is None:
-        return jsonify({"message": f"Search {search_id} not found."}), 404
+    user_id = g.user["sub"]
+    user = User.get_by_id(user_id=user_id)
 
-    company = CompanyModel.query.filter_by(ticker=search.ticker).one_or_none()
-    if company is None:
-        return jsonify({"message": "Company not found."}), 404
+    search = Search.get_by_id(search_id=search_id)
+    
+    if not search.check_permission(user_id=user.id):
+        raise PermissionDeniedError(f"User {user.id} is unauthorized to view search {search.id}")
+    
+    company = Company.get_by_ticker(ticker=search.ticker)
+    full_search_data = search.to_json()
+    full_search_data.update(
+        {"exchange": company.exchange, "currency": company.currency}
+    )
 
-    search_data = {
-        "id": search.id,
-        "company_name": search.company_name,
-        "ticker": search.ticker,
-        "exchange": company.exchange,
-        "currency": company.currency,
-        "days_range": search.days_range,
-        "created_by": search.created_by,
-        "data_from": search.data_from,
-        "created_at": search.created_at,
-        "analysis_data": {
-            "overall_summary": search.overall_summary,
-            "positive_summaries": search.positive_summaries,
-            "negative_summaries": search.negative_summaries,
-            "sources": search.sources,
-            "score": search.score
-        }
-    }
-
-    return jsonify(search_data), 200
+    return jsonify(full_search_data), 200
 
 
 @search_bp.route("/search_history", methods=["GET"])
 @token_required
 def get_search_history():
     user_id = g.user["sub"]
-    user = UserModel.query.get(user_id)
-    if user is None:
-        return jsonify({"message": "User not found."}), 404
+    user = User.get_by_id(user_id=user_id)
 
     page = request.args.get("page", default=1, type=int)
     limit = request.args.get("limit", default=30, type=int)
@@ -150,13 +93,9 @@ def get_search_history():
     if limit > 50:
         limit = 50
 
-    searches_query = (
-        SearchModel.query.filter(SearchModel.id.in_(user.search_ids))
-        .order_by(SearchModel.created_at.desc())
-        .paginate(page=page, per_page=limit)
-    )
-
-    searches = searches_query.items
+    paginated_search_history = user.get_search_history(page=page, limit=limit)
+    searches = paginated_search_history["searches"]
+    has_more = paginated_search_history["has_more"]
 
     search_content = {
         "label": "Search History",
@@ -170,7 +109,7 @@ def get_search_history():
             }
             for search in searches
         ],
-        "has_more": searches_query.has_next,
+        "has_more": has_more
     }
 
     return jsonify(search_content), 200

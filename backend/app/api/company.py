@@ -1,59 +1,34 @@
 from flask import jsonify, Blueprint
-from models import Company as CompanyModel
+from entities.company import Company, CompanyList
 
 company_bp = Blueprint("company", __name__)
 
 
 @company_bp.route("/all/full", methods=["GET"])
 def get_all_companies_full():
-    companies = CompanyModel.query.all()
+    companies = CompanyList()
 
-    company_list = [
-        {
-            "id": company.id,
-            "company_name": company.company_name,
-            "ticker": company.ticker,
-            "aliases": company.aliases,
-            "exchange": company.exchange,
-            "currency": company.currency,
-        }
-        for company in companies
-    ]
-
-    return jsonify(company_list), 200
+    return jsonify(companies.get_all(full_data=True)), 200
 
 
 @company_bp.route("/all/partial", methods=["GET"])
 def get_all_companies_partial():
-    companies = CompanyModel.query.all()
+    companies = CompanyList()
 
-    company_list = [
-        {
-            "id": company.id,
-            "company_name": company.company_name,
-            "ticker": company.ticker,
-            "aliases": company.aliases,
-        }
-        for company in companies
-    ]
-
-    return jsonify(company_list), 200
+    return jsonify(companies.get_all(full_data=False)), 200
 
 
 @company_bp.route("/search/<int:company_id>", methods=["GET"])
 def get_company_by_id(company_id: int):
-    company = CompanyModel.query.get(company_id)
+    company = Company.get_by_id(company_id=company_id)
+    company_data = company.to_json()
 
-    if company is None:
-        return jsonify({"message": "Company not found."}), 404
+    return company_data, 200
 
-    company_data = {
-        "id": company.id,
-        "company_name": company.company_name,
-        "ticker": company.ticker,
-        "aliases": company.aliases,
-        "exchange": company.exchange,
-        "currency": company.currency,
-    }
 
-    return jsonify(company_data), 200
+@company_bp.route("/search/<string:ticker>", methods=["GET"])
+def get_company_by_ticker(ticker: str):
+    company = Company.get_by_ticker(ticker=ticker)
+    company_data = company.to_json()
+
+    return company_data, 200

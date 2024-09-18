@@ -1,5 +1,5 @@
-from flask import jsonify, request, Blueprint, g
-from models import db, User as UserModel
+from flask import Blueprint, g
+from entities.user import User
 from lib.validation import token_required
 
 auth_bp = Blueprint("auth", __name__)
@@ -8,20 +8,12 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["POST"])
 @token_required
 def register_user():
-    user = g.user
+    user_data = g.user
 
-    user_id = user["sub"]
-    email = user["email"]
+    user_id = user_data["sub"]
+    email = user_data["email"]
 
-    new_user = UserModel(
-        id=user_id,
-        email=email,
-    )
-
-    try:
-        db.session.add(new_user)
-        db.session.commit()
-    except Exception as e:
-        return jsonify({"message": str(e)}), 400
+    user = User(user_id=user_id, email=email)
+    user.register()
 
     return {"message": "User created."}, 201

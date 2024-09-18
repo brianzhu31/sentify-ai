@@ -1,5 +1,6 @@
 from typing import List
-from models import db, Article as ArticleModel, Company as CompanyModel
+from models import db, Article as ArticleModel
+from entities.company import Company
 from lib.inference.prompt import stock_queries
 from lib.inference.embedding import check_article_relevance, embed_texts, filter_similar_texts
 from lib.inference.external_api import create_parallel_request
@@ -69,7 +70,7 @@ class ArticleCollection:
         self.ticker: str = ticker
         self.days_ago: int = days_ago
 
-        company = CompanyModel.query.filter_by(ticker=self.ticker).one_or_none()
+        company = Company.get_by_ticker(ticker=ticker)
         self.company_name: str = company.company_name
         self.aliases: List[str] = company.aliases
 
