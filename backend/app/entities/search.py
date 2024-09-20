@@ -111,7 +111,7 @@ class Search:
             "days_range": self.days_range,
             "created_by": self.created_by,
             "data_from": self.data_from,
-            "created_at": (self.created_at.isoformat() if self.created_at else None),
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "analysis_data": {
                 "overall_summary": self.overall_summary,
                 "positive_summaries": self.positive_summaries,

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
+import { timeAgo } from "../actions/time";
 
 interface ArticleCardProps {
   article: Article;
@@ -12,21 +13,21 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ article }: ArticleCardProps) {
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-2 flex-shrink-0">
+    <Card className={cn("h-full flex flex-col")}>
+      <CardHeader className={cn("pb-2 flex-shrink-0")}>
         <Link href={article?.url} target="_blank" rel="noopener noreferrer">
           <CardTitle
-            className="text-xl font-bold truncate overflow-hidden whitespace-nowrap"
+            className={cn("text-xl font-bold truncate overflow-hidden whitespace-nowrap")}
             title={article.title}
           >
             {article.title}
           </CardTitle>
         </Link>
         <p className="text-xs text-gray-500 mt-1">
-          {article.published_date} | {article.clean_url}
+          {timeAgo(article.published_date)} | {article.clean_url}
         </p>
       </CardHeader>
-      <CardContent className="flex pt-2 flex-grow">
+      <CardContent className={cn("flex pt-2 flex-grow")}>
         <div className="w-1/6 aspect-square mr-4 relative flex-shrink-0">
           <Image
             src={article.media}

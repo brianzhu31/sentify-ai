@@ -37,7 +37,7 @@ class Article(db.Model):
     ticker = Column(String(6), nullable=False)
     title =  Column(String, nullable=False)
     media = Column(String, nullable=True)
-    published_date = Column(String, nullable=True)
+    published_date = Column(DateTime, nullable=True)
     clean_url = Column(String, nullable=True)
     compressed_summary = Column(String, nullable=False)
     sentiment = Column(String(15), nullable=False)

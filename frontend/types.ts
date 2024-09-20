@@ -42,7 +42,7 @@ export type Article = {
   clean_url: string;
   compressed_summary: string;
   media: string;
-  published_date: string;
+  published_date: Date;
   title: string;
   url: string;
 };
