@@ -42,7 +42,7 @@ def check_article_relevance(
 
 def filter_similar_texts(values, threshold=0.9):
     embeddings = embed_texts(values, model="text-embedding-ada-002")
-    
+
     similarity_matrix = cosine_similarity(embeddings)
 
     unique_indices = []
@@ -55,15 +55,10 @@ def filter_similar_texts(values, threshold=0.9):
 
         unique_indices.append(i)
         used_indices.add(i)
-        
+
         for j in range(i + 1, len(values)):
             if similarity_matrix[i][j] > threshold:
                 used_indices.add(j)
                 similar_text_pairs.append((values[i], values[j], similarity_matrix[i][j]))
-    
-    # for text1, text2, similarity in similar_text_pairs:
-    #     print(f"Text 1: {text1}")
-    #     print(f"Text 2: {text2}")
-    #     print(f"Similarity: {similarity:.4f}\n")
 
     return unique_indices
