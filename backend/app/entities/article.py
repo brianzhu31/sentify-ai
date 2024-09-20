@@ -61,7 +61,7 @@ class SummaryPoint:
     def to_json(self):
         return {
             "value": self.value,
-            "source": self.source.url
+            "source": self.source.to_json()
         }
 
 

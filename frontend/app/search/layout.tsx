@@ -21,7 +21,7 @@ export default function SearchLayout({ children }: SearchLayoutProps) {
 const SearchLayoutContent = ({ children }: { children: ReactNode }) => {
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen border-solid border-2">
       <SheetMenu />
       <div className="hidden lg:block">
         <Sidebar />

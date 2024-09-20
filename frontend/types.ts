@@ -17,18 +17,18 @@ export type UserAuthData = {
   email_verified: boolean;
   phone_verified: boolean;
   sub: string;
-}
+};
 
 export type SessionAuthData = {
   access_token: string;
   refresh_token: string;
-}
+};
 
 export type CompanyPartial = {
   company_name: string;
   ticker: string;
   aliases: string[];
-}
+};
 
 export type CompanyFull = {
   company_name: string;
@@ -36,31 +36,40 @@ export type CompanyFull = {
   aliases: string[];
   exchange: string;
   currency: string;
-}
+};
+
+export type Article = {
+  clean_url: string;
+  compressed_summary: string;
+  media: string;
+  published_date: string;
+  title: string;
+  url: string;
+};
+
+export type AnalysisData = {
+  negative_summaries: {
+    value: string;
+    source: Article;
+  }[];
+  positive_summaries: {
+    value: string;
+    source: Article;
+  }[];
+  overall_summary: string;
+  score: number;
+  sources: Article[];
+};
 
 export type SearchData = {
   company_name: string;
-  created_at: string;
   created_by: string;
   id: number;
-  negative_summaries: {
-    source: {
-      link: string;
-      title: string;
-    };
-    summary: string;
-  }[];
-  positive_summaries: {
-    source: {
-      link: string;
-      title: string;
-    };
-    summary: string;
-  }[];
-  score: number;
   ticker: string;
-  top_sources: {
-    article_link: string;
-    article_title: string;
-  }[];
+  exchange: string;
+  currency: string;
+  created_at: Date;
+  data_from: Date;
+  days_range: number;
+  analysis_data: AnalysisData;
 };

@@ -30,9 +30,9 @@ Summarize this article in one paragraph that is STRICTLY 10 sentences or less.
 def compress_base_prompt(company_name: str, article_title: str, summary: str):
     return f"""
 You are a highly skilled financial expert and summarization and analysis assistant. I will give you a description about {company_name}.
-1. Summarize the most critical and specific information in 3 detailed sentences.
-2. Assess the overall financial sentiment using: "VERY NEGATIVE", "NEGATIVE", "NEUTRAL", "POSITIVE", "VERY POSITIVE".
-3. Evaluate the potential impact of the information on {company_name}'s market perception and future stock value using: "LOW", "MEDIUM", "HIGH".
+1. Summarize only the most critical and specific *recent* information, events, or developments about {company_name} in 3 detailed sentences. Avoid historical data or long-term trends.
+2. Assess the overall financial sentiment based on the information using: "VERY NEGATIVE", "NEGATIVE", "NEUTRAL", "POSITIVE", "VERY POSITIVE".
+3. Evaluate the potential impact of this recent information on {company_name}'s market perception and future stock value using: "LOW", "MEDIUM", "HIGH".
 Title: {article_title}
 Description: {summary}
 
@@ -48,22 +48,19 @@ Please output in valid JSON in the following format:
 def sentiment_summary_prompt(company_name: str, article_summaries: str):
     return f'''
 You are a highly skilled financial expert and summarization and analysis assistant. I will give you news article summaries about {company_name}.
+
 ** Detailed Analysis **
-Positive Information: Extract and compile all positive information into detailed chunks of information. Each chunk should:
-- Consist of multiple sentences (at least 1 and up to 2).
-- Include specific statistics, key details, and relevant metrics.
+
+Extract and compile both positive and negative *recent* information into detailed chunks. Each chunk should:
+- Be up to 3 sentences long.
+- Include specific statistics, key details, and relevant metrics from the past few months.
 - Be quantifiable, providing clear figures or data where possible.
-- Be actionable, offering insights that could impact decision-making.
-- Be relevant to the company's market perception, sentiment, and future stock value.
+- Be actionable, offering insights that impact decision-making in the near term.
+- Be relevant to the company's current market perception, sentiment, and future stock value.
 - Record which article index each chunk came from.
 
-Negative Information: Extract and compile all negative information into detailed chunks. Each chunk should:
-- Consist of multiple sentences (at least 1 and up to 2).
-- Include specific statistics, key details, and relevant metrics.
-- Be quantifiable, providing clear figures or data where possible.
-- Be actionable, indicating potential concerns or risks.
-- Be relevant to the company's market perception, sentiment, and future stock value.
-- Record which article index each chunk came from.
+For **Positive Information**, highlight strengths, opportunities, or favorable developments.  
+For **Negative Information**, point out risks, concerns, or potential challenges.
 
 Please output in valid JSON in the following format:
 {{
