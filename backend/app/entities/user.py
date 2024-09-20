@@ -2,16 +2,18 @@ from models import db, User as UserModel, Search as SearchModel
 from entities.search import Search
 from uuid import UUID
 from exceptions.errors import NotFoundError, DBCommitError
+from typing import List
+from datetime import datetime
 
 
 class User:
     def __init__(self, user_id: UUID = None, email: str = None):
-        self.id = user_id
-        self.email = email
-        self.plan = "Basic"
-        self.search_ids = []
-        self.daily_search_count = 0
-        self.created_at = None
+        self.id: UUID = user_id
+        self.email: str = email
+        self.plan: str = "Basic"
+        self.search_ids: List[UUID] = []
+        self.daily_search_count: int = 0
+        self.created_at: datetime = None
 
     @classmethod
     def get_by_id(cls, user_id: UUID):

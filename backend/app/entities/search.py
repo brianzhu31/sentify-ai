@@ -3,22 +3,23 @@ from uuid import UUID
 from entities.article import ArticleCollection
 from entities.company import Company
 from exceptions.errors import NotFoundError, DBCommitError
+from typing import Dict
 from datetime import datetime, timedelta
 
 class Search:
     def __init__(self):
-        self.id = None
-        self.company_name = None
-        self.ticker = None
-        self.overall_summary = None
-        self.positive_summaries = None
-        self.negative_summaries = None
-        self.sources = None
-        self.score = None
-        self.days_range = None
-        self.created_by = None
-        self.data_from = None
-        self.created_at = None
+        self.id: UUID = None
+        self.company_name: str = None
+        self.ticker: str = None
+        self.overall_summary: str = None
+        self.positive_summaries: Dict = None
+        self.negative_summaries: Dict = None
+        self.sources: Dict = None
+        self.score: float = None
+        self.days_range: int = None
+        self.created_by: UUID = None
+        self.data_from: datetime = None
+        self.created_at: datetime = None
 
     @classmethod
     def get_by_id(cls, search_id: UUID):

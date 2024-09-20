@@ -1,15 +1,25 @@
 from models import Company as CompanyModel
 from exceptions.errors import NotFoundError
+from uuid import UUID
+from typing import List
 
 
 class Company:
-    def __init__(self):
-        self.id = None
-        self.company_name = None
-        self.ticker = None
-        self.aliases = None
-        self.exchange = None
-        self.currency = None
+    def __init__(
+        self,
+        company_id: int = None,
+        company_name: str = None,
+        ticker: str = None,
+        aliases: List[str] = [],
+        exchange: str = None,
+        currency: str = None,
+    ):
+        self.id: int = company_id
+        self.company_name: str = company_name
+        self.ticker: str = ticker
+        self.aliases: List[str] = aliases
+        self.exchange: str = exchange
+        self.currency: str = currency
 
     @classmethod
     def get_by_id(cls, company_id: int):
@@ -57,8 +67,18 @@ class Company:
 
 class CompanyList:
     def __init__(self):
-        companies = CompanyModel.query.all()
-        self.companies = companies
+        companies_query = CompanyModel.query.all()
+        self.companies: List[Company] = [
+            Company(
+                company_id=company_query.id,
+                company_name=company_query.company_name,
+                ticker=company_query.ticker,
+                aliases=company_query.aliases,
+                exchange=company_query.exchange,
+                currency=company_query.currency,
+            )
+            for company_query in companies_query
+        ]
 
     def get_all(self, full_data: bool = True):
         company_list = []
