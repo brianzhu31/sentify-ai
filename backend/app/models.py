@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, BigInteger, String, Float, UUID, JSON, ARRAY, DateTime, UniqueConstraint
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.postgresql import ARRAY
+from pgvector.sqlalchemy import Vector
 import uuid
 
 db = SQLAlchemy()
@@ -38,6 +39,7 @@ class Article(db.Model):
     title =  Column(String, nullable=False)
     media = Column(String, nullable=True)
     published_date = Column(DateTime, nullable=True)
+    url = Column(String, nullable=True)
     clean_url = Column(String, nullable=True)
     compressed_summary = Column(String, nullable=False)
     sentiment = Column(String(15), nullable=False)

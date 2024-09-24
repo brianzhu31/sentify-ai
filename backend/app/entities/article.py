@@ -5,7 +5,7 @@ from lib.inference.prompt import stock_queries
 from lib.inference.embedding import (
     check_article_relevance,
     embed_texts,
-    filter_similar_texts,
+    filter_similar_texts
 )
 from lib.inference.external_api import create_parallel_request
 from lib.inference.summary import (
@@ -17,21 +17,25 @@ from lib.inference.summary import (
 )
 from lib.utils import clean_text, create_batches
 from lib.news import get_news
-from exceptions.errors import InsufficientArticlesError
+from exceptions.errors import InsufficientArticlesError, NotFoundError, DBCommitError
+from config import pc
 import asyncio
 from datetime import datetime
+import uuid
 
 
 class Article:
     def __init__(
         self,
-        title: str,
-        content: str,
-        url: str,
-        media: str,
-        published_date: datetime,
-        clean_url: str,
+        article_id: int = None,
+        title: str = "",
+        content: str = "",
+        url: str = "",
+        media: str = "",
+        published_date: datetime = None,
+        clean_url: str = "",
     ):
+        self.id = article_id
         self.title: str = title
         self.content: str = clean_text(content)
         self.url: str = url
@@ -43,6 +47,50 @@ class Article:
         self.sentiment: str = ""
         self.impact: str = ""
         self.exists_in_db: bool = False
+    
+    @classmethod
+    def get_by_id(cls, company_id: int):
+        article_query = ArticleModel.query.get(company_id)
+
+        if article_query is None:
+            raise NotFoundError(f"Company with id {company_id} not found.")
+
+        article_instance = cls()
+        article_instance.id = article_query.id
+        article_instance.title = article_query.title
+        article_instance.url = article_query.url
+        article_instance.media = article_query.media
+        article_instance.published_date = article_query.published_date
+        article_instance.clean_url = article_query.clean_url
+        article_instance.compressed_summary = article_query.compressed_summary
+        article_instance.sentiment = article_query.sentiment
+        article_instance.impact = article_query.impact
+        article_instance.exists_in_db = True
+
+        return article_instance
+    
+    @classmethod
+    def get_by_title_and_ticker(cls, title: str, ticker: str):
+        article_query = ArticleModel.query.filter_by(
+                ticker=ticker, title=title
+            ).one_or_none()
+
+        if article_query is not None:
+            article_instance = cls()
+            article_instance.id = article_query.id
+            article_instance.title = article_query.title
+            article_instance.url = article_query.url
+            article_instance.media = article_query.media
+            article_instance.published_date = article_query.published_date
+            article_instance.clean_url = article_query.clean_url
+            article_instance.compressed_summary = article_query.compressed_summary
+            article_instance.sentiment = article_query.sentiment
+            article_instance.impact = article_query.impact
+            article_instance.exists_in_db = True
+            
+            return article_instance
+        
+        return None
 
     def __str__(self):
         return f"Article title: {self.title}\nArticle content:\n{self.content}"
@@ -156,18 +204,10 @@ class ArticleCollection:
         generate_base_summary_data = []
         compress_base_summary_data = []
         for article in self.relevant_articles:
-            article_query = ArticleModel.query.filter_by(
-                ticker=self.ticker, title=article.title
-            ).one_or_none()
+            fetched_article = Article.get_by_title_and_ticker(title=article.title, ticker=self.ticker)
 
-            if article_query is not None:
-                article.compressed_summary = article_query.compressed_summary
-                article.sentiment = article_query.sentiment
-                article.impact = article_query.impact
-                article.media = article_query.media
-                article.published_date = article_query.published_date
-                article.clean_url = article_query.clean_url
-                article.exists_in_db = True
+            if fetched_article is not None:
+                article = fetched_article
             else:
                 generate_base_summary_data.append(
                     {"company_name": self.company_name, "article": str(article)}
@@ -221,16 +261,31 @@ class ArticleCollection:
                         title=article.title,
                         media=article.media,
                         published_date=article.published_date,
+                        url=article.url,
                         clean_url=article.clean_url,
                         compressed_summary=article.compressed_summary,
                         sentiment=article.sentiment,
-                        impact=article.impact,
+                        impact=article.impact
                     )
                     db.session.add(new_article)
                     db.session.commit()
+
+                    summary_embedding = embed_texts([article.summary])[0]
+                    index = pc.Index("article")
+                    index.upsert(
+                        vectors=[{
+                            "id": str(new_article.id),
+                            "values": summary_embedding,
+                            "metadata": {
+                                "text": article.summary
+                            }
+                        }]
+                    )
+
                 except Exception as e:
+                    print(e)
                     db.session.rollback()
-                    raise Exception(str(e))
+                    raise DBCommitError("Error saving article.")
 
         overall_score = total_score / total_weight if total_weight != 0 else 0
 
