@@ -1,7 +1,7 @@
-from models import db, User as UserModel, Search as SearchModel
+from models import db, User as UserModel, Search as SearchModel, Chat as ChatModel
 from entities.search import Search
 from uuid import UUID
-from exceptions.errors import NotFoundError, DBCommitError
+from exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedError
 from typing import List
 from datetime import datetime
 
@@ -11,8 +11,6 @@ class User:
         self.id: UUID = user_id
         self.email: str = email
         self.plan: str = "Basic"
-        self.search_ids: List[UUID] = []
-        self.daily_search_count: int = 0
         self.created_at: datetime = None
 
     @classmethod
@@ -26,8 +24,6 @@ class User:
         user_instance.id = user_query.id
         user_instance.email = user_query.email
         user_instance.plan = user_query.plan
-        user_instance.search_ids = user_query.search_ids
-        user_instance.daily_search_count = user_query.daily_search_count
         user_instance.created_at = user_query.created_at
 
         return user_instance
@@ -39,17 +35,42 @@ class User:
             db.session.commit()
         except Exception:
             raise DBCommitError("Error registering user.")
+    
+    def create_chat(self, name: str):
+        new_chat = ChatModel(user_id=self.id, name=name)
+        try:
+            db.session.add(new_chat)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise DBCommitError(f"Error creating chat.")
+        
+        chat = Chat.get_by_id(new_chat.id)
+        return chat
+    
+    def delete_chat(self, chat_id: UUID):
+        chat_to_delete = ChatModel.query.get(chat_id)
+        if chat_to_delete is None:
+            raise NotFoundError(f"Chat {chat_id} not found")
+        
+        if chat_to_delete.user_id != self.id:
+            raise PermissionDeniedError("Unauthorized deletion attempt.")
+
+        try:
+            db.session.delete(chat_to_delete)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise DBCommitError(f"Error deleting chat: {e}")
 
     def create_search(self, ticker: str, days_ago: int):
         new_search = Search.generate_by_inference(
             user_id=self.id, ticker=ticker, days_ago=days_ago
         )
-        self.search_ids.append(new_search.id)
         self.daily_search_count += 1
 
         try:
             user_query = UserModel.query.get(self.id)
-            user_query.search_ids = self.search_ids
             user_query.daily_search_count = self.daily_search_count
             db.session.commit()
         except Exception:
@@ -66,7 +87,6 @@ class User:
 
         try:
             user_query = UserModel.query.get(self.id)
-            user_query.search_ids.remove(search_id)
             db.session.commit()
         except Exception:
             db.session.rollback()

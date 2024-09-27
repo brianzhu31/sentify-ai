@@ -77,3 +77,14 @@ Please output in valid JSON in the following format:
 Article summaries:
 {article_summaries}
 '''
+
+
+def rag_chat_prompt(context: str, query: str):
+    return f'''
+Given this information:
+{context}
+Respond to the following query by only using the information I gave you.
+Output in multiple chunks of information that are up to 3 sentences long.
+If the context provided do not help answer the query, just output: "No relevant data found based on your query. Please try something else."
+Query: {query}
+'''

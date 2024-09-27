@@ -3,11 +3,14 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from models import db
-from supabase import create_client, Client
+from pinecone import Pinecone
 
 load_dotenv(".env.local")
 
 SUPABASE_URI = os.getenv("SUPABASE_URI")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
 app = Flask(__name__)
 CORS(app)
