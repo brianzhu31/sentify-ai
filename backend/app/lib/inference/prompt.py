@@ -19,11 +19,11 @@ def stock_queries(company_name: str):
     return queries
 
 
-def base_summarization_prompt(company_name: str, article: str):
+def base_summarization_prompt(company_name: str, content: str):
     return f"""
 I will give you a news article about {company_name}.
 Summarize this article in one paragraph that is STRICTLY 10 sentences or less.
-{article}
+{content}
 """
 
 

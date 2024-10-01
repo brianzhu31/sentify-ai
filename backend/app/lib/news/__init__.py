@@ -15,12 +15,13 @@ def get_news(keywords: list, days_ago: int, page: int = 1) -> dict:
         search_query = " OR ".join(f'"{keyword}"' for keyword in keywords)
         news_articles = newscatcherapi.get_search(
             q=search_query, lang="en", from_=f"{days_ago} days ago",
-            to_rank=1000, page_size=100, page=page
+            to_rank=500, page_size=100, page=page
         )
         
         with open("raw_news_data.json", "w", encoding="utf-8") as json_file:
             json.dump(news_articles, json_file, indent=4)
 
         return news_articles
-    except:
+    except Exception as e:
+        print(e)
         raise ExternalAPIError("Error fetching data from external API.")

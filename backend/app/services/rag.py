@@ -19,21 +19,20 @@ class RAGEngine:
 
     def retrieve(self):
         query_embedding = embed_texts([self.query])[0]
+        print(query_embedding.tolist())
         
-        index = pc.Index("article")
+        index = pc.Index("company-info")
         matches = index.query(
+            namespace="articles",
             vector=query_embedding.tolist(),
             top_k=5,
             include_metadata=True
         )
         
-        print(matches)
-        
         return matches.to_dict()["matches"]
 
     def inference(self, relevant_articles: List[Dict]):
         with app.app_context():
-            self.retrieve()
             if len(relevant_articles) == 0:
                 yield "No relevant data found based on your query. Please try something else.\n"
                 return

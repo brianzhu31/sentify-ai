@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { fetchChatStream } from "./actions/stream";
-import { fetchRelevantArticles, saveOutput } from "./actions/chat";
+import { processMessage } from "./actions/chat";
 import { useUserSession } from "@/context/user-session-context";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +11,6 @@ export default function ChatPage() {
   const [responseData, setResponseData] = useState("");
   const router = useRouter();
   const { session } = useUserSession();
-  // const { session } = useUserSession();
 
   const handleInputChange = (e) => {
     setMessage(e.target.value);
@@ -21,11 +19,11 @@ export default function ChatPage() {
   const handleSubmit = async (e) => {
     if (e.key === "Enter" && message.trim() !== "") {
       try {
-        const context = await fetchRelevantArticles(message, session?.access_token);
-        
-        // Navigate to the new page `/chat/[id]` and pass the context via state or query params
-        console.log(context)
-        router.push(`/chat/${context.chat_id}?message=${message}`);
+        const response = await processMessage(message, session?.access_token);
+
+        if (response.status === "ok") {
+          router.push(`/chat/${response.chat_id}`);
+        }
   
         setMessage(""); // Clear the input after the message is processed
       } catch (error) {

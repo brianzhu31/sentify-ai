@@ -1,6 +1,5 @@
 from app.services.rag import RAGEngine
 from entities.user import User
-from models import db, Chat as ChatModel, Message as MessageModel
 from managers.chat_manager import ChatManager
 from lib.validation import token_required
 from flask import jsonify, Blueprint, request, Response, g
@@ -12,6 +11,25 @@ chat_bp = Blueprint("chat", __name__)
 
 chat_manager = ChatManager()
 
+@chat_bp.route("/get/<uuid:chat_id>", methods=["GET"])
+@token_required
+def get_chat(chat_id: UUID):
+    user_id = UUID(g.user["sub"])
+    messages = ChatManager.get_all_chat_messages(user_id=user_id, chat_id=chat_id)
+    
+    formatted_messages = []
+    for message in messages:
+        message_data = {
+            "role": message.role,
+            "content": message.content
+        }
+        if message.role == "assistant":
+            message_data["sources"] = message.sources
+        
+        formatted_messages.append(message_data)
+
+    return jsonify(formatted_messages), 200
+
 
 @chat_bp.route("/send", methods=["POST"])
 @token_required
@@ -19,6 +37,9 @@ def send():
     user_id = UUID(g.user["sub"])
     message_content = request.json.get("message")
     chat_id = request.json.get("chat_id")
+    
+    if len(message_content) > 50:
+        return {"message": "Prompt too long.", "status": "error"}, 404
 
     if chat_id:
         ChatManager.create_message(user_id=user_id, chat_id=chat_id, role="user", content=message_content)
@@ -27,12 +48,16 @@ def send():
         ChatManager.create_message(user_id=user_id, chat_id=new_chat.id, role="user", content=message_content)
         chat_id = new_chat.id
 
-    chat_response = {
-        "data": RAGEngine(query=message_content).retrieve(),
-        "chat_id": chat_id
-    }
+    return jsonify({"chat_id": chat_id, "status": "ok"}), 200
 
-    return jsonify(chat_response), 200
+
+@chat_bp.route("/retrieve", methods=["POST"])
+@token_required
+def retrieve():
+    message_content = request.json.get("message")
+    context = RAGEngine(query=message_content).retrieve()
+
+    return jsonify(context), 200
 
 
 @chat_bp.route("/inference", methods=["POST"])
@@ -58,10 +83,7 @@ def save_output():
     
     sources_trimmed = []
     for source in sources:
-        sources_trimmed.append({
-            "article_title": source["metadata"]["article_title"],
-            "article_url": source["metadata"]["article_url"]
-        })
+        sources_trimmed.append(source["metadata"])
 
     ChatManager.create_message(user_id=user_id, chat_id=chat_id, role="assistant", content=message, sources=sources_trimmed)
 

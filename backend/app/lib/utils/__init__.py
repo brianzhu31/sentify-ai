@@ -1,5 +1,6 @@
 import re
 import math
+import json
 
 
 def clean_text(text):
@@ -7,6 +8,13 @@ def clean_text(text):
     text = text.strip()
     text = re.sub(r"[^a-zA-Z0-9\s\.,!?-]", "", text)
     return text
+
+
+def jsonl_string_to_list(jsonl_string):
+    lines = jsonl_string.strip().split('\n')
+    dicts = [json.loads(line) for line in lines if line]
+    
+    return dicts
 
 
 def create_batches(items, max_batch_size):

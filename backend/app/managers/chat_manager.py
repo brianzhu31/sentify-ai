@@ -18,6 +18,16 @@ class ChatManager:
         return chat
 
     @classmethod
+    def get_all_chat_messages(cls, user_id: UUID, chat_id: UUID):
+        chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
+
+        chat.last_accessed = datetime.utcnow()
+        db.session.commit()
+
+        messages = MessageModel.query.filter_by(chat_id=chat_id).all()
+        return messages
+
+    @classmethod
     def create_chat(cls, user_id: UUID, name: str):
         new_chat = ChatModel(user_id=user_id, name=name)
         try:

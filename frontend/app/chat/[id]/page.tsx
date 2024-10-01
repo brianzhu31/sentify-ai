@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { fetchChatStream } from "../actions/stream";
-import { saveOutput, fetchRelevantArticles } from "../actions/chat";
+import {
+  saveOutput,
+  fetchRelevantArticles,
+  fetchChatSession,
+} from "../actions/chat";
 import { useUserSession } from "@/context/user-session-context";
 
 const ChatPage = () => {
@@ -12,17 +16,38 @@ const ChatPage = () => {
   const router = useRouter();
   const { session } = useUserSession();
   const pathname = usePathname();
+  const hasRun = useRef(false);
 
   useEffect(() => {
     const getStream = async () => {
-      try {
-        const context = await fetchRelevantArticles(message, session?.access_token);
-      } catch (e: any) {
-        console.log(e)
+      if (!session?.access_token) {
+        console.log("Session or access token not available.");
+        return;
       }
 
-      console.log("context", context);
-      const stream = await fetchChatStream(message, context.data); // Get the stream
+      if (hasRun.current) {
+        return; // Prevent running twice
+      }
+      hasRun.current = true; // Mark as run after the first execution
+
+      const chatID = pathname.split("/").pop();
+      const chatSession = await fetchChatSession(chatID, session?.access_token);
+
+      console.log("chat session", chatSession);
+
+      if (chatSession.length > 1) {
+        return;
+      }
+
+      const firstMessage = chatSession[0].content;
+      const context = await fetchRelevantArticles(
+        firstMessage,
+        session?.access_token
+      );
+
+      console.log(context);
+
+      const stream = await fetchChatStream(firstMessage, context); // Get the stream
 
       const reader = stream.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -46,20 +71,16 @@ const ChatPage = () => {
 
       const sendResponse = {
         message: output,
-        sources: context.data,
-        chat_id: context.chat_id,
+        sources: context,
+        chat_id: chatID,
       };
+      console.log(sendResponse);
 
-      const finalOutput = await saveOutput(sendResponse, session?.access_token);
+      await saveOutput(sendResponse, session?.access_token);
     };
 
-    const message = searchParams.get("message");
-    console.log(message)
-    if (message) {
-        getStream();
-        router.replace(pathname);
-    }
-  }, []);
+    getStream();
+  }, [session]);
 
   return (
     <div>
