@@ -12,6 +12,19 @@ export type SearchHistoryData = {
   has_more: boolean;
 };
 
+export type ChatItem = {
+  chat_id: string;
+  name: string;
+  href: string;
+  last_accessed: Date;
+}
+
+export type ChatHistoryData = {
+  label: string;
+  chats: ChatItem[];
+  has_more: boolean;
+}
+
 export type UserAuthData = {
   email: string;
   email_verified: boolean;

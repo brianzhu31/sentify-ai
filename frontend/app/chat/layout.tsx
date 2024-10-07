@@ -21,7 +21,7 @@ export default function ChatLayout({ children }: ChatLayoutProps) {
 const ChatLayoutContent = ({ children }: { children: ReactNode }) => {
 
   return (
-    <div className="flex min-h-screen border-solid border-2">
+    <div className="flex min-h-screen">
       <SheetMenu />
       <div className="hidden lg:block">
         <Sidebar />

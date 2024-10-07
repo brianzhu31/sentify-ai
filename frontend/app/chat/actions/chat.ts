@@ -1,15 +1,62 @@
 "use server";
 
 import axios from "axios";
+import { ChatHistoryData } from "@/types";
+import { SendMessageResponse } from "../[id]/page";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
-export async function processMessage(message: string, accessToken: string) {
+export const fetchChats = async (
+  accessToken: string,
+  pageNumber?: number
+): Promise<ChatHistoryData> => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/api/chat/send`,
+    const response = await axios.get(
+      `${apiUrl}/api/chat/get_chats?page=${pageNumber}`,
       {
-        message: message,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};
+
+export const deleteChat = async (accessToken: string, chatID: string) => {
+  try {
+    const response = await axios.delete(`${apiUrl}/api/chat/delete/${chatID}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};
+
+export const updateChatName = async (
+  accessToken: string,
+  chatID: string,
+  newName: string
+) => {
+  try {
+    const response = await axios.put(
+      `${apiUrl}/api/chat/rename/${chatID}`,
+      {
+        new_name: newName
       },
       {
         headers: {
@@ -18,12 +65,44 @@ export async function processMessage(message: string, accessToken: string) {
       }
     );
     return response.data;
-  } catch (error) {
-    throw error;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
-}
+};
 
-export async function fetchChatSession(chatID: string, accessToken: string) {
+export const processMessage = async (
+  message: string,
+  accessToken: string,
+  chat_id?: string
+) => {
+  try {
+    const response = await axios.post(
+      `${apiUrl}/api/chat/send`,
+      {
+        message: message,
+        ...(chat_id && { chat_id: chat_id }),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};
+
+export const fetchChatSession = async (chatID: string, accessToken: string) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/chat/get/${chatID}`,
@@ -36,15 +115,19 @@ export async function fetchChatSession(chatID: string, accessToken: string) {
     );
 
     return response.data;
-  } catch (error) {
-    throw error;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
-}
+};
 
-export async function fetchRelevantArticles(
+export const fetchRelevantArticles = async (
   message: string,
   accessToken: string
-) {
+) => {
   try {
     const response = await axios.post(
       `${apiUrl}/api/chat/retrieve`,
@@ -59,12 +142,19 @@ export async function fetchRelevantArticles(
     );
 
     return response.data;
-  } catch (error) {
-    throw error;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
-}
+};
 
-export async function saveOutput(sendResponse: any, accessToken: string) {
+export const saveOutput = async (
+  sendResponse: SendMessageResponse,
+  accessToken: string
+) => {
   try {
     const response = await axios.post(
       `${apiUrl}/api/chat/save_output`,
@@ -77,7 +167,11 @@ export async function saveOutput(sendResponse: any, accessToken: string) {
     );
 
     return response.data;
-  } catch (error) {
-    throw new Error("Error saving assistant output");
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
   }
-}
+};

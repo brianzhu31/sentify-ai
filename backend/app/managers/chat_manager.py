@@ -20,11 +20,7 @@ class ChatManager:
     @classmethod
     def get_all_chat_messages(cls, user_id: UUID, chat_id: UUID):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
-
-        chat.last_accessed = datetime.utcnow()
-        db.session.commit()
-
-        messages = MessageModel.query.filter_by(chat_id=chat_id).all()
+        messages = MessageModel.query.filter_by(chat_id=chat.id).all()
         return messages
 
     @classmethod
@@ -62,6 +58,7 @@ class ChatManager:
     @classmethod
     def create_message(cls, user_id: UUID, chat_id: UUID, role: str, content: str, sources: List = []):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
+        chat.last_accessed = datetime.utcnow()
         try:
             new_message = MessageModel(chat_id=chat_id, role=role, content=content, sources=sources)
             db.session.add(new_message)
@@ -70,3 +67,14 @@ class ChatManager:
         except:
             db.session.rollback()
             raise DBCommitError("Error creating message.")
+
+    @classmethod
+    def get_chat_sessions(cls, user_id: UUID, page: int, limit: int):
+        chats_query = (
+            ChatModel.query.filter_by(user_id=user_id)
+            .order_by(ChatModel.last_accessed.desc())
+            .paginate(page=page, per_page=limit)
+        )
+
+        chats = chats_query.items
+        return {"chats": chats, "has_more": chats_query.has_next}

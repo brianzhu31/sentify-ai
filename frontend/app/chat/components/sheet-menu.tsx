@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { SearchHistoryData } from "@/types";
 import { useUserSession } from "@/context/user-session-context";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { SearchHistoryContent } from "./search-history";
+import { ChatHistoryContent } from "./chat-history";
 import {
   Sheet,
   SheetHeader,
@@ -14,8 +13,8 @@ import {
   SheetTrigger,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { MenuIcon } from "lucide-react";
-import { Search } from "lucide-react";
 
 export function SheetMenu() {
   const { user } = useUserSession();
@@ -40,20 +39,20 @@ export function SheetMenu() {
           </SheetTitle>
         </SheetHeader>
         <SheetDescription></SheetDescription>
-        <SearchHistoryContent />
+        <ChatHistoryContent />
         <Button
           variant="outline"
           className="w-full justify-start h-10 mb-1"
           asChild
         >
-          <Link href="/search">
+          <Link href="/chat">
             <span className={cn("mr-4")}>
-              <Search size={18} />
+              <ChatBubbleIcon />
             </span>
             <p
               className={cn("max-w-[200px] truncate translate-x-0 opacity-100")}
             >
-              New Search
+              New Chat
             </p>
           </Link>
         </Button>

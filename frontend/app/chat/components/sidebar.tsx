@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { SearchHistoryData } from "@/types";
 import { useUserSession } from "@/context/user-session-context";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/useStore";
-import { SearchHistoryContent } from "./search-history";
+import { ChatHistoryContent } from "./chat-history";
 import { useSidebarToggle } from "@/hooks/useSidebarToggle";
 import { SidebarToggle } from "./sidebar-toggle";
 import {
@@ -15,7 +14,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { ChatBubbleIcon, HomeIcon } from "@radix-ui/react-icons";
 
 export function Sidebar() {
   const { user } = useUserSession();
@@ -27,12 +26,13 @@ export function Sidebar() {
     <aside
       className={cn(
         "top-0 left-0 z-20 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
-        sidebar?.isOpen === false ? "w-[90px]" : "w-72"
+        sidebar?.isOpen === false ? "w-[90px]" : "w-[260px]"
       )}
     >
       <SidebarToggle isOpen={sidebar?.isOpen} setIsOpen={sidebar?.setIsOpen} />
       <div className="relative h-full flex flex-col px-3 shadow-md dark:shadow-zinc-800">
         <div className={sidebar?.isOpen ? "py-4 border-b" : ""}>
+          {/* <HomeIcon width={24} height={24}/> */}
           <p
             className={cn(
               "text-m text-center font-semibold whitespace-nowrap transition-[transform,opacity,display] ease-in-out duration-300",
@@ -45,7 +45,7 @@ export function Sidebar() {
           </p>
         </div>
         {sidebar?.isOpen && (
-          <SearchHistoryContent />
+          <ChatHistoryContent />
         )}
         <div className="mt-auto p-2 border-t">
           <TooltipProvider disableHoverableContent>
@@ -56,11 +56,11 @@ export function Sidebar() {
                   className="w-full justify-start h-10 mb-1"
                   asChild
                 >
-                  <Link href="/search">
+                  <Link href="/chat">
                     <span
                       className={cn(sidebar?.isOpen === false ? "" : "mr-4")}
                     >
-                      <Search size={18} />
+                      <ChatBubbleIcon />
                     </span>
                     <p
                       className={cn(
@@ -70,13 +70,13 @@ export function Sidebar() {
                           : "translate-x-0 opacity-100"
                       )}
                     >
-                      New Search
+                      New Chat
                     </p>
                   </Link>
                 </Button>
               </TooltipTrigger>
               {sidebar?.isOpen === false && (
-                <TooltipContent side="right">New Search</TooltipContent>
+                <TooltipContent side="right">New Chat</TooltipContent>
               )}
             </Tooltip>
           </TooltipProvider>

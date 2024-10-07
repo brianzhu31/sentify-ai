@@ -9,14 +9,7 @@ from lib.inference.embedding import (
     embed_texts,
     filter_similar_texts
 )
-from lib.inference.external_api import create_parallel_request
-from lib.inference.summary import (
-    generate_base_summary,
-    compress_base_summary,
-    generate_sentiment_summaries,
-    sentiment_to_int_score,
-    impact_to_int_score,
-)
+from lib.inference.batch import create_jsonl_batch_file
 from lib.inference.prompt import base_summarization_prompt, compress_base_prompt
 from lib.utils import clean_text, create_batches, jsonl_string_to_list
 from lib.news import get_news
@@ -67,76 +60,6 @@ class Article:
         self.impact: str = ""
         self.exists_in_db: bool = False
 
-    @classmethod
-    def get_by_id(cls, company_id: int):
-        article_query = ArticleModel.query.get(company_id)
-
-        if article_query is None:
-            raise NotFoundError(f"Company with id {company_id} not found.")
-
-        article_instance = cls()
-        article_instance.id = article_query.id
-        article_instance.title = article_query.title
-        article_instance.url = article_query.url
-        article_instance.media = article_query.media
-        article_instance.published_date = article_query.published_date
-        article_instance.clean_url = article_query.clean_url
-        article_instance.compressed_summary = article_query.compressed_summary
-        article_instance.sentiment = article_query.sentiment
-        article_instance.impact = article_query.impact
-        article_instance.exists_in_db = True
-
-        return article_instance
-
-    @classmethod
-    def get_by_title_and_ticker(cls, title: str, ticker: str):
-        article_query = ArticleModel.query.filter_by(
-            ticker=ticker, title=title
-        ).one_or_none()
-
-        if article_query is not None:
-            article_instance = cls()
-            article_instance.id = article_query.id
-            article_instance.title = article_query.title
-            article_instance.url = article_query.url
-            article_instance.media = article_query.media
-            article_instance.published_date = article_query.published_date
-            article_instance.clean_url = article_query.clean_url
-            article_instance.compressed_summary = article_query.compressed_summary
-            article_instance.sentiment = article_query.sentiment
-            article_instance.impact = article_query.impact
-            article_instance.exists_in_db = True
-
-            return article_instance
-
-        return None
-
-    def __str__(self):
-        return f"Article title: {self.title}\nArticle content:\n{self.content}"
-
-    def to_json(self):
-        return {
-            "title": self.title,
-            "url": self.url,
-            "media": self.media,
-            "published_date": (
-                self.published_date.strftime("%Y-%m-%d %H:%M:%S")
-                if isinstance(self.published_date, datetime)
-                else self.published_date
-            ),
-            "clean_url": self.clean_url,
-            "compressed_summary": self.compressed_summary,
-        }
-
-
-class SummaryPoint:
-    def __init__(self, value: str, source: Article):
-        self.value: str = value
-        self.source: Article = source
-
-    def to_json(self):
-        return {"value": self.value, "source": self.source.to_json()}
-
 
 class ArticleCollection:
     def __init__(self):
@@ -159,9 +82,6 @@ class ArticleCollection:
                     keywords=keywords, days_ago=days_ago, page=page
                 )
 
-                if request_page["status"].lower() != "ok":
-                    break
-
                 for article_data in request_page["articles"]:
                     article_title = article_data["title"]
                     article_query = ArticleManager.get_article_by_title_and_ticker(article_title=article_title, ticker=ticker)
@@ -182,6 +102,10 @@ class ArticleCollection:
                         )
                         title_set.add(article.title)
                         articles.append(article)
+                
+                if request_page["page"] >= request_page["total_pages"]:
+                    break
+
                 page += 1
                 time.sleep(1.5)
             time.sleep(1)
@@ -203,33 +127,13 @@ class ArticleCollection:
         if len(self.articles) == 0:
             return
 
-        output_dir = "files"
-        os.makedirs(output_dir, exist_ok=True)
-        output_file = os.path.join(output_dir, "articles.jsonl")
-
-        with open(output_file, 'w') as file:
-            for i, article in enumerate(self.articles):
-                post_data = {
-                    "custom_id": str(i),
-                    "method": "POST",
-                    "url": "/v1/chat/completions",
-                    "body": {
-                        "model": "gpt-4o-mini",
-                        "messages": [
-                            {
-                                "role": "user",
-                                "content": base_summarization_prompt(
-                                    company_name=article.company_name,
-                                    content=article.content
-                                )
-                            }
-                        ],
-                        "temperature": 0.2,
-                        "top_p": 0.9
-                    }
-                }
-
-                file.write(json.dumps(post_data) + '\n')
+        create_jsonl_batch_file(
+            articles=self.articles,
+            output_dir="files",
+            file_name="articles.jsonl",
+            prompt_function=base_summarization_prompt,
+            prompt_args=['company_name', 'content']
+        )
 
         batch_input_file = client.files.create(
             file=open("files/articles.jsonl", "rb"),
@@ -277,33 +181,14 @@ class ArticleCollection:
             article_index = int(summary["custom_id"])
             self.articles[article_index].summary = summary["response"]["body"]["choices"][0]["message"]["content"]
 
-        output_file = os.path.join(output_dir, "article_summaries.jsonl")
-
-        with open(output_file, 'w') as file:
-            for i, article in enumerate(self.articles):
-                post_data = {
-                    "custom_id": str(i),
-                    "method": "POST",
-                    "url": "/v1/chat/completions",
-                    "body": {
-                        "model": "gpt-4o-mini",
-                        "response_format": {"type": "json_object"},
-                        "messages": [
-                            {
-                                "role": "user",
-                                "content": compress_base_prompt(
-                                    company_name=article.company_name,
-                                    article_title=article.title,
-                                    summary=article.summary
-                                )
-                            }
-                        ],
-                        "temperature": 0.2,
-                        "top_p": 0.9
-                    }
-                }
-
-                file.write(json.dumps(post_data) + '\n')
+        create_jsonl_batch_file(
+            articles=self.articles,
+            output_dir="files",
+            file_name="article_summaries.jsonl",
+            prompt_function=compress_base_prompt,
+            prompt_args=['company_name', 'title', 'summary'],
+            output_json=True
+        )
 
         batch_input_file = client.files.create(
             file=open("files/article_summaries.jsonl", "rb"),
@@ -373,18 +258,7 @@ class ArticleCollection:
                 impact=article.impact
             )
             article.id = new_article.id
-            
-        # article_models = []
-        # for article in self.articles:
-        #     article_model = ArticleModel(ticker=article.ticker, title=article.title, media=article.media, published_date=article.published_date, url=article.url,
-        #                                  clean_url=article.clean_url, compressed_summary=article.compressed_summary, sentiment=article.sentiment, impact=article.impact)
-        #     article_models.append(article_model)
-        # try:
-        #     db.session.add_all(article_models)
-        #     db.session.commit()
-        # except:
-        #     db.session.rollback()
-        #     raise DBCommitError("Error saving all new articles.")
+
 
     def embed_articles_to_vector_db(self):
         if len(self.articles) == 0:
@@ -411,7 +285,6 @@ class ArticleCollection:
                 }
             }
             vectors.append(vector)
-        print("vectors", vectors)
         index = pc.Index("company-info")
         index.upsert(
             vectors=vectors,
