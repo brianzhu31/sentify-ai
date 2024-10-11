@@ -7,15 +7,20 @@ from lib.inference.prompt import stock_queries
 from lib.inference.embedding import (
     check_article_relevance,
     embed_texts,
-    filter_similar_texts
+    filter_similar_texts,
 )
-from lib.inference.batch import create_jsonl_batch_file
+from lib.inference.batch import (
+    create_jsonl_batch_file,
+    create_jsonl_embedding_batch_file,
+    submit_batch,
+    get_batch_results,
+)
 from lib.inference.prompt import base_summarization_prompt, compress_base_prompt
-from lib.utils import clean_text, create_batches, jsonl_string_to_list
+from lib.utils import clean_text, create_batches, jsonl_string_to_list, datetime_to_unix
 from lib.news import get_news
 from exceptions.errors import InsufficientArticlesError, NotFoundError, DBCommitError
-from config import pc
 from openai import OpenAI
+from pinecone import Pinecone
 from dotenv import load_dotenv
 import asyncio
 from datetime import datetime
@@ -30,6 +35,9 @@ load_dotenv(".env.local")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
 client = OpenAI(api_key=OPENAI_KEY)
+
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+pc = Pinecone(api_key=PINECONE_API_KEY)
 
 
 class Article:
@@ -65,7 +73,7 @@ class ArticleCollection:
     def __init__(self):
         self.articles: List[Article] = []
 
-    def fetch_articles(self, tickers: List[str] = None, days_ago: int = 1):
+    def fetch_articles(self, tickers: List[str] = None, days_ago: int = 7):
         articles = []
         title_set = set()
         query_embeddings = {}
@@ -73,18 +81,19 @@ class ArticleCollection:
             company = CompanyManager.get_company_by_ticker(ticker=ticker)
             keywords = company.aliases + [company.company_name, company.ticker]
             query_embeddings[company.company_name] = embed_texts(
-                stock_queries(company.company_name))
+                stock_queries(company.company_name)
+            )
 
-            max_pages = 1
+            max_pages = 2
             page = 1
             while page <= max_pages:
-                request_page = get_news(
-                    keywords=keywords, days_ago=days_ago, page=page
-                )
+                request_page = get_news(keywords=keywords, days_ago=days_ago, page=page)
 
                 for article_data in request_page["articles"]:
                     article_title = article_data["title"]
-                    article_query = ArticleManager.get_article_by_title_and_ticker(article_title=article_title, ticker=ticker)
+                    article_query = ArticleManager.get_article_by_title_and_ticker(
+                        article_title=article_title, ticker=ticker
+                    )
                     if article_query:
                         continue
                     if article_title not in title_set:
@@ -92,7 +101,7 @@ class ArticleCollection:
                             company_name=company.company_name,
                             ticker=company.ticker,
                             title=article_data["title"],
-                            content=article_data["summary"],
+                            content=article_data["summary"][:10000],
                             url=article_data["link"],
                             media=article_data["media"],
                             published_date=datetime.strptime(
@@ -102,24 +111,51 @@ class ArticleCollection:
                         )
                         title_set.add(article.title)
                         articles.append(article)
-                
+
                 if request_page["page"] >= request_page["total_pages"]:
                     break
 
                 page += 1
-                time.sleep(1.5)
-            time.sleep(1)
+                time.sleep(3.5)
 
         article_texts = []
         for article in articles:
             article_texts.append(article.content)
 
-        article_embeddings = embed_texts(article_texts)
+        article_embeddings = [0] * len(articles)
+
+        create_jsonl_embedding_batch_file(
+            article_texts=article_texts,
+            output_dir="files",
+            file_name="article_texts.jsonl",
+        )
+
+        batch_id = submit_batch(
+            filepath="files/article_texts.jsonl",
+            endpoint="/v1/embeddings",
+            job_description="article embedding job",
+        )
+
+        article_embeddings_batch_output = get_batch_results(
+            batch_id=batch_id,
+            output_dir="files",
+            output_filename="article_embeddings.jsonl",
+        )
+
+        for embedding_data in article_embeddings_batch_output:
+            article_index = int(embedding_data["custom_id"])
+            embedding = embedding_data["response"]["body"]["data"][0]["embedding"]
+            article_embeddings[article_index] = embedding
 
         relevant_articles = []
         for article, article_embedding in zip(articles, article_embeddings):
-            if check_article_relevance(article_embedding, query_embeddings[article.company_name]):
+            if check_article_relevance(
+                article_embedding, query_embeddings[article.company_name]
+            ):
                 relevant_articles.append(article)
+                print("RELEVANT", article.title)
+            else:
+                print("NOT RELEVANT", article.title)
 
         self.articles = relevant_articles
 
@@ -132,110 +168,53 @@ class ArticleCollection:
             output_dir="files",
             file_name="articles.jsonl",
             prompt_function=base_summarization_prompt,
-            prompt_args=['company_name', 'content']
+            prompt_args=["company_name", "content"],
         )
 
-        batch_input_file = client.files.create(
-            file=open("files/articles.jsonl", "rb"),
-            purpose="batch"
-        )
-
-        batch_input_file_id = batch_input_file.id
-        new_batch = client.batches.create(
-            input_file_id=batch_input_file_id,
+        batch_id = submit_batch(
+            filepath="files/articles.jsonl",
             endpoint="/v1/chat/completions",
-            completion_window="24h",
-            metadata={
-                "description": "article summarization job"
-            }
+            job_description="article summarization job",
         )
-        batch_id = new_batch.id
 
-        batch_success = False
-        while True:
-            batch = client.batches.retrieve(batch_id)
-            if batch.status == "completed":
-                batch_success = True
-                break
-            if batch.status in ["failed", "expired", "cancelled"]:
-                break
-
-            time.sleep(10)
-
-        file_response = None
-        batch = client.batches.retrieve(batch_id)
-        if batch_success:
-            file_response = client.files.content(batch.output_file_id)
-            output_dir = "files"
-            output_file = os.path.join(output_dir, "base_summaries.jsonl")
-
-            with open(output_file, 'w') as file:
-                file.write(file_response.text)
-
-            client.files.delete(batch.input_file_id)
-            client.files.delete(batch.output_file_id)
-
-        summaries_batch_output = jsonl_string_to_list(file_response.text)
+        summaries_batch_output = get_batch_results(
+            batch_id=batch_id,
+            output_dir="files",
+            output_filename="base_summaries.jsonl",
+        )
 
         for summary in summaries_batch_output:
             article_index = int(summary["custom_id"])
-            self.articles[article_index].summary = summary["response"]["body"]["choices"][0]["message"]["content"]
+            self.articles[article_index].summary = summary["response"]["body"][
+                "choices"
+            ][0]["message"]["content"]
 
         create_jsonl_batch_file(
             articles=self.articles,
             output_dir="files",
             file_name="article_summaries.jsonl",
             prompt_function=compress_base_prompt,
-            prompt_args=['company_name', 'title', 'summary'],
-            output_json=True
+            prompt_args=["company_name", "title", "summary"],
+            output_json=True,
         )
 
-        batch_input_file = client.files.create(
-            file=open("files/article_summaries.jsonl", "rb"),
-            purpose="batch"
-        )
-
-        batch_input_file_id = batch_input_file.id
-        new_batch = client.batches.create(
-            input_file_id=batch_input_file_id,
+        batch_id = submit_batch(
+            filepath="files/article_summaries.jsonl",
             endpoint="/v1/chat/completions",
-            completion_window="24h",
-            metadata={
-                "description": "article summary compression job"
-            }
+            job_description="article summary compression job",
         )
-        batch_id = new_batch.id
 
-        batch_success = False
-        while True:
-            batch = client.batches.retrieve(batch_id)
-            if batch.status == "completed":
-                batch_success = True
-                break
-            if batch.status in ["failed", "expired", "cancelled"]:
-                break
+        compressed_summaries_batch_output = get_batch_results(
+            batch_id=batch_id,
+            output_dir="files",
+            output_filename="compressed_summaries.jsonl",
+        )
 
-            time.sleep(10)
-
-        file_response = None
-        batch = client.batches.retrieve(batch_id)
-        if batch_success:
-            file_response = client.files.content(batch.output_file_id)
-            output_dir = "files"
-            output_file = os.path.join(
-                output_dir, "compressed_summaries.jsonl")
-
-            with open(output_file, 'w') as file:
-                file.write(file_response.text)
-
-            client.files.delete(batch.input_file_id)
-            client.files.delete(batch.output_file_id)
-
-        summaries_batch_output = jsonl_string_to_list(file_response.text)
-
-        for summary in summaries_batch_output:
+        for summary in compressed_summaries_batch_output:
             article_index = int(summary["custom_id"])
-            text_output = summary["response"]["body"]["choices"][0]["message"]["content"]
+            text_output = summary["response"]["body"]["choices"][0]["message"][
+                "content"
+            ]
             json_output = json.loads(text_output)
             self.articles[article_index].compressed_summary = json_output["summary"]
             self.articles[article_index].sentiment = json_output["sentiment"]
@@ -255,10 +234,9 @@ class ArticleCollection:
                 clean_url=article.clean_url,
                 compressed_summary=article.compressed_summary,
                 sentiment=article.sentiment,
-                impact=article.impact
+                impact=article.impact,
             )
             article.id = new_article.id
-
 
     def embed_articles_to_vector_db(self):
         if len(self.articles) == 0:
@@ -278,18 +256,15 @@ class ArticleCollection:
                     "article_title": article.title,
                     "ticker": article.ticker,
                     "media": article.media,
-                    "published_date": article.published_date.strftime("%Y-%m-%d %H:%M:%S"),
+                    "published_date": datetime_to_unix(article.published_date),
                     "url": article.url,
                     "clean_url": article.clean_url,
-                    "text": article.summary
-                }
+                    "text": article.summary,
+                },
             }
             vectors.append(vector)
         index = pc.Index("company-info")
-        index.upsert(
-            vectors=vectors,
-            namespace="articles"
-        )
+        index.upsert(vectors=vectors, namespace="articles")
 
     # def generate_sentiment_summaries(self, filter_unique: bool = False):
     #     article_batches = create_batches(self.relevant_articles, 10)

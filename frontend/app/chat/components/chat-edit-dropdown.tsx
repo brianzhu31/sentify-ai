@@ -24,13 +24,11 @@ import { deleteChat, updateChatName } from "../actions/chat";
 interface ChatEditDropdownProps {
   chatID: string;
   name: string;
-  onRename: any;
 }
 
 export function ChatEditDropdown({
   chatID,
   name,
-  onRename,
 }: ChatEditDropdownProps) {
   const { session } = useUserSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,8 +73,6 @@ export function ChatEditDropdown({
         chatID,
         newName
       );
-
-      onRename(newName);
 
       const updatedChats = chatHistory.chats.map((chat) =>
         chat.chat_id === chatID ? { ...chat, name: newName } : chat

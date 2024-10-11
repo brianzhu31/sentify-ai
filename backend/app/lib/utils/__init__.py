@@ -1,6 +1,8 @@
 import re
 import math
 import json
+from datetime import datetime, timezone
+import pytz
 
 
 def clean_text(text):
@@ -38,3 +40,26 @@ def create_batches(items, max_batch_size):
         start_idx += batch_size
 
     return batches
+
+
+def datetime_to_unix(dt_obj: datetime):
+    dt_obj = dt_obj.replace(tzinfo=timezone.utc)
+    unix_timestamp = int(dt_obj.timestamp())
+    return unix_timestamp
+
+
+def convert_est_string_to_utc(date_string: str):
+    date_format = '%Y-%m-%d %H:%M:%S' 
+    est = pytz.timezone('America/New_York')
+    naive_datetime = datetime.strptime(date_string, date_format)
+    localized_datetime = est.localize(naive_datetime)
+    utc_datetime = localized_datetime.astimezone(pytz.utc)
+    return utc_datetime
+
+
+def unix_to_formatted_string_est(unix_timestamp):
+    dt_utc = datetime.utcfromtimestamp(unix_timestamp)
+    est = pytz.timezone('America/New_York')
+    dt_est = dt_utc.replace(tzinfo=pytz.utc).astimezone(est)
+    formatted_time = dt_est.strftime("%B %d, %Y %I:%M %p")
+    return formatted_time

@@ -11,9 +11,11 @@ import {
 import { useUserSession } from "@/context/user-session-context";
 import { Input } from "@/components/ui/input";
 import { processMessage } from "../actions/chat";
+import ArticleCard from "./components/article-card";
 import { useToast } from "@/components/ui/use-toast";
+import { MessagesSquare } from "lucide-react";
 
-export type ArticleSource = { 
+export type ArticleSource = {
   article_title: string;
   clean_url: string;
   media: string;
@@ -21,13 +23,13 @@ export type ArticleSource = {
   text: string;
   ticker: string;
   url: string;
-}
+};
 
 export type Message = {
   role: string;
   content: string;
   sources?: ArticleSource[];
-}
+};
 
 export type ChatSession = {
   chat_id: string;
@@ -36,20 +38,20 @@ export type ChatSession = {
   created_at: Date;
   last_accessed: Date;
   messages: Message[];
-}
+};
 
 export type ArticleSourceMatch = {
   id: string;
   metadata: ArticleSource;
   score: number;
   values: number[];
-}
+};
 
 export type SendMessageResponse = {
   message: string;
   sources: ArticleSourceMatch[];
   chat_id?: string;
-}
+};
 
 const ChatPage = () => {
   const { session } = useUserSession();
@@ -90,7 +92,12 @@ const ChatPage = () => {
     if (isAssistantRunning) {
       return;
     }
-    const stream = await fetchChatStream(session?.access_token, message, context, chatID);
+    const stream = await fetchChatStream(
+      session?.access_token,
+      message,
+      context,
+      chatID
+    );
 
     const reader = stream.getReader();
     const decoder = new TextDecoder("utf-8");
@@ -138,7 +145,7 @@ const ChatPage = () => {
         {
           content: streamedOutput || "",
           role: "assistant",
-          sources: context
+          sources: context,
         },
       ]);
 
@@ -181,8 +188,7 @@ const ChatPage = () => {
         ]);
 
         if (response.status === "ok") {
-
-          const context = await fetchRelevantArticles(
+          let context = await fetchRelevantArticles(
             message,
             session?.access_token
           );
@@ -192,12 +198,17 @@ const ChatPage = () => {
           const streamedOutput = await getStream(message, context);
 
           setResponseData("");
+          console.log("context", context)
+
+          if (streamedOutput === "No relevant data found based on your query. Please try something else.") {
+            context = []
+          }
           setChatMessages((prevChatMessages: Message[]) => [
             ...prevChatMessages,
             {
               content: streamedOutput || "",
               role: "assistant",
-              sources: context
+              sources: context,
             },
           ]);
 
@@ -209,12 +220,10 @@ const ChatPage = () => {
           console.log(sendResponse);
 
           await saveOutput(sendResponse, session?.access_token);
-        }
-        else if (response.status == "not accepted") {
+        } else if (response.status === "not accepted") {
           setResponseData(response.message);
         }
         setIsAssistantRunning(false);
-
       } catch (error) {
         setIsAssistantRunning(false);
         console.error("Error processing message:", error);
@@ -227,7 +236,7 @@ const ChatPage = () => {
   }, [session]);
 
   useEffect(() => {
-    console.log("chat session", chatMessages)
+    console.log("chat session", chatMessages);
     if (chatMessages && chatMessages.length == 1) {
       loadUpFirstMessage();
     }
@@ -243,31 +252,58 @@ const ChatPage = () => {
   }, [responseData]);
 
   return (
-    <div className="h-[100vh] flex flex-col p-4">
-      <div ref={containerRef} className="flex flex-col gap-4 overflow-y-auto flex-grow">
-        {chatMessages &&
-          chatMessages.map((message: Message, index: number) => (
-            <div key={index}>
-              <p className="font-semibold">{message.role}</p>
-              <p className="border-2 border-solid">{message.content}</p>
-            </div>
-          ))}
-        {responseData && (
-          <div>
-            <p className="font-semibold">assistant</p>
-            <p className="border-2 border-solid">{responseData}</p>
+    <>
+      <div className="h-screen flex flex-col relative">
+        <div className="flex-1 overflow-y-auto">
+          <div
+            ref={containerRef}
+            className="flex flex-col w-full max-w-4xl mx-auto gap-6 p-6 rounded-lg bg-white"
+          >
+            {chatMessages &&
+              chatMessages.map((message: Message, index: number) => (
+                <div
+                  key={index}
+                  className="border-solid border-[1px] p-2 rounded-md"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                      {message.role}
+                    </p>
+                    <p className="text-base text-gray-800">{message.content}</p>
+                  </div>
+                  {message?.sources && message?.sources.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
+                      {message.sources?.map((article, index) => (
+                        <ArticleCard key={index} article={article} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            {responseData && (
+              <div className="border-solid border-[1px] p-2 rounded-md">
+                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                  assistant
+                </p>
+                <p className="text-base text-gray-800">{responseData}</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        <div className="pb-6">
+          <div className="max-w-4xl mx-auto">
+            <Input
+              className="w-full h-12 text-sm rounded-lg"
+              placeholder="Enter your message..."
+              value={message}
+              onChange={handleInputChange}
+              onKeyDown={handleSubmit}
+              disabled={isAssistantRunning}
+            />
+          </div>
+        </div>
       </div>
-      <Input
-        className="w-96"
-        placeholder="Enter message"
-        value={message}
-        onChange={handleInputChange}
-        onKeyDown={handleSubmit}
-        disabled={isAssistantRunning}
-      />
-    </div>
+    </>
   );
 };
 

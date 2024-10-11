@@ -94,9 +94,25 @@ Query:
 def query_validation_prompt(query: str):
     return f'''
 You are a guardrail for a RAG chat bot.
-Reject all inappropriate or unethical queries.
-If the query is acceptable, return only a short title that represents the query without any additional text.
-If not, repond exactly with "error".
+Reject all toxic or unethical queries by reponding exactly with "error".
+Else, return only a short title that represents the query without any additional text.
+Query:
+{query}
+'''
+
+
+def query_to_date_range_prompt(current_date: str, earliest_date: str, query: str):
+    return f'''
+I want you to convert a user query into a date range to fetch data from.
+Currently it is is {current_date}. I have data from {earliest_date} to {current_date}.
+Try to give some extra leeway after the end date.
+If the query does not specify a time frame, return exactly null for the start and end.
+The dates should be in %Y-%m-%d %H:%M:%S format.
+Please output in valid JSON in the following format:
+{{
+    "start": str,
+    "end": str
+}}
 Query:
 {query}
 '''
@@ -106,13 +122,18 @@ def rag_system_prompt():
     return "You are a finance RAG chatbot. I will give you the chat history and extra context."
 
 
-def rag_chat_prompt(chat_session_history: str, context: str, query: str):
+def rag_chat_prompt(chat_session_history: str, context: str, current_date: str, query: str):
     return f'''
 Context:
 {context}
+
 Chat History:
 {chat_session_history}
-Respond to the following query by only using the information in the context and chat history, in 1 to 5 sentences.
-If the context or chat history provided do not help answer the query, just output: "No relevant data found based on your query. Please try something else."
+
+Current Date: {current_date}
+
+Respond to the following query by using the information in the context and chat history, in 1 to 5 sentences.
+If the query is a follow up to the messages in the chat history, provide an answer.
+Else, if the query is independent and the context or chat history provided do not help answer it, just output: "No relevant data found based on your query. Please try something else."
 Query: {query}
 '''

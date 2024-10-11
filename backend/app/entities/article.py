@@ -18,7 +18,6 @@ from lib.inference.summary import (
 from lib.utils import clean_text, create_batches
 from lib.news import get_news
 from exceptions.errors import InsufficientArticlesError, NotFoundError, DBCommitError
-from config import pc
 import asyncio
 from datetime import datetime
 import uuid

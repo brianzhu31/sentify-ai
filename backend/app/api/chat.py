@@ -1,4 +1,4 @@
-from app.services.rag import RAGEngine
+from services.rag import RAGEngine
 from entities.user import User
 from managers.chat_manager import ChatManager
 from lib.validation import token_required
@@ -166,7 +166,7 @@ def save_output():
 
     sources_trimmed = []
     for source in sources:
-        sources_trimmed.append(source["metadata"])
+        sources_trimmed.append(source)
 
     ChatManager.create_message(user_id=user_id, chat_id=chat_id, role="assistant", content=message, sources=sources_trimmed)
 

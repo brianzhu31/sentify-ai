@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUserSession } from "@/context/user-session-context";
 import { useChatHistory } from "@/context/chat-history-context";
 import { cn } from "@/lib/utils";
@@ -12,27 +12,35 @@ import InfiniteScroll from "./infinite-scroll";
 import { Loader2 } from "lucide-react";
 import { ChatHistorySublist } from "./chat-history-sublist";
 import { fetchChats } from "../actions/chat";
+import { ChatLink } from "./chat-history-sublist";
+import { ChatEditDropdown } from "./chat-edit-dropdown";
 import { ChatItem } from "@/types";
 import { isToday, isWithinInterval, subDays } from "date-fns";
-
 
 export function ChatHistoryContent() {
   const { session } = useUserSession();
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const { chatHistory, setChatHistory, pageNumber, setPageNumber } =
     useChatHistory();
-
-  if (!session) {
-    return null;
-  }
+  const [categorizedChats, setCategorizedChats] = useState<any>({
+    today: [],
+    yesterday: [],
+    last7Days: [],
+    last30Days: [],
+    older: [],
+  });
+  const pathname = usePathname();
 
   const fetchMoreChats = async () => {
+    if (!session) {
+      return;
+    }
+
     if (chatHistory.has_more) {
       setLoadingMore(true);
 
       setTimeout(async () => {
         const data = await fetchChats(session.access_token, pageNumber);
-        console.log("chat history", data);
         setChatHistory({
           label: data.label,
           chats: [...chatHistory.chats, ...data.chats],
@@ -44,14 +52,14 @@ export function ChatHistoryContent() {
     }
   };
 
-  const categorizeChats = (chats: ChatItem[]) => {
+  const categorizeChats = () => {
     const today: ChatItem[] = [];
     const yesterday: ChatItem[] = [];
     const last7Days: ChatItem[] = [];
     const last30Days: ChatItem[] = [];
     const older: ChatItem[] = [];
 
-    chats.forEach((chat) => {
+    chatHistory.chats.forEach((chat) => {
       const lastAccessedDate = new Date(chat.last_accessed);
 
       if (isToday(lastAccessedDate)) {
@@ -82,23 +90,40 @@ export function ChatHistoryContent() {
       }
     });
 
-    return { today, yesterday, last7Days, last30Days, older };
+    setCategorizedChats((prev: any) => ({
+      today: today,
+      yesterday: yesterday,
+      last7Days: last7Days,
+      last30Days: last30Days,
+      older: older
+    }))
   };
 
-  const { today, yesterday, last7Days, last30Days, older } = categorizeChats(
-    chatHistory?.chats || []
-  );
+  useEffect(() => {
+    if(chatHistory?.chats) {
+      categorizeChats();
+    }
+  }, [chatHistory])
+
+  // const { today, yesterday, last7Days, last30Days, older } = categorizeChats(
+  //   chatHistory?.chats || []
+  // );
+
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">
       <nav className="h-full w-full">
         <ul className="flex flex-col min-h-[calc(100vh-48px-36px-16px-32px)] lg:min-h-[calc(100vh-32px-40px-32px)] items-start space-y-1 pr-2">
           <li className={cn("w-full", chatHistory.label ? "pt-5" : "")}>
-            <ChatHistorySublist chatList={today} label="Today"/>
-            <ChatHistorySublist chatList={yesterday} label="Yesterday"/>
-            <ChatHistorySublist chatList={last7Days} label="Previous 7 Days"/>
-            <ChatHistorySublist chatList={last30Days} label="Previous 30 Days"/>
-            <ChatHistorySublist chatList={older} label="Older"/>
+            <ChatHistorySublist chatList={categorizedChats.today} label="Today"/>
+            <ChatHistorySublist chatList={categorizedChats.yesterday} label="Yesterday"/>
+            <ChatHistorySublist chatList={categorizedChats.last7Days} label="Previous 7 Days"/>
+            <ChatHistorySublist chatList={categorizedChats.last30Days} label="Previous 30 Days"/>
+            <ChatHistorySublist chatList={categorizedChats.older} label="Older"/>
             <InfiniteScroll
               hasMore={chatHistory.has_more}
               isLoading={loadingMore}

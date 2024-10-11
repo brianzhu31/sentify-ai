@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChatEditDropdown } from "./chat-edit-dropdown";
 import { ChatItem } from "@/types";
-import { RenameDialog } from "./rename-dialog";
 
 interface ChatLinkProps {
   href: string;
@@ -16,11 +15,6 @@ interface ChatLinkProps {
 
 export function ChatLink({ href, name, chatID }: ChatLinkProps) {
   const pathname = usePathname();
-  const [newName, setNewName] = useState(name);
-
-  const handleRenameSubmit = (updatedName: string) => {
-    setNewName(updatedName);
-  };
 
   return (
     <>
@@ -32,13 +26,12 @@ export function ChatLink({ href, name, chatID }: ChatLinkProps) {
         <Link href={href} className="relative group">
           <div className="flex justify-between items-center w-full">
             <p className="text-sm font-normal max-w-[200px] truncate">
-              {newName}
+              {name}
             </p>
           </div>
           <ChatEditDropdown
-            name={newName}
+            name={name}
             chatID={chatID}
-            onRename={handleRenameSubmit}
           />
         </Link>
       </Button>

@@ -7,15 +7,16 @@ import { useUserSession } from "@/context/user-session-context";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useRouter } from "next/navigation";
 import { ChatItem } from "@/types";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ChatPage() {
   const { chatHistory, setChatHistory, pageNumber, setPageNumber } =
     useChatHistory();
   const [message, setMessage] = useState<string>("");
   const [isMessageSent, setIsMessageSent] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
   const router = useRouter();
   const { session } = useUserSession();
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
@@ -32,7 +33,6 @@ export default function ChatPage() {
       try {
         setIsMessageSent(true);
         setMessage("");
-        setErrorMessage("");
         const response = await processMessage(message, session?.access_token);
 
         if (response.status === "ok") {
@@ -49,34 +49,45 @@ export default function ChatPage() {
           });
           router.push(`/chat/${response.chat_id}`);
         } else {
+          toast({
+            variant: "error",
+            description: response.message,
+          });
           setIsMessageSent(false);
-          setErrorMessage(response.message);
         }
-      } catch (error) {
+      } catch (err: any) {
         setIsMessageSent(false);
-        console.error("Error processing message:", error);
+        toast({
+          variant: "error",
+          description: err.response.data.message,
+        });
+        console.error("Error processing message:", err);
       }
     }
   };
 
   return (
-    <div className="h-[100vh] flex flex-col justify-end p-4">
-      <div className="flex flex-col gap-4 overflow-y-auto flex-grow">
-        {errorMessage && (
-          <div>
-            <p className="font-semibold">assistant</p>
-            <p className="border-2 border-solid">{errorMessage}</p>
-          </div>
-        )}
+    <div className="flex flex-col h-screen bg-background">
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div className="flex flex-col gap-2 py-4">
+          <p className="text-center text-3xl font-semibold">
+            What can I help you with?
+          </p>
+          <p className="text-center text-sm text-gray-600">
+            Ask finance related questions
+          </p>
+        </div>
+        <div className="w-full max-w-2xl px-4">
+          <Input
+            className="w-full h-12 backdrop-blur-sm"
+            placeholder="Enter message"
+            value={message}
+            onChange={handleInputChange}
+            onKeyDown={handleSubmit}
+            disabled={isMessageSent}
+          />
+        </div>
       </div>
-      <Input
-        className="w-96"
-        placeholder="Enter message"
-        value={message}
-        onChange={handleInputChange}
-        onKeyDown={handleSubmit}
-        disabled={isMessageSent}
-      />
     </div>
   );
 }

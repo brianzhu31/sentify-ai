@@ -1,5 +1,4 @@
 from typing import List, Dict
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from openai import OpenAI
@@ -10,24 +9,14 @@ load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
-miniLM = SentenceTransformer(
-    "sentence-transformers/paraphrase-MiniLM-L6-v2")
+client = OpenAI(api_key=OPENAI_KEY)
 
 def embed_texts(
-    texts: List[str], model: str = "sentence-transformers/paraphrase-MiniLM-L6-v2"
+    texts: List[str]
 ):
-    embeddings = []
-    if model == "sentence-transformers/paraphrase-MiniLM-L6-v2":
-        embeddings = miniLM.encode(texts, normalize_embeddings=True)
-    elif model in [
-        "text-embedding-3-small",
-        "text-embedding-3-large",
-        "text-embedding-ada-002",
-    ]:
-        client = OpenAI(api_key=OPENAI_KEY)
-        response = client.embeddings.create(input=texts, model=model)
-
-        embeddings = [item.embedding for item in response.data]
+    model = "text-embedding-3-small"
+    response = client.embeddings.create(input=texts, model=model)
+    embeddings = [item.embedding for item in response.data]
 
     return embeddings
 
