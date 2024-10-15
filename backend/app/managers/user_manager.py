@@ -7,15 +7,15 @@ from datetime import datetime
 
 class UserManager:
 
-    @classmethod
-    def get_user_by_id(cls, user_id: UUID):
+    @staticmethod
+    def get_user_by_id(user_id: UUID):
         user = UserModel.query.get(user_id)
         if user is None:
             raise NotFoundError(f"User with id {user_id} not found.")
         return user
 
-    @classmethod
-    def create_user(cls, user_id: UUID, email: str):
+    @staticmethod
+    def create_user(user_id: UUID, email: str):
         new_user = UserModel(id=user_id, email=email)
         try:
             db.session.add(new_user)

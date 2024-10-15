@@ -116,7 +116,7 @@ class ArticleCollection:
                     break
 
                 page += 1
-                time.sleep(3.5)
+                time.sleep(1.5)
 
         article_texts = []
         for article in articles:
@@ -125,7 +125,7 @@ class ArticleCollection:
         article_embeddings = [0] * len(articles)
 
         create_jsonl_embedding_batch_file(
-            article_texts=article_texts,
+            texts=article_texts,
             output_dir="files",
             file_name="article_texts.jsonl",
         )
@@ -164,7 +164,7 @@ class ArticleCollection:
             return
 
         create_jsonl_batch_file(
-            articles=self.articles,
+            objects=self.articles,
             output_dir="files",
             file_name="articles.jsonl",
             prompt_function=base_summarization_prompt,
@@ -190,7 +190,7 @@ class ArticleCollection:
             ][0]["message"]["content"]
 
         create_jsonl_batch_file(
-            articles=self.articles,
+            objects=self.articles,
             output_dir="files",
             file_name="article_summaries.jsonl",
             prompt_function=compress_base_prompt,

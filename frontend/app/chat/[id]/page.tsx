@@ -131,13 +131,15 @@ const ChatPage = () => {
 
     if (firstMessage) {
       setIsAssistantRunning(true);
-      const context = await fetchRelevantArticles(
+      let context = await fetchRelevantArticles(
         firstMessage,
         session?.access_token
       );
 
       const streamedOutput = await getStream(firstMessage, context);
-      setIsAssistantRunning(false);
+      if (streamedOutput?.toLowerCase().startsWith("no relevant data")) {
+        context = [];
+      }
 
       setResponseData("");
       setChatMessages((prevChatMessages: Message[]) => [
@@ -155,6 +157,7 @@ const ChatPage = () => {
         chat_id: chatID,
       };
       console.log(sendResponse);
+      setIsAssistantRunning(false);
 
       await saveOutput(sendResponse, session?.access_token);
     }
@@ -198,10 +201,9 @@ const ChatPage = () => {
           const streamedOutput = await getStream(message, context);
 
           setResponseData("");
-          console.log("context", context)
 
-          if (streamedOutput === "No relevant data found based on your query. Please try something else.") {
-            context = []
+          if (streamedOutput?.toLowerCase().startsWith("no relevant data")) {
+            context = [];
           }
           setChatMessages((prevChatMessages: Message[]) => [
             ...prevChatMessages,

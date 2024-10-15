@@ -12,7 +12,7 @@ client = OpenAI(api_key=OPENAI_KEY)
 
 
 def create_jsonl_batch_file(
-    articles: List,
+    objects: List,
     output_dir: str,
     file_name: str,
     prompt_function: Callable,
@@ -23,8 +23,8 @@ def create_jsonl_batch_file(
     output_file = os.path.join(output_dir, file_name)
 
     with open(output_file, "w") as file:
-        for i, article in enumerate(articles):
-            prompt_data = {arg: getattr(article, arg) for arg in prompt_args}
+        for i, obj in enumerate(objects):
+            prompt_data = {arg: getattr(obj, arg) for arg in prompt_args}
             prompt_content = prompt_function(**prompt_data)
 
             post_data = {
@@ -46,7 +46,7 @@ def create_jsonl_batch_file(
 
 
 def create_jsonl_embedding_batch_file(
-    article_texts: List[str],
+    texts: List[str],
     output_dir: str,
     file_name: str,
 ):
@@ -55,7 +55,7 @@ def create_jsonl_embedding_batch_file(
     output_file_path = os.path.join(output_dir, file_name)
 
     with open(output_file_path, "w") as f:
-        for i, text in enumerate(article_texts):
+        for i, text in enumerate(texts):
             json_record = {
                 "custom_id": str(i),
                 "method": "POST",

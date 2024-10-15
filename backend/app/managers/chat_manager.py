@@ -8,8 +8,8 @@ from typing import Dict, List
 
 class ChatManager:
 
-    @classmethod
-    def get_chat_by_id(cls, user_id: UUID, chat_id: UUID):
+    @staticmethod
+    def get_chat_by_id(user_id: UUID, chat_id: UUID):
         chat = ChatModel.query.get(chat_id)
         if chat is None:
             raise NotFoundError(f"Chat {chat_id} not found.")
@@ -23,8 +23,8 @@ class ChatManager:
         messages = MessageModel.query.filter_by(chat_id=chat.id).all()
         return messages
 
-    @classmethod
-    def create_chat(cls, user_id: UUID, name: str):
+    @staticmethod
+    def create_chat(user_id: UUID, name: str):
         new_chat = ChatModel(user_id=user_id, name=name)
         try:
             db.session.add(new_chat)
@@ -68,8 +68,8 @@ class ChatManager:
             db.session.rollback()
             raise DBCommitError("Error creating message.")
 
-    @classmethod
-    def get_chat_sessions(cls, user_id: UUID, page: int, limit: int):
+    @staticmethod
+    def get_chat_sessions(user_id: UUID, page: int, limit: int):
         chats_query = (
             ChatModel.query.filter_by(user_id=user_id)
             .order_by(ChatModel.last_accessed.desc())

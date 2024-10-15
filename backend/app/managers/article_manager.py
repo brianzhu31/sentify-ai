@@ -1,25 +1,33 @@
 from models import db, Article as ArticleModel
-from datetime import datetime
+from datetime import datetime, timedelta
 from exceptions.errors import DBCommitError
 
 
 class ArticleManager:
 
-    @classmethod
-    def get_article_by_id(cls, article_id: int):
+    @staticmethod
+    def get_article_by_id(article_id: int):
         article = ArticleModel.query.get(article_id)
         return article
 
-    @classmethod
-    def get_article_by_title_and_ticker(cls, article_title: str, ticker: str):
+    @staticmethod
+    def get_article_by_title_and_ticker(article_title: str, ticker: str):
         article = ArticleModel.query.filter_by(
             title=article_title, ticker=ticker
         ).one_or_none()
         return article
+    
+    @staticmethod
+    def get_articles_by_ticker(ticker: str, time_period: int):
+        cutoff_date = datetime.now() - timedelta(days=time_period)
+        return (
+            ArticleModel.query
+            .filter(ArticleModel.ticker == ticker, ArticleModel.published_date >= cutoff_date)
+            .all()
+        )
 
-    @classmethod
+    @staticmethod
     def add_article(
-            cls,
             ticker: str,
             title: str,
             compressed_summary: str,

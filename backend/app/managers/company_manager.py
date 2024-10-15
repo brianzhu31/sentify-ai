@@ -3,8 +3,8 @@ from exceptions.errors import NotFoundError
 
 class CompanyManager:
     
-    @classmethod
-    def get_company_by_ticker(cls, ticker: str):
+    @staticmethod
+    def get_company_by_ticker(ticker: str):
         company = CompanyModel.query.filter_by(ticker=ticker).one_or_none()
 
         if company is None:

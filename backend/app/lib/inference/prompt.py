@@ -45,11 +45,11 @@ Please output in valid JSON in the following format:
 """
 
 
-def sentiment_summary_prompt(company_name: str, article_summaries: str):
+def sentiment_summary_prompt(company_name: str, summaries: str):
     return f'''
-You are a highly skilled financial expert and summarization and analysis assistant. I will give you news article summaries about {company_name}.
+I will give you news article summaries about {company_name}.
 
-** Detailed Analysis **
+Compile all of the summaries together to an overall summary that is up to 10 sentences long.
 
 Extract and compile both positive and negative *recent* information into detailed chunks. Each chunk should:
 - Be up to 3 sentences long.
@@ -59,11 +59,12 @@ Extract and compile both positive and negative *recent* information into detaile
 - Be relevant to the company's current market perception, sentiment, and future stock value.
 - Record which article index each chunk came from.
 
-For **Positive Information**, highlight strengths, opportunities, or favorable developments.  
-For **Negative Information**, point out risks, concerns, or potential challenges.
+For positive information, highlight strengths, opportunities, or favorable developments.  
+For negative information, point out risks, concerns, or potential challenges.
 
 Please output in valid JSON in the following format:
 {{
+    "overall_summary": str,
     "positive": {{
         "info": str,
         "source": int
@@ -75,7 +76,7 @@ Please output in valid JSON in the following format:
 }}
 
 Article summaries:
-{article_summaries}
+{summaries}
 '''
 
 
@@ -94,7 +95,8 @@ Query:
 def query_validation_prompt(query: str):
     return f'''
 You are a guardrail for a RAG chat bot.
-Reject all toxic or unethical queries by reponding exactly with "error".
+I will give you a user query.
+If the query is harmful or unethical, repond exactly with "error".
 Else, return only a short title that represents the query without any additional text.
 Query:
 {query}
