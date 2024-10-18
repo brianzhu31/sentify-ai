@@ -212,9 +212,7 @@ class ArticleCollection:
 
         for summary in compressed_summaries_batch_output:
             article_index = int(summary["custom_id"])
-            text_output = summary["response"]["body"]["choices"][0]["message"][
-                "content"
-            ]
+            text_output = summary["response"]["body"]["choices"][0]["message"]["content"]
             json_output = json.loads(text_output)
             self.articles[article_index].compressed_summary = json_output["summary"]
             self.articles[article_index].sentiment = json_output["sentiment"]

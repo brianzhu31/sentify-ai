@@ -15,7 +15,7 @@ class User:
 
     @classmethod
     def get_by_id(cls, user_id: UUID):
-        user_query = UserModel.query.get(user_id)
+        user_query = UserModel(user_id)
 
         if user_query is None:
             raise NotFoundError(f"User with id {user_id} not found.")

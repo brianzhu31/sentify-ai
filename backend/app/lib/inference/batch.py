@@ -1,10 +1,12 @@
 from openai import OpenAI
 from lib.utils import jsonl_string_to_list
 from typing import List, Callable
+from dotenv import load_dotenv
 import os
 import json
 import time
 
+load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
@@ -18,6 +20,7 @@ def create_jsonl_batch_file(
     prompt_function: Callable,
     prompt_args: List[str],
     output_json: bool = False,
+    custom_id_key: str = None
 ):
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, file_name)
@@ -27,8 +30,10 @@ def create_jsonl_batch_file(
             prompt_data = {arg: getattr(obj, arg) for arg in prompt_args}
             prompt_content = prompt_function(**prompt_data)
 
+            custom_id = getattr(obj, custom_id_key) if custom_id_key else str(i)
+
             post_data = {
-                "custom_id": str(i),
+                "custom_id": custom_id,
                 "method": "POST",
                 "url": "/v1/chat/completions",
                 "body": {

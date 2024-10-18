@@ -16,27 +16,32 @@ class ArticleManager:
             title=article_title, ticker=ticker
         ).one_or_none()
         return article
-    
+
     @staticmethod
-    def get_articles_by_ticker(ticker: str, time_period: int):
+    def get_articles_by_ticker(ticker: str, time_period: int, limit: int = 100):
         cutoff_date = datetime.now() - timedelta(days=time_period)
         return (
-            ArticleModel.query
-            .filter(ArticleModel.ticker == ticker, ArticleModel.published_date >= cutoff_date)
+            ArticleModel.query.filter(
+                ArticleModel.ticker == ticker,
+                ArticleModel.published_date >= cutoff_date,
+            )
+            .order_by(ArticleModel.published_date.desc())
+            .limit(limit)
             .all()
         )
 
     @staticmethod
     def add_article(
-            ticker: str,
-            title: str,
-            compressed_summary: str,
-            sentiment: str,
-            impact: str,
-            url: str = None,
-            published_date: datetime = None,
-            clean_url: str = None,
-            media: str = None):
+        ticker: str,
+        title: str,
+        compressed_summary: str,
+        sentiment: str,
+        impact: str,
+        url: str = None,
+        published_date: datetime = None,
+        clean_url: str = None,
+        media: str = None,
+    ):
         new_article = ArticleModel(
             ticker=ticker,
             title=title,
@@ -46,7 +51,7 @@ class ArticleManager:
             clean_url=clean_url,
             compressed_summary=compressed_summary,
             sentiment=sentiment,
-            impact=impact
+            impact=impact,
         )
         try:
             db.session.add(new_article)

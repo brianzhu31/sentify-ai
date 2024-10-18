@@ -6,7 +6,7 @@ def process_articles():
         print("running")
         # Initialize the ArticleCollection and fetch articles within the app context
         article_collection = ArticleCollection()
-        article_collection.fetch_articles(tickers=["NVDA", "AAPL", "MSFT", "TSLA"], days_ago=1)
+        article_collection.fetch_articles(tickers=["NVDA", "AAPL", "MSFT", "TSLA"], days_ago=7)
 
         # Now print the article titles
         for article in article_collection.articles:

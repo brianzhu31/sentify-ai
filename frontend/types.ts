@@ -53,36 +53,38 @@ export type CompanyFull = {
 
 export type Article = {
   clean_url: string;
-  compressed_summary: string;
-  media: string;
-  published_date: Date;
+  published_date: Date | number;
   title: string;
   url: string;
+  compressed_summary?: string;
+  media?: string;
 };
 
-export type AnalysisData = {
+export type CompanyAnalytics = {
+  id: number;
+  company_name: string;
+  overall_summary: string;
   negative_summaries: {
-    value: string;
+    info: string;
     source: Article;
   }[];
   positive_summaries: {
-    value: string;
+    info: string;
     source: Article;
   }[];
-  overall_summary: string;
   score: number;
-  sources: Article[];
+  last_updated: string;
 };
 
-export type SearchData = {
-  company_name: string;
-  created_by: string;
-  id: number;
-  ticker: string;
-  exchange: string;
-  currency: string;
-  created_at: Date;
-  data_from: Date;
-  days_range: number;
-  analysis_data: AnalysisData;
-};
+// export type SearchData = {
+//   company_name: string;
+//   created_by: string;
+//   id: number;
+//   ticker: string;
+//   exchange: string;
+//   currency: string;
+//   created_at: Date;
+//   data_from: Date;
+//   days_range: number;
+//   analysis_data: AnalysisData;
+// };

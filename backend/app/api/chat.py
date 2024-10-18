@@ -32,7 +32,16 @@ def get_chat(chat_id: UUID):
             "content": message.content
         }
         if message.role == "assistant":
-            message_data["sources"] = message.sources
+            message_data["sources"] = [
+                {
+                    "title": source["article_title"],
+                    "clean_url": source["clean_url"],
+                    "media": source["media"],
+                    "published_date": source["published_date"],
+                    "url": source["url"],
+                }
+                for source in message.sources
+            ]
 
         chat_data["messages"].append(message_data)
 
@@ -143,9 +152,11 @@ def inference():
 
     messages = ChatManager.get_all_chat_messages(user_id=user_id, chat_id=chat_id)
 
-    chat_session_history = ""
+    chat_session_history_list = []
     for message in messages[:-1]:
-        chat_session_history += f"{message.role}: {message.content}\n\n"
+        chat_session_history_list.append(f"{message.role}: {message.content}")
+
+    chat_session_history = "\n\n".join(chat_session_history_list)
 
     rag_engine = RAGEngine()
 

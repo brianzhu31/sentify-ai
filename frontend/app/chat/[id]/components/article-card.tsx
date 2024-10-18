@@ -9,7 +9,7 @@ import { timeAgo } from "../actions/time";
 import { useEffect } from "react";
 
 interface ArticleCardProps {
-  article: any;
+  article: Article;
 }
 
 export default function ArticleCard({ article }: ArticleCardProps) {
@@ -30,10 +30,14 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             </div>
             <div className="flex-1 p-1 flex flex-col justify-between">
               <h3 className="text-xs font-medium leading-tight line-clamp-1 mb-1">
-                {article?.article_title}
+                {article?.title}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {timeAgo(new Date(article?.published_date * 1000))}
+                {timeAgo(
+                  typeof article?.published_date === "number"
+                    ? new Date(article.published_date * 1000)
+                    : article?.published_date
+                )}
               </p>
             </div>
           </div>

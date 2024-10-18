@@ -37,7 +37,7 @@ class Message(db.Model):
 
 
 class Search(db.Model):
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     company_name = Column(String(80), nullable=False)
     ticker = Column(String(6), nullable=False)
     overall_summary = Column(String, nullable=True)
@@ -48,6 +48,19 @@ class Search(db.Model):
     days_range = Column(Integer, nullable=False)
     data_from = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class CompanyAnalytics(db.Model):
+    __tablename__ = "company_analytics"
+ 
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    company_name = Column(String(80), nullable=False)
+    ticker = Column(String(6), unique=True, nullable=False)
+    overall_summary = Column(String, nullable=True)
+    positive_summaries = Column(ARRAY(JSON), nullable=True)
+    negative_summaries = Column(ARRAY(JSON), nullable=True)
+    score = Column(Float, nullable=True)
+    last_updated = Column(DateTime, nullable=True, default=datetime.utcnow)
 
 
 class Article(db.Model):

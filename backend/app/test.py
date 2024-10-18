@@ -119,34 +119,10 @@
 # # 2024-10-07 14:20:41
 
 
-from datetime import datetime, timedelta
-import pytz
-def unix_to_formatted_string_est(unix_timestamp):
-    # Convert Unix timestamp to a UTC datetime object
-    dt_utc = datetime.utcfromtimestamp(unix_timestamp)
-    
-    # Define the EST timezone
-    est = pytz.timezone('America/New_York')
-    
-    # Localize the UTC datetime to EST
-    dt_est = dt_utc.replace(tzinfo=pytz.utc).astimezone(est)
-    
-    # Format the datetime object into a string
-    formatted_time = dt_est.strftime("%B %d, %Y %I:%M %p")  # 12-hour format
-    return formatted_time
+from services.company_analytics import CompanyAnalyticsEngine
+from config import app
 
-est = pytz.timezone('America/New_York')
+with app.app_context():
+    companies_analyzer = CompanyAnalyticsEngine(tickers=["NVDA", "AAPL", "MSFT", "TSLA"])
 
-# Get the current date and time in EST
-current_date_est = datetime.now(est)
-
-# Calculate the date 14 days ago
-date_14_days_ago_est = current_date_est - timedelta(days=14)
-
-# Format the dates as strings (optional)
-current_date_str = current_date_est.strftime('%Y-%m-%d %H:%M:%S')
-date_14_days_ago_str = date_14_days_ago_est.strftime('%Y-%m-%d %H:%M:%S')
-
-# Print the results
-print(f"Current Date (EST): {current_date_str}")
-print(f"Date 14 Days Ago (EST): {date_14_days_ago_str}")
+    companies_analyzer.generate_overall_summaries(time_period=7)

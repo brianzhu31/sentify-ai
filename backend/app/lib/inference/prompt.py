@@ -48,18 +48,19 @@ Please output in valid JSON in the following format:
 def sentiment_summary_prompt(company_name: str, summaries: str):
     return f'''
 I will give you news article summaries about {company_name}.
+Compile all of the summaries into an overall summary that is up to 10 sentences long, focusing on recent developments and future outlook.
+Extract and compile both positive and negative information into detailed summary points. For each category (positive and negative), provide up to 15 points. Each point should:
 
-Compile all of the summaries together to an overall summary that is up to 10 sentences long.
+Be up to 3 sentences long.
+Focus on recent events, current situation, or near-future projections.
+Include specific statistics, key details, and relevant metrics from recently, where available.
+Be quantifiable, providing clear figures or data where possible.
+Be actionable, offering insights that impact decision-making in the near term.
+Be relevant to the company's current market perception, sentiment, and future stock value.
+Avoid discussing long-term past events or historical information not directly relevant to the present or future.
+Record the exact article index of where the information came from.
 
-Extract and compile both positive and negative *recent* information into detailed chunks. Each chunk should:
-- Be up to 3 sentences long.
-- Include specific statistics, key details, and relevant metrics from the past few months.
-- Be quantifiable, providing clear figures or data where possible.
-- Be actionable, offering insights that impact decision-making in the near term.
-- Be relevant to the company's current market perception, sentiment, and future stock value.
-- Record which article index each chunk came from.
-
-For positive information, highlight strengths, opportunities, or favorable developments.  
+For positive information, highlight strengths, opportunities, or favorable developments.
 For negative information, point out risks, concerns, or potential challenges.
 
 Please output in valid JSON in the following format:

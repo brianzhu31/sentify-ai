@@ -13,22 +13,12 @@ import { Input } from "@/components/ui/input";
 import { processMessage } from "../actions/chat";
 import ArticleCard from "./components/article-card";
 import { useToast } from "@/components/ui/use-toast";
-import { MessagesSquare } from "lucide-react";
-
-export type ArticleSource = {
-  article_title: string;
-  clean_url: string;
-  media: string;
-  published_date: Date;
-  text: string;
-  ticker: string;
-  url: string;
-};
+import { Article } from "@/types";
 
 export type Message = {
   role: string;
   content: string;
-  sources?: ArticleSource[];
+  sources?: Article[];
 };
 
 export type ChatSession = {
@@ -42,7 +32,7 @@ export type ChatSession = {
 
 export type ArticleSourceMatch = {
   id: string;
-  metadata: ArticleSource;
+  metadata: Article;
   score: number;
   values: number[];
 };

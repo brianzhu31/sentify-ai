@@ -17,8 +17,8 @@ scheduler.add_job(
     id='process_articles_job',
     func=process_articles,
     trigger='cron',
-    hour=20,
-    minute=5,
+    hour=18,
+    minute=51,
     timezone='US/Eastern',
     misfire_grace_time=None
 )
@@ -27,5 +27,5 @@ scheduler.start()
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    # app.run(port=8000, debug=True)
-    app.run(port=8000, debug=True, use_reloader=False)
+    app.run(port=8000, debug=True)
+    # app.run(port=8000, debug=True, use_reloader=False)

@@ -157,15 +157,18 @@ class RAGEngine:
         current_date_est = datetime.now(est)
         current_date_str = current_date_est.strftime("%B %d, %Y %I:%M %p") + " EST"
 
-        context = ""
+        context_list = []
         for article in relevant_articles:
             article_title = article["article_title"]
             article_content = article["text"]
             unix_timestamp = article["published_date"]
-            article_published_date = (
-                unix_to_formatted_string_est(unix_timestamp) + " EST"
+            article_published_date = unix_to_formatted_string_est(unix_timestamp) + " EST"
+
+            context_list.append(
+                f"Published date: {article_published_date}\nArticle title: {article_title}\nArticle summary:\n{article_content}\n"
             )
-            context += f"Published date: {article_published_date}\nArticle title: {article_title}\nArticle summary:\n{article_content}\n\n"
+
+        context = "\n\n".join(context_list)
 
         prompt = rag_chat_prompt(
             chat_session_history=chat_session_history,
