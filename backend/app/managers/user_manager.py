@@ -5,6 +5,15 @@ from exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedErro
 from typing import List
 from datetime import datetime
 
+
+class User:
+    def __init__(self, user_model: UserModel):
+        self.id = user_model.id
+        self.email = user_model.email
+        self.plan = user_model.plan
+        self.created_at = user_model.created_at
+
+
 class UserManager:
 
     @staticmethod
@@ -12,7 +21,7 @@ class UserManager:
         user = UserModel.query.get(user_id)
         if user is None:
             raise NotFoundError(f"User with id {user_id} not found.")
-        return user
+        return User(user)
 
     @staticmethod
     def create_user(user_id: UUID, email: str):

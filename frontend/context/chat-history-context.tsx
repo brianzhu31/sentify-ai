@@ -1,9 +1,9 @@
 import { createContext, useState, useContext, ReactNode } from 'react';
-import { ChatHistoryData } from '@/types';
+import { PaginatedChatHistoryData } from '@/types';
 
 interface ChatHistoryContextType {
-  chatHistory: ChatHistoryData;
-  setChatHistory: (chatHistory: ChatHistoryData) => void;
+  chatHistory: PaginatedChatHistoryData;
+  setChatHistory: (chatHistory: PaginatedChatHistoryData) => void;
   pageNumber: number;
   setPageNumber: (pageNumber: number) => void;
 }
@@ -23,7 +23,7 @@ interface ChatHistoryProviderProps {
 }
 
 export const ChatHistoryProvider = ({ children }: ChatHistoryProviderProps) => {
-  const [chatHistory, setChatHistory] = useState<ChatHistoryData>({
+  const [chatHistory, setChatHistory] = useState<PaginatedChatHistoryData>({
     label: '',
     chats: [],
     has_more: true

@@ -25,27 +25,30 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             {article.title}
           </CardTitle>
         </Link>
-        <p className="text-xs text-muted-foreground">
-          {typeof article.published_date === "number"
-            ? null
-            : timeAgo(article.published_date)}
-        </p>
+        <div className="flex gap-2">
+          <p className="text-xs text-muted-foreground">{article?.clean_url}</p>
+          <p className="text-xs text-muted-foreground">
+            {typeof article.published_date === "number"
+              ? null
+              : timeAgo(article.published_date)}
+          </p>
+        </div>
       </CardHeader>
       <CardContent className={cn("flex pt-2 flex-grow")}>
         <div className="w-1/6 aspect-square mr-4 relative flex-shrink-0">
           <Image
             src={article.media}
             alt={article.title}
-            layout="fill"
-            objectFit="cover"
+            style={{objectFit:"cover"}}
+            fill={true}
+            quality={30}
+            sizes="146px"
             className="rounded-md"
+            loading="lazy"
           />
         </div>
         <div className="w-5/6 flex flex-col">
-          <p
-            className="text-sm text-gray-600 line-clamp-5"
-            title={article.compressed_summary}
-          >
+          <p className="text-sm text-gray-600 line-clamp-5">
             {article.compressed_summary}
           </p>
         </div>

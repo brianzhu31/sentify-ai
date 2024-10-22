@@ -3,6 +3,7 @@ from api.auth import auth_bp
 from api.search import search_bp
 from api.company import company_bp
 from api.chat import chat_bp
+from api.article import article_bp
 from exceptions.handlers import errors_bp
 from models import db
 from tasks.article_tasks import process_articles
@@ -11,6 +12,7 @@ app.register_blueprint(search_bp, url_prefix="/api/search")
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(company_bp, url_prefix="/api/company")
 app.register_blueprint(chat_bp, url_prefix="/api/chat")
+app.register_blueprint(article_bp, url_prefix="/api/article")
 app.register_blueprint(errors_bp)
 
 scheduler.add_job(

@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { CompanyFull, CompanyAnalytics } from "@/types";
+import { CompanyFull, CompanyAnalytics, PaginatedArticlesData } from "@/types";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
@@ -34,3 +34,20 @@ export const fetchAnalytics = async (
     }
   }
 };
+
+export const fetchArticles = async (
+  ticker: string,
+  page: number,
+  limit: number,
+): Promise<PaginatedArticlesData> => {
+  try {
+    const response = await axios.get(`${apiUrl}/api/article/${ticker}?page=${page}&limit=${limit}`);
+    return response.data;
+  } catch (err: any) {
+    if (err.response && err.response.data && err.response.data.message) {
+      throw new Error(err.response.data.message);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}

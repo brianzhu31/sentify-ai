@@ -30,9 +30,19 @@ export type ChatSession = {
   messages: Message[];
 };
 
+export type ArticleFullSource = {
+  article_title: string;
+  clean_url: string;
+  media: string;
+  published_date: number;
+  text: string;
+  ticker: string;
+  url: string;
+}
+
 export type ArticleSourceMatch = {
   id: string;
-  metadata: Article;
+  metadata: ArticleFullSource;
   score: number;
   values: number[];
 };
@@ -186,8 +196,6 @@ const ChatPage = () => {
             session?.access_token
           );
 
-          console.log("context....", context);
-
           const streamedOutput = await getStream(message, context);
 
           setResponseData("");
@@ -195,6 +203,11 @@ const ChatPage = () => {
           if (streamedOutput?.toLowerCase().startsWith("no relevant data")) {
             context = [];
           }
+
+          context = context.map((article: ArticleFullSource) => ({
+            title: article.article_title,
+            ...(({ text, ticker, ...rest }) => rest)(article),
+          }));
           setChatMessages((prevChatMessages: Message[]) => [
             ...prevChatMessages,
             {

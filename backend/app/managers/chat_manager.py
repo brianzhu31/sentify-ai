@@ -6,6 +6,25 @@ from uuid import UUID
 from typing import Dict, List
 
 
+class Chat:
+    def __init__(self, chat_model: ChatModel):
+        self.id = chat_model.id
+        self.user_id = chat_model.user_id
+        self.name = chat_model.name
+        self.created_at = chat_model.created_at
+        self.last_accessed = chat_model.last_accessed
+
+
+class Message:
+    def __init__(self, message_model: MessageModel):
+        self.id = message_model.id
+        self.chat_id = message_model.chat_id
+        self.role = message_model.role
+        self.content = message_model.content
+        self.sources = message_model.sources
+        self.timestamp = message_model.timestamp
+
+
 class ChatManager:
 
     @staticmethod
@@ -15,13 +34,13 @@ class ChatManager:
             raise NotFoundError(f"Chat {chat_id} not found.")
         if chat.user_id != user_id:
             raise PermissionDeniedError(f"Unauthorized request attempt on chat {chat_id}. User id: {chat.user_id}")
-        return chat
+        return Chat(chat)
 
     @classmethod
     def get_all_chat_messages(cls, user_id: UUID, chat_id: UUID):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
         messages = MessageModel.query.filter_by(chat_id=chat.id).all()
-        return messages
+        return [Message(message) for message in messages]
 
     @staticmethod
     def create_chat(user_id: UUID, name: str):
@@ -29,7 +48,7 @@ class ChatManager:
         try:
             db.session.add(new_chat)
             db.session.commit()
-            return new_chat
+            return Chat(new_chat)
         except Exception:
             db.session.rollback()
             raise DBCommitError("Error creating chat.")
@@ -50,7 +69,7 @@ class ChatManager:
         try:
             chat.name = new_name
             db.session.commit()
-            return chat
+            return Chat(chat)
         except:
             db.session.rollback()
             raise DBCommitError("Error editing chat name")
@@ -63,7 +82,7 @@ class ChatManager:
             new_message = MessageModel(chat_id=chat_id, role=role, content=content, sources=sources)
             db.session.add(new_message)
             db.session.commit()
-            return new_message
+            return Message(new_message)
         except:
             db.session.rollback()
             raise DBCommitError("Error creating message.")

@@ -1,7 +1,7 @@
 "use server";
 
 import axios from "axios";
-import { ChatHistoryData } from "@/types";
+import { PaginatedChatHistoryData } from "@/types";
 import { SendMessageResponse } from "../[id]/page";
 
 const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
@@ -9,7 +9,7 @@ const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 export const fetchChats = async (
   accessToken: string,
   pageNumber?: number
-): Promise<ChatHistoryData> => {
+): Promise<PaginatedChatHistoryData> => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/chat/get_chats?page=${pageNumber}`,

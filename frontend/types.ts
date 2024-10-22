@@ -19,7 +19,7 @@ export type ChatItem = {
   last_accessed: Date;
 }
 
-export type ChatHistoryData = {
+export type PaginatedChatHistoryData = {
   label: string;
   chats: ChatItem[];
   has_more: boolean;
@@ -59,6 +59,11 @@ export type Article = {
   compressed_summary?: string;
   media?: string;
 };
+
+export type PaginatedArticlesData = {
+  articles: Article[];
+  has_more: boolean;
+}
 
 export type CompanyAnalytics = {
   id: number;

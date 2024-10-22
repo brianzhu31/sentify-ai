@@ -9,8 +9,6 @@ from uuid import UUID
 
 chat_bp = Blueprint("chat", __name__)
 
-chat_manager = ChatManager()
-
 @chat_bp.route("/get/<uuid:chat_id>", methods=["GET"])
 @token_required
 def get_chat(chat_id: UUID):

@@ -7,7 +7,6 @@ from lib.inference.prompt import stock_queries
 from lib.inference.embedding import (
     check_article_relevance,
     embed_texts,
-    filter_similar_texts,
 )
 from lib.inference.batch import (
     create_jsonl_batch_file,
@@ -22,7 +21,6 @@ from exceptions.errors import InsufficientArticlesError, NotFoundError, DBCommit
 from openai import OpenAI
 from pinecone import Pinecone
 from dotenv import load_dotenv
-import asyncio
 from datetime import datetime
 import uuid
 import time
@@ -40,7 +38,7 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 pc = Pinecone(api_key=PINECONE_API_KEY)
 
 
-class Article:
+class NewArticle:
     def __init__(
         self,
         article_id: int = None,
@@ -71,7 +69,7 @@ class Article:
 
 class ArticleCollection:
     def __init__(self):
-        self.articles: List[Article] = []
+        self.articles: List[NewArticle] = []
 
     def fetch_articles(self, tickers: List[str] = None, days_ago: int = 7):
         articles = []
@@ -97,7 +95,7 @@ class ArticleCollection:
                     if article_query:
                         continue
                     if article_title not in title_set:
-                        article = Article(
+                        article = NewArticle(
                             company_name=company.company_name,
                             ticker=company.ticker,
                             title=article_data["title"],
@@ -263,80 +261,3 @@ class ArticleCollection:
             vectors.append(vector)
         index = pc.Index("company-info")
         index.upsert(vectors=vectors, namespace="articles")
-
-    # def generate_sentiment_summaries(self, filter_unique: bool = False):
-    #     article_batches = create_batches(self.relevant_articles, 10)
-    #     index = 0
-    #     data = []
-    #     for batch in article_batches:
-    #         article_summaries_batch = ""
-    #         for article in batch:
-    #             article_summaries_batch += f"** Article {index} **\nTitle: {article.title}\nSummary: {article.compressed_summary}\n\n"
-    #             index += 1
-    #         data.append(
-    #             {
-    #                 "company_name": self.company_name,
-    #                 "article_summaries": article_summaries_batch,
-    #             }
-    #         )
-
-    #     sentiment_summary_batch_results = asyncio.run(
-    #         create_parallel_request(func=generate_sentiment_summaries, data=data)
-    #     )
-
-    #     merged_results = {"positive": [], "negative": []}
-
-    #     for batch in sentiment_summary_batch_results:
-    #         merged_results["positive"].extend(batch.get("positive", []))
-    #         merged_results["negative"].extend(batch.get("negative", []))
-
-    #     positive_summaries = []
-    #     negative_summaries = []
-    #     for summary_point_json in merged_results["positive"]:
-    #         summary_point_value = summary_point_json["info"]
-    #         source = self.relevant_articles[summary_point_json["source"]]
-    #         summary_point = SummaryPoint(value=summary_point_value, source=source)
-    #         positive_summaries.append(summary_point)
-
-    #     for summary_point_json in merged_results["negative"]:
-    #         summary_point_value = summary_point_json["info"]
-    #         source = self.relevant_articles[summary_point_json["source"]]
-    #         summary_point = SummaryPoint(value=summary_point_value, source=source)
-    #         negative_summaries.append(summary_point)
-
-    #     self.positive_summaries = positive_summaries
-    #     self.negative_summaries = negative_summaries
-
-    #     if filter_unique:
-    #         all_positive_summary_points = [
-    #             summary.value for summary in self.positive_summaries
-    #         ]
-    #         all_negative_summary_points = [
-    #             summary.value for summary in self.negative_summaries
-    #         ]
-
-    #         filtered_positive_summary_indices = filter_similar_texts(
-    #             all_positive_summary_points, threshold=0.94
-    #         )
-    #         filtered_negative_summary_indices = filter_similar_texts(
-    #             all_negative_summary_points, threshold=0.94
-    #         )
-
-    #         self.positive_summaries = [
-    #             self.positive_summaries[i] for i in filtered_positive_summary_indices
-    #         ]
-    #         self.negative_summaries = [
-    #             self.negative_summaries[i] for i in filtered_negative_summary_indices
-    #         ]
-
-    # def full_analysis(self):
-    #     self.generate_relevant_articles()
-    #     self.summarize_articles()
-    #     self.generate_sentiment_summaries(filter_unique=True)
-
-    #     return {
-    #         "positive": [summary.to_json() for summary in self.positive_summaries],
-    #         "negative": [summary.to_json() for summary in self.negative_summaries],
-    #         "score": self.score,
-    #         "sources": [article.to_json() for article in self.relevant_articles],
-    #     }
