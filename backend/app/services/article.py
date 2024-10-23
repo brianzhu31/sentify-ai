@@ -1,6 +1,4 @@
 from typing import List
-from models import db, Article as ArticleModel
-from entities.company import Company
 from managers.company_manager import CompanyManager
 from managers.article_manager import ArticleManager
 from lib.inference.prompt import stock_queries

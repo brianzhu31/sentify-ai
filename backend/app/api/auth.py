@@ -1,5 +1,4 @@
 from flask import Blueprint, g
-from entities.user import User
 from managers.user_manager import UserManager
 from lib.validation import token_required
 

@@ -1,5 +1,4 @@
 from services.rag import RAGEngine
-from entities.user import User
 from managers.chat_manager import ChatManager
 from lib.validation import token_required
 from flask import jsonify, Blueprint, request, Response, g
