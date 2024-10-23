@@ -10,11 +10,11 @@ interface CompaniesLayoutProps {
 export default function CompaniesLayout({ children }: CompaniesLayoutProps) {
   return (
     <CompaniesProvider>
-      <SearchLayoutContent>{children}</SearchLayoutContent>
+      <CompaniesLayoutContent>{children}</CompaniesLayoutContent>
     </CompaniesProvider>
   );
 }
 
-const SearchLayoutContent = ({ children }: { children: ReactNode }) => {
+const CompaniesLayoutContent = ({ children }: { children: ReactNode }) => {
   return <div>{children}</div>;
 };

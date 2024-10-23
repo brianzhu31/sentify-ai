@@ -36,20 +36,6 @@ class Message(db.Model):
     chat = relationship("Chat", back_populates="messages")
 
 
-class Search(db.Model):
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    company_name = Column(String(80), nullable=False)
-    ticker = Column(String(6), nullable=False)
-    overall_summary = Column(String, nullable=True)
-    positive_summaries = Column(ARRAY(JSON), nullable=False)
-    negative_summaries = Column(ARRAY(JSON), nullable=False)
-    sources = Column(ARRAY(JSON), nullable=False)
-    score = Column(Float, nullable=False)
-    days_range = Column(Integer, nullable=False)
-    data_from = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-
-
 class CompanyAnalytics(db.Model):
     __tablename__ = "company_analytics"
  

@@ -63,11 +63,11 @@ export default function CompanyAnalyticsContent() {
         } else {
           toast({
             variant: "error",
-            description: `Search ${ticker} not found!`,
+            description: `Company ${ticker} not found!`,
           });
         }
       } catch (err: any) {
-        router.push("/search");
+        router.push("/companies");
         setLoading(false);
         toast({
           variant: "error",

@@ -7,7 +7,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col justify-center items-center p-24">
       <p className="text-2xl mb-8">sentify ai</p>
       <div className="flex space-x-4">
-        <Link href="/search">
+        <Link href="/chat">
           <Button>Get Started</Button>
         </Link>
         <Link href="/register">

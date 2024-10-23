@@ -1,17 +1,3 @@
-export type SearchItem = {
-  search_id: string;
-  ticker: string;
-  href: string;
-  company_name: string;
-  created_at: string;
-};
-
-export type SearchHistoryData = {
-  label: string;
-  searches: SearchItem[];
-  has_more: boolean;
-};
-
 export type ChatItem = {
   chat_id: string;
   name: string;
@@ -81,15 +67,3 @@ export type CompanyAnalytics = {
   last_updated: string;
 };
 
-// export type SearchData = {
-//   company_name: string;
-//   created_by: string;
-//   id: number;
-//   ticker: string;
-//   exchange: string;
-//   currency: string;
-//   created_at: Date;
-//   data_from: Date;
-//   days_range: number;
-//   analysis_data: AnalysisData;
-// };

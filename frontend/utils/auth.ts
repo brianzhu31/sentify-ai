@@ -48,8 +48,8 @@ export async function signUp(formData: FormData) {
     redirect("/error")
   }
 
-  revalidatePath("/search", "layout");
-  redirect("/search");
+  revalidatePath("/chat", "layout");
+  redirect("/chat");
 }
 
 export async function login(formData: FormData) {
@@ -66,8 +66,8 @@ export async function login(formData: FormData) {
     return error.message;
   }
 
-  revalidatePath("/search", "layout");
-  redirect("/search");
+  revalidatePath("/chat", "layout");
+  redirect("/chat");
 }
 
 export async function logout() {

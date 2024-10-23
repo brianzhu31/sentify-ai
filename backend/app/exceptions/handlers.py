@@ -24,10 +24,6 @@ def handle_not_found_error(e):
 def handle_db_commit_error(e):
     return jsonify({"message": str(e)}), 404
 
-@app.errorhandler(SearchLimitError)
-def handle_search_limit_error(e):
-    return jsonify({"message": str(e)}), 429
-
 @app.errorhandler(InvalidRequestError)
 def handle_invalid_request_error(e):
     return jsonify({"message": str(e)}), 404
