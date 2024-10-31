@@ -69,10 +69,11 @@ class ArticleCollection:
     def __init__(self):
         self.articles: List[NewArticle] = []
 
-    def fetch_articles(self, tickers: List[str] = None, days_ago: int = 7):
+    def fetch_articles(self, tickers: List[str], days_ago: int = 7):
         articles = []
         title_set = set()
         query_embeddings = {}
+
         for ticker in tickers:
             company = CompanyManager.get_company_by_ticker(ticker=ticker)
             keywords = company.aliases + [company.company_name, company.ticker]
@@ -80,12 +81,13 @@ class ArticleCollection:
                 stock_queries(company.company_name)
             )
 
-            max_pages = 2
+            max_pages = 1
             page = 1
             while page <= max_pages:
                 request_page = get_news(keywords=keywords, days_ago=days_ago, page=page)
+                print(ticker)
 
-                for article_data in request_page["articles"]:
+                for article_data in request_page.get("articles", []):
                     article_title = article_data["title"]
                     article_query = ArticleManager.get_article_by_title_and_ticker(
                         article_title=article_title, ticker=ticker
@@ -112,7 +114,7 @@ class ArticleCollection:
                     break
 
                 page += 1
-                time.sleep(1.5)
+                time.sleep(0.5)
 
         article_texts = []
         for article in articles:
@@ -140,8 +142,12 @@ class ArticleCollection:
 
         for embedding_data in article_embeddings_batch_output:
             article_index = int(embedding_data["custom_id"])
-            embedding = embedding_data["response"]["body"]["data"][0]["embedding"]
-            article_embeddings[article_index] = embedding
+            try:
+                embedding = embedding_data["response"]["body"]["data"][0]["embedding"]
+                article_embeddings[article_index] = embedding
+            except (KeyError, IndexError, TypeError) as e:
+                article_embeddings[article_index] = None
+                print(f"Failed to retrieve embedding for article_index {article_index}: {e}")
 
         relevant_articles = []
         for article, article_embedding in zip(articles, article_embeddings):
@@ -149,9 +155,6 @@ class ArticleCollection:
                 article_embedding, query_embeddings[article.company_name]
             ):
                 relevant_articles.append(article)
-                print("RELEVANT", article.title)
-            else:
-                print("NOT RELEVANT", article.title)
 
         self.articles = relevant_articles
 
@@ -180,10 +183,12 @@ class ArticleCollection:
         )
 
         for summary in summaries_batch_output:
-            article_index = int(summary["custom_id"])
-            self.articles[article_index].summary = summary["response"]["body"][
-                "choices"
-            ][0]["message"]["content"]
+            try:
+                article_index = int(summary["custom_id"])
+                self.articles[article_index].summary = summary["response"]["body"]["choices"][0]["message"]["content"]
+            except (KeyError, IndexError, ValueError, TypeError) as e:
+                print(f"Error processing summary for article index {summary.get('custom_id')}: {e}")
+                self.articles[article_index].summary = ""
 
         create_jsonl_batch_file(
             objects=self.articles,
@@ -207,12 +212,22 @@ class ArticleCollection:
         )
 
         for summary in compressed_summaries_batch_output:
-            article_index = int(summary["custom_id"])
-            text_output = summary["response"]["body"]["choices"][0]["message"]["content"]
-            json_output = json.loads(text_output)
-            self.articles[article_index].compressed_summary = json_output["summary"]
-            self.articles[article_index].sentiment = json_output["sentiment"]
-            self.articles[article_index].impact = json_output["impact"]
+            try:
+                article_index = int(summary["custom_id"])
+
+                text_output = summary["response"]["body"]["choices"][0]["message"]["content"]
+                json_output = json.loads(text_output)
+
+                self.articles[article_index].compressed_summary = json_output.get("summary", "")
+                self.articles[article_index].sentiment = json_output.get("sentiment", "")
+                self.articles[article_index].impact = json_output.get("impact", "")
+
+            except (KeyError, IndexError, ValueError, TypeError, json.JSONDecodeError) as e:
+                print(f"Error processing summary for article index {summary.get('custom_id')}: {e}")
+
+                self.articles[article_index].compressed_summary = ""
+                self.articles[article_index].sentiment = ""
+                self.articles[article_index].impact = ""
 
     def save_articles(self):
         if len(self.articles) == 0:
@@ -232,6 +247,12 @@ class ArticleCollection:
             )
             article.id = new_article.id
 
+    def _batch_upsert(self, vectors: List, namespace: str, batch_size: int):
+        index = pc.Index("company-info")
+        for i in range(0, len(vectors), batch_size):
+            batch = vectors[i:i + batch_size]
+            index.upsert(vectors=batch, namespace=namespace)
+
     def embed_articles_to_vector_db(self):
         if len(self.articles) == 0:
             return
@@ -239,23 +260,50 @@ class ArticleCollection:
         summary_texts = []
         for article in self.articles:
             summary_texts.append(article.summary)
-        summary_embeddings = embed_texts(summary_texts)
+
+        create_jsonl_embedding_batch_file(
+            texts=summary_texts,
+            output_dir="files",
+            file_name="summary_texts.jsonl",
+        )
+
+        batch_id = submit_batch(
+            filepath="files/summary_texts.jsonl",
+            endpoint="/v1/embeddings",
+            job_description="article summaries embedding job",
+        )
+
+        summary_embeddings_batch_output = get_batch_results(
+            batch_id=batch_id,
+            output_dir="files",
+            output_filename="summary_embeddings.jsonl",
+        )
+        
+        summary_embeddings = [0] * len(self.articles)
+        for embedding_data in summary_embeddings_batch_output:
+            article_index = int(embedding_data["custom_id"])
+            try:
+                embedding = embedding_data["response"]["body"]["data"][0]["embedding"]
+                summary_embeddings[article_index] = embedding
+            except (KeyError, IndexError, TypeError) as e:
+                summary_embeddings[article_index] = None
+                print(f"Failed to retrieve embedding for article_index {article_index}: {e}")
 
         vectors = []
         for article, embedding in zip(self.articles, summary_embeddings):
-            vector = {
-                "id": str(article.id),
-                "values": embedding,
-                "metadata": {
-                    "article_title": article.title,
-                    "ticker": article.ticker,
-                    "media": article.media,
-                    "published_date": datetime_to_unix(article.published_date),
-                    "url": article.url,
-                    "clean_url": article.clean_url,
-                    "text": article.summary,
-                },
-            }
-            vectors.append(vector)
-        index = pc.Index("company-info")
-        index.upsert(vectors=vectors, namespace="articles")
+            if embedding is not None:
+                vector = {
+                    "id": str(article.id),
+                    "values": embedding,
+                    "metadata": {
+                        "article_title": article.title,
+                        "ticker": article.ticker,
+                        "media": article.media or "",
+                        "published_date": datetime_to_unix(article.published_date) or "",
+                        "url": article.url or "",
+                        "clean_url": article.clean_url or "",
+                        "text": article.summary or "",
+                    },
+                }
+                vectors.append(vector)
+        self._batch_upsert(vectors=vectors, namespace="articles", batch_size=100)

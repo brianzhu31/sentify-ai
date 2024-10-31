@@ -26,6 +26,14 @@ export default function ArticleCard({ article }: ArticleCardProps) {
           </CardTitle>
         </Link>
         <div className="flex gap-2">
+          <div className="relative w-4 h-4">
+            <img
+              src={`/icons/news/${article?.clean_url.split(".")[0]}.png`}
+              alt={article?.clean_url.split(".")[0]}
+              className="object-contain rounded-lg"
+              onError={(e) => (e.currentTarget.src = "/icons/news/newspaper.png")}
+            />
+          </div>
           <p className="text-xs text-muted-foreground">{article?.clean_url}</p>
           <p className="text-xs text-muted-foreground">
             {typeof article.published_date === "number"
@@ -39,7 +47,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
           <Image
             src={article.media}
             alt={article.title}
-            style={{objectFit:"cover"}}
+            style={{ objectFit: "cover" }}
             fill={true}
             quality={30}
             sizes="146px"

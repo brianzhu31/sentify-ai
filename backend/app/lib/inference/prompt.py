@@ -47,32 +47,29 @@ Please output in valid JSON in the following format:
 
 def sentiment_summary_prompt(company_name: str, summaries: str):
     return f'''
+You are a summarization expert. When summarizing content, provide comprehensive and detailed summaries.
+
 I will give you news article summaries about {company_name}.
-Compile all of the summaries into an overall summary that is up to 10 sentences long, focusing on recent developments and future outlook.
-Extract and compile both positive and negative information into detailed summary points. For each category (positive and negative), provide up to 15 points. Each point should:
+Summarize all the information into a list of summary sections. Each summary section should:
+- Include a header, that is either a general topic (e.g. "Financial Overview") OR a specific topic (e.g. "New Partnership with XYZ Corp"). You must include topics of both types.
+- A summary of the header topic written in MULTIPLE, very detailed paragraphs.
 
-Be up to 3 sentences long.
-Focus on recent events, current situation, or near-future projections.
-Include specific statistics, key details, and relevant metrics from recently, where available.
-Be quantifiable, providing clear figures or data where possible.
-Be actionable, offering insights that impact decision-making in the near term.
-Be relevant to the company's current market perception, sentiment, and future stock value.
-Avoid discussing long-term past events or historical information not directly relevant to the present or future.
-Record the exact article index of where the information came from.
+The information you provide should:
+- Focus on recent events, current situation, or near-future projections.
+- Include specific statistics, key details, and relevant metrics from recently, where available.
+- Be quantifiable, providing clear figures or data where possible.
+- Be actionable, offering insights that impact decision-making in the near term.
+- Be relevant to the company's current market perception, sentiment, and future stock value.
+- Avoid discussing long-term past events or historical information not directly relevant to the present or future.
 
-For positive information, highlight strengths, opportunities, or favorable developments.
-For negative information, point out risks, concerns, or potential challenges.
+For each summary section, record all the article indices of where the information from
 
 Please output in valid JSON in the following format:
 {{
-    "overall_summary": str,
-    "positive": {{
-        "info": str,
-        "source": int
-    }}[],
-    "negative": {{
-        "info": str,
-        "source": int
+    "summary_sections": {{
+        "header": str,
+        "paragraphs": str[],
+        "sources": int[]
     }}[]
 }}
 

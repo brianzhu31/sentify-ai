@@ -12,19 +12,18 @@
 #         print()
 
 #     print(len(article_collection.articles))
-    
+
 #     article_collection.summarize_articles()
-    
+
 #     for article in article_collection.articles:
 #         print(article.title)
 #         print(article.compressed_summary)
 #         print(article.sentiment)
 #         print(article.impact)
 #         print("-----------------------------------------------------------")
-    
+
 #     article_collection.save_articles()
 #     article_collection.embed_articles_to_vector_db()
-
 
 
 # from pinecone import Pinecone
@@ -41,7 +40,7 @@
 # def get_ids_from_query(index, input_vector, namespace):
 #     # Simulating query logic
 #     query_result = index.query(
-#         vector=input_vector, 
+#         vector=input_vector,
 #         top_k=1000,  # Adjust top_k based on index limits
 #         namespace=namespace,
 #         include_metadata=False
@@ -51,35 +50,35 @@
 # def get_all_ids_from_namespace(index, num_dimensions, namespace):
 #     # Get index statistics
 #     stats = index.describe_index_stats()
-    
+
 #     # Check if the namespace exists
 #     if namespace not in stats['namespaces']:
 #         print(f"Namespace {namespace} not found in index.")
 #         return None
-    
+
 #     # Get the total number of vectors in the namespace
 #     num_vectors = stats['namespaces'][namespace]['vector_count']
 #     print(f"Namespace {namespace} contains {num_vectors} vectors.")
-    
+
 #     all_ids = set()
-    
+
 #     # Keep querying the index until we get all vector IDs
 #     while len(all_ids) < num_vectors:
 #         print("Length of ids list is shorter than the number of total vectors...")
-        
+
 #         # Create a random vector for querying
 #         input_vector = np.random.rand(num_dimensions).tolist()  # or [0.5] * num_dimensions for a fixed vector
 #         print("Creating random vector...")
-        
+
 #         # Query the index to get the vector IDs
 #         ids = get_ids_from_query(index, input_vector, namespace)
 #         print(f"Getting ids from a vector query of {namespace}...")
-        
+
 #         # Add the new IDs to the set
 #         all_ids.update(ids)
 #         print("Updating ids set...")
 #         print(f"Collected {len(all_ids)} ids out of {num_vectors}.")
-    
+
 #     return all_ids
 
 # index = pc.Index("company-info")
@@ -89,13 +88,13 @@
 # def convert_to_unix(timestamp_str):
 #     # Define the format of the input timestamp string
 #     time_format = "%Y-%m-%d %H:%M:%S"
-    
+
 #     # Convert the timestamp string to a datetime object
 #     dt_obj = datetime.strptime(timestamp_str, time_format)
-    
+
 #     # Convert the datetime object to a Unix timestamp (assuming UTC)
 #     unix_timestamp = int(dt_obj.timestamp())
-    
+
 #     return unix_timestamp
 
 
@@ -103,12 +102,12 @@
 
 # for article_id in all_ids:
 #     print(all_articles["vectors"][article_id]["metadata"])
-    
+
 #     article_metadata = all_articles["vectors"][article_id]["metadata"]
-#     iso_time = article_metadata["published_date"]   
+#     iso_time = article_metadata["published_date"]
 #     if isinstance(iso_time, str):
 #         unix_time = convert_to_unix(iso_time)
-    
+
 #     index.update(
 #         id=article_id,
 #         set_metadata= {"published_date": unix_time},
@@ -119,10 +118,17 @@
 # # 2024-10-07 14:20:41
 
 
-from services.company_analytics import CompanyAnalyticsEngine
+
 from config import app
+from managers.company_manager import CompanyManager
+from lib.news import get_news
 
 with app.app_context():
-    companies_analyzer = CompanyAnalyticsEngine(tickers=["NVDA", "AAPL", "MSFT", "TSLA"])
+    all_companies = CompanyManager.get_all_companies()
+    tickers = [company.ticker for company in all_companies]
+    for ticker in tickers:
+        company = CompanyManager.get_company_by_ticker(ticker=ticker)
+        keywords = company.aliases + [company.company_name, company.ticker]
 
-    companies_analyzer.generate_overall_summaries(time_period=7)
+        request_page = get_news(keywords=keywords, days_ago=7, page=1)
+        print(f"{ticker} _______ {len(request_page.get("articles", []))}")

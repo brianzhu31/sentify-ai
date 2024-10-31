@@ -85,7 +85,7 @@ export function SearchBar() {
           onKeyDown={handleKeyDown}
           placeholder="Search"
           className={cn(
-            "h-12 rounded-lg",
+            "h-10 rounded-full",
             "border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-black",
             "text-gray-900 placeholder-gray-500 transition-shadow shadow-sm focus:shadow-lg"
           )}
@@ -99,7 +99,7 @@ export function SearchBar() {
                 className="px-4 py-2 hover:bg-gray-200 cursor-pointer flex items-center space-x-3 transition-colors"
               >
                 <div className="rounded-full overflow-hidden w-7 h-7">
-                  <Image
+                  <img
                     src={`/icons/small/${company.ticker}.svg`}
                     alt={`${company.ticker} icon`}
                     width={32}

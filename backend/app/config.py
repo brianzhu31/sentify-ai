@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-from flask_apscheduler import APScheduler
 from models import db
 
 load_dotenv(".env.local")
@@ -12,8 +11,6 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 
 app = Flask(__name__)
 CORS(app)
-
-scheduler = APScheduler()
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f"{SUPABASE_URI}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -32,4 +29,4 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 db.init_app(app)
 
-scheduler.init_app(app)
+# scheduler.init_app(app)

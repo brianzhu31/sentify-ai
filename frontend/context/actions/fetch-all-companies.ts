@@ -1,11 +1,11 @@
 "use server";
 
 import axios from "axios";
-import { CompanyPartial } from "@/types";
+import { CompanyPartial, CompanyFull } from "@/types";
 
-export const fetchAllCompaniesFull = async (
-  apiUrl: string
-): Promise<CompanyPartial[]> => {
+const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+
+export const fetchAllCompaniesFull = async (): Promise<CompanyFull[]> => {
   try {
     const response = await axios.get(`${apiUrl}/api/company/all/full`);
     const companiesData = response.data;
@@ -20,9 +20,7 @@ export const fetchAllCompaniesFull = async (
   }
 };
 
-export const fetchAllCompaniesPartial = async (
-  apiUrl: string
-): Promise<CompanyPartial[]> => {
+export const fetchAllCompaniesPartial = async (): Promise<CompanyPartial[]> => {
   try {
     const response = await axios.get(`${apiUrl}/api/company/all/partial`);
     const companiesData = response.data;

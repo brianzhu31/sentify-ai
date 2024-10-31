@@ -42,6 +42,8 @@ class ArticleManager:
         article = ArticleModel.query.filter_by(
             title=article_title, ticker=ticker
         ).one_or_none()
+        if article is None:
+            return None
         return Article(article)
 
     @staticmethod

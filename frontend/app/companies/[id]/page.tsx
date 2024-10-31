@@ -10,24 +10,30 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import SummaryCard from "./components/summary-card";
 import ArticleCard from "./components/article-card";
-import { CompanyFull, CompanyAnalytics, Article, PaginatedArticlesData } from "@/types";
+import { StockGraph } from "./components/stock-graph";
+import {
+  CompanyFull,
+  CompanyAnalytics,
+  Article,
+  PaginatedArticlesData,
+} from "@/types";
 import Image from "next/image";
+import SentimentScoreCard from "./components/sentiment-score-card";
 
 export default function CompanyAnalyticsContent() {
   const pathname = usePathname();
-  const ticker = pathname.split("/").pop();
+  const ticker = pathname.split("/").pop() || "";
   const router = useRouter();
   const [companyData, setCompanyData] = useState<CompanyFull | null>(null);
   const [companyAnalytics, setCompanyAnalytics] =
     useState<CompanyAnalytics | null>(null);
-  const [paginatedArticles, setPaginatedArticles] = useState<PaginatedArticlesData | null>(null);
+  const [paginatedArticles, setPaginatedArticles] =
+    useState<PaginatedArticlesData | null>(null);
   const [articlePage, setArticlePage] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   const handlePreviousPage = async () => {
@@ -35,7 +41,7 @@ export default function CompanyAnalyticsContent() {
     const articlesData = await fetchArticles(ticker, previousPage, 10);
     setPaginatedArticles(articlesData);
     setArticlePage(previousPage);
-  }
+  };
 
   const handleNextPage = async () => {
     if (!paginatedArticles?.has_more) {
@@ -45,12 +51,11 @@ export default function CompanyAnalyticsContent() {
     const articlesData = await fetchArticles(ticker, nextPage, 10);
     setPaginatedArticles(articlesData);
     setArticlePage(nextPage);
-  }
+  };
 
   useEffect(() => {
     const getAllCompanyData = async () => {
       try {
-        setLoading(true);
         if (ticker) {
           const analyticsData = await fetchAnalytics(ticker);
           setCompanyAnalytics(analyticsData);
@@ -68,34 +73,23 @@ export default function CompanyAnalyticsContent() {
         }
       } catch (err: any) {
         router.push("/companies");
-        setLoading(false);
         toast({
           variant: "error",
           description: err.message || "An unexpected error occurred",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     getAllCompanyData();
   }, [pathname]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen justify-center items-center">
-        <Spinner className={cn("size-24")} strokeWidth={0.6}></Spinner>
-      </div>
-    );
-  }
-
   if (!companyData && !companyAnalytics) {
     return <></>;
   }
 
   return (
-    <div className="flex w-full min-h-screen justify-center">
-      <div className="flex flex-col max-w-[1300px] py-16 gap-8">
+    <div className="flex flex-col w-full min-h-screen justify-center items-center">
+      <div className="flex flex-col max-w-[1300px] gap-8">
         <div className="flex">
           <div className="mr-6">
             <div className="rounded-full overflow-auto min-w-[120px] min-h-[120px]">
@@ -104,7 +98,7 @@ export default function CompanyAnalyticsContent() {
                 width={180}
                 height={180}
                 alt={companyData?.ticker || ""}
-              ></Image>
+              />
             </div>
           </div>
           <div className="flex flex-col gap-6">
@@ -116,34 +110,23 @@ export default function CompanyAnalyticsContent() {
               <span className="text-lg">•</span>
               <p className="text-lg">{companyData?.exchange}</p>
               <div className="rounded-full overflow-auto">
-                <Image
+                <img
                   src={`/icons/exchanges/${companyData?.exchange}.svg`}
-                  width={22}
-                  height={22}
                   alt={companyData?.exchange || ""}
-                ></Image>
+                />
               </div>
             </div>
           </div>
+          <div className="ml-auto">
+            <SentimentScoreCard score={companyAnalytics?.score || 3} />
+          </div>
         </div>
-        <Card className={cn("flex-1 flex-grow rounded-md")}>
-          <CardHeader>
-            <CardTitle>Overall Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{companyAnalytics?.overall_summary}</p>
-          </CardContent>
-        </Card>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-          <SummaryCard
-            sentimentLabel="Positive"
-            summaryPoints={companyAnalytics?.positive_summaries || []}
-          />
-          <SummaryCard
-            sentimentLabel="Negative"
-            summaryPoints={companyAnalytics?.negative_summaries || []}
-          />
+        <div>
+          <StockGraph ticker={ticker} companyData={companyData} />
         </div>
+        {companyAnalytics?.summary_sections.map((summarySection, index) => (
+          <SummaryCard summarySection={summarySection} key={index} />
+        ))}
         <div className="flex-col">
           <p className="text-2xl mb-4">Article sources</p>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

@@ -15,8 +15,6 @@ interface CompaniesContextType {
   companies: CompanyPartial[];
 }
 
-const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
-
 const CompaniesContext = createContext<CompaniesContextType | undefined>(
   undefined
 );
@@ -28,7 +26,7 @@ export const CompaniesProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const getCompanies = async () => {
       try {
-        const data = await fetchAllCompaniesPartial(apiUrl);
+        const data = await fetchAllCompaniesPartial();
         setCompanies(data);
       } catch (err: any) {
         toast({

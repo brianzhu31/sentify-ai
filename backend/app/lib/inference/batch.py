@@ -20,7 +20,9 @@ def create_jsonl_batch_file(
     prompt_function: Callable,
     prompt_args: List[str],
     output_json: bool = False,
-    custom_id_key: str = None
+    custom_id_key: str = None,
+    temperature: int = 0.2,
+    top_p: int = 0.9
 ):
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, file_name)
@@ -39,8 +41,8 @@ def create_jsonl_batch_file(
                 "body": {
                     "model": "gpt-4o-mini",
                     "messages": [{"role": "user", "content": prompt_content}],
-                    "temperature": 0.2,
-                    "top_p": 0.9,
+                    "temperature": temperature,
+                    "top_p": top_p,
                 },
             }
 

@@ -35,6 +35,7 @@ export type CompanyFull = {
   aliases: string[];
   exchange: string;
   currency: string;
+  score?: number;
 };
 
 export type Article = {
@@ -51,19 +52,36 @@ export type PaginatedArticlesData = {
   has_more: boolean;
 }
 
+export type SummarySection = {
+  header: string;
+  paragraphs: string[];
+  sources: Article[];
+}
+
 export type CompanyAnalytics = {
   id: number;
   company_name: string;
-  overall_summary: string;
-  negative_summaries: {
-    info: string;
-    source: Article;
-  }[];
-  positive_summaries: {
-    info: string;
-    source: Article;
-  }[];
+  summary_sections: SummarySection[];
   score: number;
   last_updated: string;
 };
 
+export type TimeSeriesOptionValue = {
+  datetime: string;
+  price: number;
+}
+
+export type TimeSeriesOption = {
+  min_price: number;
+  max_price: number;
+  values: TimeSeriesOptionValue[]
+}
+
+export type TimeSeries = {
+  [key: string]: TimeSeriesOption;
+};
+
+export type StockPriceData = {
+  ticker: string;
+  price: number;
+}

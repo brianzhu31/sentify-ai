@@ -8,19 +8,49 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 import { logout } from "@/utils/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function UserDropdown() {
   const { user } = useUserSession();
+  const router = useRouter();
 
   const handleLogout = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     await logout();
   };
 
+  const handleLogin = () => {
+    router.push("/login");
+  };
+
+  const handleRegister = () => {
+    router.push("/register");
+  };
+
   if (!user) {
-    return null;
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="cursor-pointer">
+            <AvatarImage src="" />
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 mr-3">
+          <DropdownMenuGroup>
+            <DropdownMenuItem className="cursor-pointer" onClick={handleLogin}>
+              Log In
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onClick={handleRegister}>
+              Sign Up
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
   }
 
   return (

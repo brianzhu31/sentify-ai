@@ -3,12 +3,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { UserAuthData, SessionAuthData } from "@/types";
 
-export const fetchUser = async (): Promise<UserAuthData> => {
+export const fetchUser = async (): Promise<UserAuthData | undefined> => {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.auth.getUser();
-    if (error) {
-      throw error;
+    if (error || !data.user) {
+      return undefined;
     }
 
     const user = data.user;
@@ -29,12 +29,12 @@ export const fetchUser = async (): Promise<UserAuthData> => {
   }
 };
 
-export const fetchSession = async (): Promise<SessionAuthData> => {
+export const fetchSession = async (): Promise<SessionAuthData | undefined> => {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      throw error;
+    if (error || !data.session) {
+      return undefined;
     }
 
     const session = data.session;

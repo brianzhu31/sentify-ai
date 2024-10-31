@@ -42,11 +42,13 @@ class CompanyAnalytics(db.Model):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     company_name = Column(String(80), nullable=False)
     ticker = Column(String(6), unique=True, nullable=False)
-    overall_summary = Column(String, nullable=True)
-    positive_summaries = Column(ARRAY(JSON), nullable=True)
-    negative_summaries = Column(ARRAY(JSON), nullable=True)
+    summary_sections = Column(ARRAY(JSON), nullable=True)
     score = Column(Float, nullable=True)
-    last_updated = Column(DateTime, nullable=True, default=datetime.utcnow)
+    stock_price = Column(Float, nullable=True)
+    time_series = Column(JSONB, nullable=True)
+    stock_price_last_updated = Column(DateTime, nullable=True)
+    time_series_last_updated = Column(DateTime, nullable=True)
+    analytics_last_updated = Column(DateTime, nullable=True)
 
 
 class Article(db.Model):

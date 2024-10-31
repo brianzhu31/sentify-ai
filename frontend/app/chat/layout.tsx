@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import AppProviders from "@/context/app-providers";
 import { Sidebar } from "./components/sidebar";
 import { SheetMenu } from "./components/sheet-menu";
-import { UserDropdown } from "./components/user-dropdown";
+import { UserDropdown } from "../components/user-dropdown";
 
 interface ChatLayoutProps {
   children: ReactNode;
