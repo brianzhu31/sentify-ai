@@ -25,7 +25,7 @@ scheduler.add_job(
     trigger=trigger,
     misfire_grace_time=None,
 )
-scheduler.start()
+# scheduler.start()
 
 if __name__ == "__main__":
     with app.app_context():

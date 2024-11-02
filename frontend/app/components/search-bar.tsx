@@ -75,7 +75,7 @@ export function SearchBar() {
   };
 
   return (
-    <div className="flex gap-2 lg:w-[60%] md:w-[75%] w-[85%]">
+    <div className="flex gap-2">
       <div className="relative w-full">
         <Input
           type="text"
@@ -83,7 +83,7 @@ export function SearchBar() {
           onChange={handleInputChange}
           onClick={handleInputClick}
           onKeyDown={handleKeyDown}
-          placeholder="Search"
+          placeholder="Search company"
           className={cn(
             "h-10 rounded-full",
             "border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-black",

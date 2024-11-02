@@ -56,8 +56,9 @@ class ChatManager:
     @classmethod
     def delete_chat(cls, user_id: UUID, chat_id: UUID):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
+        chat_query = ChatModel.query.get(chat.id)
         try:
-            db.session.delete(chat)
+            db.session.delete(chat_query)
             db.session.commit()
         except Exception:
             db.session.rollback()
@@ -66,10 +67,10 @@ class ChatManager:
     @classmethod
     def edit_chat_name(cls, user_id: UUID, chat_id: UUID, new_name: str):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
+        chat_query = ChatModel.query.get(chat.id)
         try:
-            chat.name = new_name
+            chat_query.name = new_name
             db.session.commit()
-            return Chat(chat)
         except:
             db.session.rollback()
             raise DBCommitError("Error editing chat name")
@@ -77,9 +78,10 @@ class ChatManager:
     @classmethod
     def create_message(cls, user_id: UUID, chat_id: UUID, role: str, content: str, sources: List = []):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
-        chat.last_accessed = datetime.utcnow()
+        chat_query = ChatModel.query.get(chat.id)
+        chat_query.last_accessed = datetime.utcnow()
         try:
-            new_message = MessageModel(chat_id=chat_id, role=role, content=content, sources=sources)
+            new_message = MessageModel(chat_id=chat.id, role=role, content=content, sources=sources)
             db.session.add(new_message)
             db.session.commit()
             return Message(new_message)

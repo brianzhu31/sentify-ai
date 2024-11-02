@@ -87,3 +87,18 @@
   content: "";
   animation: ellipsis 2.5s infinite steps(3);
 }
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 1.5s ease-out forwards;
+}

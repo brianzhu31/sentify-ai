@@ -91,7 +91,7 @@ def rename_chat(chat_id: UUID):
     user_id = UUID(g.user["sub"])
     new_name = request.json.get("new_name")
     chat = ChatManager.get_chat_by_id(user_id=user_id, chat_id=chat_id)
-    new_chat = ChatManager.edit_chat_name(user_id=user_id, chat_id=chat_id, new_name=new_name)
+    ChatManager.edit_chat_name(user_id=user_id, chat_id=chat.id, new_name=new_name)
 
     return jsonify({"message": f"Chat renamed successfully."})
 
