@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchAllCompaniesWithScore } from "../actions/fetch-companies";
 import { CompanyFull } from "@/types";
 import Link from "next/link";
 import {
@@ -16,9 +15,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { CaretSortIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
 
-export function CompaniesTable() {
-  const [companies, setCompanies] = useState<CompanyFull[]>([]);
+interface CompaniesTableProps {
+  companies: CompanyFull[];
+  setCompanies: (companies: CompanyFull[]) => void;
+}
+
+export function CompaniesTable({ companies, setCompanies }: CompaniesTableProps ) {
   const [sortOrder, setSortOrder] = useState("");
 
   const toggleSortOrder = () => {
@@ -39,19 +43,6 @@ export function CompaniesTable() {
     );
   };
 
-  useEffect(() => {
-    const getAllCompanies = async () => {
-      const response = await fetchAllCompaniesWithScore();
-      console.log(response);
-      setCompanies(response);
-    };
-    getAllCompanies();
-  }, []);
-
-  if (companies.length === 0) {
-    return <></>
-  }
-
   return (
     <Table>
       <TableHeader>
@@ -69,7 +60,7 @@ export function CompaniesTable() {
       </TableHeader>
       <TableBody>
         {companies.map((company, index) => (
-          <TableRow key={index}>
+          <TableRow key={index} className={cn("h-12")}>
             <TableCell>
               <div className="flex gap-4 items-center">
                 <div className="rounded-full overflow-hidden w-6 h-6">
