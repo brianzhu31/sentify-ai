@@ -1,9 +1,13 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
 import { SearchBar } from "./search-bar";
 import { UserDropdown } from "./user-dropdown";
+import { useUserSession } from "@/context/user-session-context";
 import Link from "next/link";
 
 export function Navbar() {
+  const { user } = useUserSession();
   return (
     <header className="sticky top-0 z-10 w-full bg-background">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-8">
@@ -15,7 +19,14 @@ export function Navbar() {
             <SearchBar />
           </div>
         </div>
-        <UserDropdown />
+        <div className="flex items-center gap-8">
+          {user && (
+            <Link href="/chat">
+              <Button>Chat</Button>
+            </Link>
+          )}
+          <UserDropdown />
+        </div>
       </div>
     </header>
   );

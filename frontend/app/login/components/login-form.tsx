@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -70,9 +71,14 @@ export default function LoginForm() {
           {error && <div className="text-red-500 text-sm">{error}</div>}
         </CardContent>
         <CardFooter>
-          <Button className="w-full" type="submit">
-            Sign In
-          </Button>
+          <div className="flex flex-col w-full gap-4">
+            <Button className="w-full" type="submit">
+              Sign In
+            </Button>
+            <Link href="/register">
+              <Button className="w-full" variant="outline">Sign Up</Button>
+            </Link>
+          </div>
         </CardFooter>
       </form>
     </Card>

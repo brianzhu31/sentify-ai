@@ -26,7 +26,7 @@ export default function SignUpForm() {
     formData.append("email", email);
     formData.append("password", password);
 
-    await signUp(formData);
+    // await signUp(formData);
   };
 
   return (
@@ -62,9 +62,16 @@ export default function SignUpForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" type="submit">
-            Sign Up
-          </Button>
+          <div>
+            <Button className="w-full" type="submit" disabled>
+              Sign Up
+            </Button>
+            <p className="text-xs mt-2">
+              Our service is currently in beta, and public access is restricted.
+              If you'd like access to chat feature, please contact the site
+              owner for permission.
+            </p>
+          </div>
         </CardFooter>
       </form>
     </Card>

@@ -31,7 +31,9 @@ export default function ArticleCard({ article }: ArticleCardProps) {
               src={`/icons/news/${article?.clean_url.split(".")[0]}.png`}
               alt={article?.clean_url.split(".")[0]}
               className="object-contain rounded-lg"
-              onError={(e) => (e.currentTarget.src = "/icons/news/newspaper.png")}
+              onError={(e) =>
+                (e.currentTarget.src = "/icons/news/newspaper.png")
+              }
             />
           </div>
           <p className="text-xs text-muted-foreground">{article?.clean_url}</p>
@@ -44,15 +46,12 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       </CardHeader>
       <CardContent className={cn("flex pt-2 flex-grow")}>
         <div className="w-1/6 aspect-square mr-4 relative flex-shrink-0">
-          <Image
-            src={article.media}
+          <img
+            src={article.media || "/images/news-default-image.png"}
             alt={article.title}
-            style={{ objectFit: "cover" }}
-            fill={true}
-            quality={30}
-            sizes="146px"
-            className="rounded-md"
             loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="w-5/6 flex flex-col">

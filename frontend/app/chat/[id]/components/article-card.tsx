@@ -16,30 +16,28 @@ export default function ArticleCard({ article }: ArticleCardProps) {
   return (
     <Card className="overflow-hidden max-w-96">
       <Link href={article?.url || ""} target="_blank" rel="noopener noreferrer">
-        <CardContent className="p-0">
-          <div className="flex h-12">
-            <div className="relative w-12 h-12 flex-shrink-0">
-              <Image
-                src={article?.media}
-                alt="Thumbnail"
-                fill
-                className="object-cover"
-                quality={1}
-                sizes="(max-width: 768px) 100vw, 50vw"
+        <CardContent className="p-3 space-y-2">
+          <div className="flex gap-2 items-center">
+            <div className="w-4 h-4 shrink-0 grow-0 rounded-full overflow-hidden">
+              <img
+                src={`/icons/news/${article?.clean_url.split(".")[0]}.png`}
+                alt={article?.clean_url.split(".")[0]}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "/icons/news/newspaper.png";
+                }}
               />
             </div>
-            <div className="flex-1 p-1 flex flex-col justify-between">
-              <h3 className="text-xs font-medium leading-tight line-clamp-1 mb-1">
-                {article?.title}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {timeAgo(
-                  typeof article?.published_date === "number"
-                    ? new Date(article.published_date * 1000)
-                    : article?.published_date
-                )}
-              </p>
-            </div>
+            <p className="text-sm font-medium leading-tight line-clamp-1">
+              {article?.title}
+            </p>
+          </div>
+          <div className="flex items-center text-xs text-muted-foreground">
+            {timeAgo(
+              typeof article?.published_date === "number"
+                ? new Date(article.published_date * 1000)
+                : new Date(article?.published_date || "")
+            )}
           </div>
         </CardContent>
       </Link>

@@ -1,4 +1,6 @@
 import { useUserSession } from "@/context/user-session-context";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,35 +23,11 @@ export function UserDropdown() {
     await logout();
   };
 
-  const handleLogin = () => {
-    router.push("/login");
-  };
-
-  const handleRegister = () => {
-    router.push("/register");
-  };
-
   if (!user) {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Avatar className="cursor-pointer">
-            <AvatarImage src="" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 mr-3">
-          <DropdownMenuGroup>
-            <DropdownMenuItem className="cursor-pointer" onClick={handleLogin}>
-              Log In
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={handleRegister}>
-              Sign Up
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Link href="/login">
+        <Button>Get Started</Button>
+      </Link>
     );
   }
 
@@ -65,9 +43,6 @@ export function UserDropdown() {
         <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">
-            Settings
-          </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
             Log out
           </DropdownMenuItem>

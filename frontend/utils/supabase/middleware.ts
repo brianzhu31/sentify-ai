@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/register"))
   ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/chat";
+    url.pathname = "/companies";
     return NextResponse.redirect(url);
   }
 

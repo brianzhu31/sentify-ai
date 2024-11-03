@@ -61,7 +61,7 @@ export default async function LandingPage() {
       <footer className="bg-background py-8 px-4 border-t">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground mb-4 md:mb-0">
-            &copy; 2024 v0. All rights reserved.
+            &copy; 2024 All rights reserved.
           </p>
         </div>
       </footer>
