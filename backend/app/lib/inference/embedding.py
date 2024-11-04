@@ -3,9 +3,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from openai import OpenAI
 import os
-from dotenv import load_dotenv
-
-load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 

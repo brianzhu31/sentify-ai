@@ -13,17 +13,12 @@ from lib.utils import (
     datetime_to_unix,
 )
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 from pinecone import Pinecone
-
-# from config import app
 import json
 from datetime import datetime, timedelta
 import pytz
 
-
-load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 client = OpenAI(api_key=OPENAI_KEY)

@@ -1,10 +1,7 @@
 import os
 import json
-from dotenv import load_dotenv
 from newscatcherapi import NewsCatcherApiClient
 from exceptions.errors import ExternalAPIError
-
-load_dotenv(".env.local")
 
 NEWSCATCHER_KEY = os.getenv("NEWSCATCHER_KEY")
 

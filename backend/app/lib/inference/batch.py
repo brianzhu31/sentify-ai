@@ -1,12 +1,9 @@
 from openai import OpenAI
 from lib.utils import jsonl_string_to_list
 from typing import List, Callable
-from dotenv import load_dotenv
 import os
 import json
 import time
-
-load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 

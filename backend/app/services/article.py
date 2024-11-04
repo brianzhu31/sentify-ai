@@ -18,15 +18,12 @@ from lib.news import get_news
 from exceptions.errors import InsufficientArticlesError, NotFoundError, DBCommitError
 from openai import OpenAI
 from pinecone import Pinecone
-from dotenv import load_dotenv
 from datetime import datetime
 import uuid
 import time
 import os
 import json
 
-
-load_dotenv(".env.local")
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 

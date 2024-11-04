@@ -1,13 +1,10 @@
 from managers.company_manager import CompanyManager
-from dotenv import load_dotenv
 import requests
 from urllib.parse import urlencode
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List
 from copy import deepcopy
-
-load_dotenv(".env.local")
 
 TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY")
 

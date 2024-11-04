@@ -4,7 +4,10 @@ from flask import Flask
 from flask_cors import CORS
 from models import db
 
-load_dotenv(".env.local")
+if os.getenv("FLASK_ENV") == "production":
+    load_dotenv(".env.production")
+elif os.getenv("FLASK_ENV") == "development":
+    load_dotenv(".env.local")
 
 SUPABASE_URI = os.getenv("SUPABASE_URI")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -28,5 +31,3 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 
 db.init_app(app)
-
-# scheduler.init_app(app)

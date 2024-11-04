@@ -1,11 +1,8 @@
 import os
 import jwt
-from dotenv import load_dotenv
 from functools import wraps
 from flask import request, jsonify, g
 import time
-
-load_dotenv(".env.local")
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 PUBLIC_SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL")

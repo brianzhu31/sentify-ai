@@ -6,11 +6,7 @@ from lib.inference.prompt import (
     sentiment_summary_prompt,
 )
 from lib.inference.external_api import call_model_api_async
-from dotenv import load_dotenv
-from openai import OpenAI
 import os
-
-load_dotenv(".env.local")
 
 GENAI_KEY = os.getenv("GENAI_KEY")
 OPENAI_KEY = os.getenv("OPENAI_KEY")
