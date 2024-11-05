@@ -4,6 +4,7 @@ from lib.inference.batch import create_jsonl_batch_file, submit_batch, get_batch
 from lib.inference.prompt import sentiment_summary_prompt
 from typing import List, Dict
 import json
+from config import logger
 
 
 class SummaryCollection:
@@ -89,8 +90,6 @@ class CompanyAnalyticsEngine:
 
             summaries_text = "\n\n".join(summaries_text_list)
 
-            print(summaries_text)
-
             summary_collection = SummaryCollection(
                 company_name=company_name, ticker=ticker, summaries=summaries_text)
             self.summary_collections.append(summary_collection)
@@ -134,5 +133,5 @@ class CompanyAnalyticsEngine:
                 )
             
             except (KeyError, IndexError, ValueError, TypeError, json.JSONDecodeError) as e:
-                print(f"Error processing analysis for ticker {ticker}: {e}")
+                logger.debug(f"Error processing analysis for ticker {ticker}: {e}")
                 continue

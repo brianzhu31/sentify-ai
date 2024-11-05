@@ -17,7 +17,7 @@ app.register_blueprint(errors_bp)
 
 scheduler = BackgroundScheduler()
 
-trigger = CronTrigger(year="*", month="*", day="*", hour="15", minute="37", timezone="US/Eastern")
+trigger = CronTrigger(year="*", month="*", day="*", hour="22", minute="18", timezone="US/Eastern")
 
 scheduler.add_job(
     id="full_inferece_job",
@@ -25,10 +25,10 @@ scheduler.add_job(
     trigger=trigger,
     misfire_grace_time=None,
 )
-# scheduler.start()
+scheduler.start()
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(port=8000, debug=True)
-    # app.run(port=8000, debug=True, use_reloader=False)
+    # app.run(port=8000, debug=True)
+    app.run(port=8000, debug=True, use_reloader=False)

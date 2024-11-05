@@ -4,6 +4,7 @@ from typing import List, Callable
 import os
 import json
 import time
+from config import logger
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
@@ -73,18 +74,36 @@ def create_jsonl_embedding_batch_file(
             f.write(json.dumps(json_record) + "\n")
 
 
-def submit_batch(filepath: str, endpoint: str, job_description: str):
-    batch_input_file = client.files.create(file=open(filepath, "rb"), purpose="batch")
+def submit_batch(filepath: str, endpoint: str, job_description: str, max_retries: int = 5, delay: int = 10):
+    def create_batch() -> str:
+        batch_input_file = client.files.create(file=open(filepath, "rb"), purpose="batch")
+        batch_input_file_id = batch_input_file.id
 
-    batch_input_file_id = batch_input_file.id
-    new_batch = client.batches.create(
-        input_file_id=batch_input_file_id,
-        endpoint=endpoint,
-        completion_window="24h",
-        metadata={"description": job_description},
-    )
+        new_batch = client.batches.create(
+            input_file_id=batch_input_file_id,
+            endpoint=endpoint,
+            completion_window="24h",
+            metadata={"description": job_description},
+        )
 
-    return new_batch.id
+        return new_batch.id
+
+    try:
+        return create_batch()
+
+    except Exception as e:
+        logger.debug(f"Error occurred when submitting batch: {e}. Retrying...")
+
+        for attempt in range(max_retries):
+            time.sleep(delay)
+            try:
+                return create_batch()
+            
+            except Exception as retry_e:
+                print(f"Retry {attempt + 1} failed: {retry_e}.")
+
+        logger.debug("Max retries exceeded. Batch submission failed.")
+        return None
 
 
 def get_batch_results(batch_id: str, output_dir: str, output_filename: str,):

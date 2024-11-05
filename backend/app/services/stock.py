@@ -35,7 +35,6 @@ class StockClient:
     def _call_stock_api(self, endpoint: str, params: Dict):
         url = f"{self.BASE_URL}{endpoint}?{urlencode(params)}"
         response = requests.get(url)
-        print(response)
         return response.json()
 
     def _fetch_and_format_time_series(self, ticker: str, interval: str, days: int):

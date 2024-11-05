@@ -37,15 +37,11 @@ class RAGEngine:
                 "status": -1,
             }
 
-        print("is new", is_new_chat)
-
         query_prompt = ""
         if is_new_chat:
             query_prompt = query_validation_prompt_new(query=query)
         else:
             query_prompt = query_validation_prompt(query=query)
-
-        print(query_prompt)
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -53,8 +49,6 @@ class RAGEngine:
             temperature=0,
             max_tokens=50,
         )
-
-        print(response)
 
         output = response.choices[0].message.content
         if output.lower() == "error":
@@ -92,16 +86,12 @@ class RAGEngine:
         date_range = json.loads(inference_output)
         start_date = date_range["start"]
         end_date = date_range["end"]
-        print("start date", start_date)
-        print("end date", end_date)
         metadata_filter = None
         if start_date is not None and end_date is not None:
             start_date = convert_est_string_to_utc(start_date)
             end_date = convert_est_string_to_utc(end_date)
             unix_start_date = datetime_to_unix(start_date)
             unix_end_date = datetime_to_unix(end_date)
-            print("unix start date", unix_start_date)
-            print("unix end date", unix_end_date)
             metadata_filter = {
                 "$and": [
                     {"published_date": {"$gte": unix_start_date}},
@@ -143,11 +133,6 @@ class RAGEngine:
     def inference(
         self, query: str, chat_session_history: str, relevant_articles: List[Dict]
     ):
-        # with app.app_context():
-        # if len(relevant_articles) == 0:
-        #     yield "No relevant data found based on your query. Please try something else.\n"
-        #     return
-
         est = pytz.timezone("America/New_York")
         current_date_est = datetime.now(est)
         current_date_str = current_date_est.strftime("%B %d, %Y %I:%M %p") + " EST"
@@ -171,7 +156,6 @@ class RAGEngine:
             current_date=current_date_str,
             query=query,
         )
-        print(prompt)
 
         stream = client.chat.completions.create(
             model="gpt-4o-mini",

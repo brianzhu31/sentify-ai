@@ -20,5 +20,4 @@ def get_news(keywords: list, days_ago: int, page: int = 1) -> dict:
 
         return news_articles
     except Exception as e:
-        print(e)
         raise ExternalAPIError("Error fetching data from external API.")
