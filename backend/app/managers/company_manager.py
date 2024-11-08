@@ -1,9 +1,9 @@
-from models import (
+from app.models import (
     db,
     Company as CompanyModel,
     CompanyAnalytics as CompanyAnalyticsModel,
 )
-from exceptions.errors import NotFoundError
+from app.exceptions.errors import NotFoundError
 from datetime import datetime
 from typing import Dict, List
 

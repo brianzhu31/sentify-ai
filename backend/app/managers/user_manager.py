@@ -1,9 +1,6 @@
-from models import db, User as UserModel, Chat as ChatModel
-from managers.chat_manager import ChatManager
+from app.models import db, User as UserModel
+from app.exceptions.errors import NotFoundError, DBCommitError
 from uuid import UUID
-from exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedError
-from typing import List
-from datetime import datetime
 
 
 class User:

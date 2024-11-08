@@ -1,6 +1,6 @@
-from models import db, Article as ArticleModel
+from app.models import db, Article as ArticleModel
+from app.exceptions.errors import DBCommitError
 from datetime import datetime, timedelta
-from exceptions.errors import DBCommitError
 
 class Article:
     def __init__(self, article_model: ArticleModel):

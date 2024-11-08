@@ -1,17 +1,17 @@
-from lib.inference.prompt import (
+from app.lib.inference.prompt import (
     rag_chat_prompt,
     rag_system_prompt,
     query_validation_prompt_new,
     query_validation_prompt,
     query_to_date_range_prompt,
 )
-from typing import List, Dict
-from lib.inference.embedding import embed_texts
-from lib.utils import (
+from app.lib.inference.embedding import embed_texts
+from app.lib.utils import (
     unix_to_formatted_string_est,
     convert_est_string_to_utc,
     datetime_to_unix,
 )
+from typing import List, Dict
 import os
 from openai import OpenAI
 from pinecone import Pinecone

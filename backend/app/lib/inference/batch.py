@@ -1,10 +1,10 @@
 from openai import OpenAI
-from lib.utils import jsonl_string_to_list
+from app.lib.utils import jsonl_string_to_list
 from typing import List, Callable
 import os
 import json
 import time
-from config import logger
+from app.logger import logger
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 
@@ -100,7 +100,7 @@ def submit_batch(filepath: str, endpoint: str, job_description: str, max_retries
                 return create_batch()
             
             except Exception as retry_e:
-                print(f"Retry {attempt + 1} failed: {retry_e}.")
+                logger.debug(f"Retry {attempt + 1} failed: {retry_e}.")
 
         logger.debug("Max retries exceeded. Batch submission failed.")
         return None

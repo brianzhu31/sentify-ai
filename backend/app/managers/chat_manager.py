@@ -1,9 +1,8 @@
-from models import db, Message as MessageModel, Chat as ChatModel
-from sqlalchemy.exc import SQLAlchemyError
+from app.models import db, Message as MessageModel, Chat as ChatModel
+from app.exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedError
 from datetime import datetime
-from exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedError
 from uuid import UUID
-from typing import Dict, List
+from typing import List
 
 
 class Chat:

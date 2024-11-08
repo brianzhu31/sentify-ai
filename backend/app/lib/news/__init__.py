@@ -1,7 +1,7 @@
 import os
 import json
 from newscatcherapi import NewsCatcherApiClient
-from exceptions.errors import ExternalAPIError
+from app.exceptions.errors import ExternalAPIError
 
 NEWSCATCHER_KEY = os.getenv("NEWSCATCHER_KEY")
 

@@ -1,9 +1,9 @@
-from managers.company_manager import CompanyManager
+from app.managers.company_manager import CompanyManager
 import requests
 from urllib.parse import urlencode
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 
 TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY")

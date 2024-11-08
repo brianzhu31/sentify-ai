@@ -1,10 +1,10 @@
-from managers.article_manager import ArticleManager
-from managers.company_manager import CompanyManager
-from lib.inference.batch import create_jsonl_batch_file, submit_batch, get_batch_results
-from lib.inference.prompt import sentiment_summary_prompt
+from app.managers.article_manager import ArticleManager
+from app.managers.company_manager import CompanyManager
+from app.lib.inference.batch import create_jsonl_batch_file, submit_batch, get_batch_results
+from app.lib.inference.prompt import sentiment_summary_prompt
 from typing import List, Dict
 import json
-from config import logger
+from app.logger import logger
 
 
 class SummaryCollection:

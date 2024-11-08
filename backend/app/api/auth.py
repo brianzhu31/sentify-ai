@@ -1,6 +1,6 @@
 from flask import Blueprint, g
-from managers.user_manager import UserManager
-from lib.validation import token_required
+from app.managers.user_manager import UserManager
+from app.lib.validation import token_required
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -13,8 +13,6 @@ def register_user():
     user_id = user_data["sub"]
     email = user_data["email"]
 
-    # user = User(user_id=user_id, email=email)
-    # user.register()
     UserManager.create_user(user_id=user_id, email=email)
 
     return {"message": "User created."}, 201

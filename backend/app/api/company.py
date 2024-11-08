@@ -1,6 +1,6 @@
-from flask import jsonify, Blueprint, request
-from managers.company_manager import CompanyManager
-from services.stock import StockClient
+from flask import Blueprint, request
+from app.managers.company_manager import CompanyManager
+from app.services.stock import StockClient
 
 company_bp = Blueprint("company", __name__)
 

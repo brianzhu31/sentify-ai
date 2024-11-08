@@ -1,4 +1,4 @@
-from managers.article_manager import ArticleManager
+from app.managers.article_manager import ArticleManager
 from flask import jsonify, Blueprint, request, Response, g
 
 article_bp = Blueprint("article", __name__)

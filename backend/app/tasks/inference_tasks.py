@@ -1,10 +1,10 @@
-from services.article import ArticleCollection
-from services.company_analytics import CompanyAnalyticsEngine
-from managers.company_manager import CompanyManager
-from config import app
+from app.services.article import ArticleCollection
+from app.services.company_analytics import CompanyAnalyticsEngine
+from app.managers.company_manager import CompanyManager
 from itertools import islice
+from app.logger import logger
+from app import app
 import time
-from config import logger
 
 def batch_iterable(iterable, batch_size):
     iterator = iter(iterable)

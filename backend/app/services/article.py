@@ -1,27 +1,27 @@
 from typing import List
-from managers.company_manager import CompanyManager
-from managers.article_manager import ArticleManager
-from lib.inference.prompt import stock_queries
-from lib.inference.embedding import (
+from app.managers.company_manager import CompanyManager
+from app.managers.article_manager import ArticleManager
+from app.lib.inference.prompt import stock_queries
+from app.lib.inference.embedding import (
     check_article_relevance,
     embed_texts,
 )
-from lib.inference.batch import (
+from app.lib.inference.batch import (
     create_jsonl_batch_file,
     create_jsonl_embedding_batch_file,
     submit_batch,
     get_batch_results,
 )
-from lib.inference.prompt import base_summarization_prompt, compress_base_prompt
-from lib.utils import clean_text, datetime_to_unix
-from lib.news import get_news
+from app.lib.inference.prompt import base_summarization_prompt, compress_base_prompt
+from app.lib.utils import clean_text, datetime_to_unix
+from app.lib.news import get_news
 from openai import OpenAI
 from pinecone import Pinecone
 from datetime import datetime
 import time
 import os
 import json
-from config import logger
+from app.logger import logger
 
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")

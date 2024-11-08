@@ -1,33 +1,32 @@
 from flask import jsonify, Blueprint
-from config import app
-from exceptions.errors import *
+from app.exceptions.errors import *
 
 errors_bp = Blueprint("errors", __name__)
 
-@app.errorhandler(ExternalAPIError)
+@errors_bp.errorhandler(ExternalAPIError)
 def handle_api_error(e):
     return jsonify({"message": str(e)}), 502
 
-@app.errorhandler(InsufficientArticlesError)
+@errors_bp.errorhandler(InsufficientArticlesError)
 def handle_insufficient_articles_error(e):
     return jsonify({"message": str(e)}), 422
 
-@app.errorhandler(ExternalAPITimeoutError)
+@errors_bp.errorhandler(ExternalAPITimeoutError)
 def handle_external_api_timeout_error(e):
     return jsonify({"message": str(e)}), 408
 
-@app.errorhandler(NotFoundError)
+@errors_bp.errorhandler(NotFoundError)
 def handle_not_found_error(e):
     return jsonify({"message": str(e)}), 404
 
-@app.errorhandler(DBCommitError)
+@errors_bp.errorhandler(DBCommitError)
 def handle_db_commit_error(e):
     return jsonify({"message": str(e)}), 404
 
-@app.errorhandler(InvalidRequestError)
+@errors_bp.errorhandler(InvalidRequestError)
 def handle_invalid_request_error(e):
     return jsonify({"message": str(e)}), 404
 
-@app.errorhandler(PermissionDeniedError)
+@errors_bp.errorhandler(PermissionDeniedError)
 def handle_permission_denied_error(e):
     return jsonify({"message": str(e)}), 403

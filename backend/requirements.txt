@@ -19,6 +19,7 @@ Flask-Cors==5.0.0
 Flask-SQLAlchemy==3.1.1
 frozenlist==1.4.1
 greenlet==3.1.1
+gunicorn==23.0.0
 h11==0.14.0
 httpcore==1.0.6
 httpx==0.27.2
@@ -32,6 +33,7 @@ multidict==6.1.0
 newscatcherapi==0.7.3
 numpy==2.1.2
 openai==1.51.2
+packaging==24.1
 pinecone==5.3.1
 pinecone-plugin-inference==1.1.0
 pinecone-plugin-interface==0.0.7
