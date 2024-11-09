@@ -32,4 +32,4 @@ def create_app():
 application = create_app()
 
 if __name__ == "__main__":
-    application.run(port=8000, debug=True, use_reloader=False)
+    application.run(debug=True, use_reloader=False)
