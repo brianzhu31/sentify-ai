@@ -20,7 +20,7 @@ def process_articles():
         
         batch_size = 80
         for batch in batch_iterable(tickers, batch_size):
-            article_collection.fetch_articles(tickers=batch, days_ago=3)
+            article_collection.fetch_articles(tickers=batch, days_ago=1)
 
             logger.info(f"Fetched {len(article_collection.articles)} relevant articles.")
             

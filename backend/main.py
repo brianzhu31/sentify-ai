@@ -10,8 +10,8 @@ def create_app():
         year="*", 
         month="*", 
         day="*", 
-        hour="1", 
-        minute="1", 
+        hour="20", 
+        minute="0", 
         timezone="US/Eastern"
     )
     
