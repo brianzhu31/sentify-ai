@@ -28,7 +28,7 @@ export function ChatCard() {
             <p className="text-xs">Why did TSLA drop so hard yesterday?</p>
           </Card>
           <Card className="w-3/4 p-2 bg-primary text-primary-foreground">
-            <p className="text-xs">Tesla's stock dropped sharply because ...</p>
+            <p className="text-xs">Tesla&apos;s stock dropped sharply because ...</p>
           </Card>
         </div>
       </CardContent>

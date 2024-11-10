@@ -68,7 +68,7 @@ export default function SignUpForm() {
             </Button>
             <p className="text-xs mt-2">
               Our service is currently in beta, and public access is restricted.
-              If you'd like access to chat feature, please contact the site
+              If you&apos;d like access to chat feature, please contact the site
               owner for permission.
             </p>
           </div>
