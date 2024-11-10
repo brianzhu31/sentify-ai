@@ -11,7 +11,7 @@ def create_app():
         month="*", 
         day="*", 
         hour="21", 
-        minute="0", 
+        minute="15", 
         timezone="US/Eastern"
     )
     
