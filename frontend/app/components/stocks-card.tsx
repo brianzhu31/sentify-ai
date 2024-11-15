@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export function StocksCard() {
   return (
-    <Card className={cn("flex flex-col w-full max-w-[350px] min-w-[240px]")}>
+    <Card className={cn("flex flex-col w-full min-h-[380px] max-w-[350px] min-w-[240px]")}>
       <CardContent className="h-full">
         <div className="h-full bg-neutral-200 dark:bg-[rgba(40,40,40,0.70)] [mask-image:radial-gradient(50%_50%_at_50%_50%,white_0%,transparent_100%)]">
           <Skeleton />

@@ -3,10 +3,8 @@
 import * as React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-import {
-  ChartConfig,
-  ChartContainer,
-} from "@/components/ui/chart";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 
 export const description = "An interactive line chart";
 
@@ -148,19 +146,18 @@ export function MainGraph() {
   return (
     <ChartContainer
       config={chartConfig}
-      className="aspect-auto h-full max-h-[300px] w-full max-w-[600px]"
+      className={cn(
+        "w-full max-w-[600px] px-8"
+      )}
     >
       <LineChart
         accessibilityLayer
         data={chartData}
-        margin={{
-          left: 12,
-          right: 12,
-        }}
+        margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
       >
         <CartesianGrid vertical={false} horizontal={false} />
-        <YAxis domain={[70, 150]} tick={false} />
-        <XAxis tick={false} />
+        <YAxis domain={[70, 150]} tick={false} width={0} />
+        {/* <XAxis tick={false} width={0} /> */}
         <Line
           dataKey={"price"}
           type="monotone"

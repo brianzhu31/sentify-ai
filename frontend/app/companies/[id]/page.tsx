@@ -21,7 +21,6 @@ import {
   Article,
   PaginatedArticlesData,
 } from "@/types";
-import Image from "next/image";
 import SentimentScoreCard from "./components/sentiment-score-card";
 
 export default function CompanyAnalyticsContent() {
@@ -88,42 +87,42 @@ export default function CompanyAnalyticsContent() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-screen justify-center items-center">
+    <div className="flex flex-col w-full min-h-screen justify-center items-center px-12">
       <div className="flex flex-col max-w-[1300px] gap-8">
-        <div className="flex">
-          <div className="mr-6">
-            <div className="rounded-full overflow-auto min-w-[120px] min-h-[120px]">
-              <Image
-                src={`/icons/big/${companyData?.ticker}.svg`}
-                width={180}
-                height={180}
-                alt={companyData?.ticker || ""}
-              />
-            </div>
+        <div className="flex flex-row gap-6 sm:gap-8">
+          <div>
+            <img
+              className="rounded-full min-w-[150px]"
+              src={`/icons/big/${companyData?.ticker}.svg`}
+              alt={companyData?.ticker || ""}
+              width="220"
+              height="220"
+            />
           </div>
-          <div className="flex flex-col gap-6">
-            <p className="text-5xl font-semibold">
-              {companyData?.company_name}
-            </p>
-            <div className="flex items-center gap-2 border-solid border-[1px] py-1 px-4 rounded-lg self-start">
-              <p className="text-lg">{companyData?.ticker}</p>
-              <span className="text-lg">•</span>
-              <p className="text-lg">{companyData?.exchange}</p>
-              <div className="rounded-full overflow-auto">
-                <img
-                  src={`/icons/exchanges/${companyData?.exchange}.svg`}
-                  alt={companyData?.exchange || ""}
-                />
+          <div className="flex flex-col md:flex-row w-full gap-4">
+            <div className="flex flex-col gap-4">
+              <p className="text-3xl md:text-4xl lg:text-5xl font-semibold">
+                {companyData?.company_name}
+              </p>
+              <div className="flex items-center gap-2 border-solid border-[1px] py-1 px-4 rounded-lg self-start">
+                <p className="text-sm lg:text-md">{companyData?.ticker}</p>
+                <span className="text-sm">•</span>
+                <p className="text-sm lg:text-md">{companyData?.exchange}</p>
+                <div>
+                  <img
+                    className="rounded-full min-w-5"
+                    src={`/icons/exchanges/${companyData?.exchange}.svg`}
+                    alt={companyData?.exchange || ""}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="ml-auto">
-            <SentimentScoreCard score={companyAnalytics?.score || 3} />
+            <div className="md:ml-auto">
+              <SentimentScoreCard score={companyAnalytics?.score || 3} />
+            </div>
           </div>
         </div>
-        <div>
-          <StockGraph ticker={ticker} companyData={companyData} />
-        </div>
+        <StockGraph ticker={ticker} companyData={companyData} />
         {companyAnalytics?.summary_sections.map((summarySection, index) => (
           <SummaryCard summarySection={summarySection} key={index} />
         ))}

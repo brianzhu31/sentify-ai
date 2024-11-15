@@ -18,14 +18,14 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         <Link href={article?.url} target="_blank" rel="noopener noreferrer">
           <CardTitle
             className={cn(
-              "text-xl font-bold truncate overflow-hidden whitespace-nowrap"
+              "text-md sm:text-xl font-bold truncate overflow-hidden whitespace-nowrap"
             )}
             title={article.title}
           >
             {article.title}
           </CardTitle>
         </Link>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-1">
           <div className="relative w-4 h-4">
             <img
               src={`/icons/news/${article?.clean_url.split(".")[0]}.png`}
@@ -45,7 +45,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         </div>
       </CardHeader>
       <CardContent className={cn("flex pt-2 flex-grow")}>
-        <div className="w-1/6 aspect-square mr-4 relative flex-shrink-0">
+        <div className="w-24 h-24 mr-4 relative flex-shrink-0">
           <img
             src={article.media || "/images/news-default-image.png"}
             alt={article.title}
@@ -54,8 +54,8 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             className="absolute inset-0 w-full h-full object-cover rounded-lg"
           />
         </div>
-        <div className="w-5/6 flex flex-col">
-          <p className="text-sm text-gray-600 line-clamp-5">
+        <div className="flex-1 flex flex-col">
+          <p className="text-xs sm:text-sm text-gray-600 line-clamp-6 sm:line-clamp-5">
             {article.compressed_summary}
           </p>
         </div>

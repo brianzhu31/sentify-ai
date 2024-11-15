@@ -13,24 +13,26 @@ import Link from "next/link";
 export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <section className="h-screen flex flex-col lg:flex-row justify-center items-center text-center px-4">
-        <div className="flex flex-col gap-4 animate-fade-up w-full max-w-[550px]">
-          <div>
-            <p className="font-bold text-5xl">Market Sentry</p>
-            <p className="text-slate-500 text-xl">
-              AI-powered financial companion
-            </p>
+      <section className="h-screen">
+        <div className="flex flex-col-reverse h-full lg:flex-row justify-center items-center text-center px-4">
+          <div className="flex flex-col gap-4 animate-fade-up w-full max-w-[550px] mb-[30%] lg:mb-0">
+            <div>
+              <p className="font-bold text-5xl">Market Sentry</p>
+              <p className="text-slate-500 text-xl">
+                AI-powered financial companion
+              </p>
+            </div>
+            <SearchBar />
           </div>
-          <SearchBar />
+          <MainGraph />
         </div>
-        <MainGraph />
       </section>
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
             Key Features
           </h2>
-          <div className="flex gap-8 justify-center">
+          <div className="flex flex-wrap gap-8 justify-center">
             <StocksCard />
             <SentimentCard />
             <ChatCard />

@@ -39,6 +39,7 @@
     "next-themes": "^0.3.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-use": "^17.5.1",
     "recharts": "^2.13.0",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.0",

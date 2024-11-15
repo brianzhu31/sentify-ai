@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export function ChatCard() {
   return (
-    <Card className={cn("flex flex-col w-full max-w-[350px] min-w-[240px]")}>
+    <Card className={cn("flex flex-col w-full min-h-[380px] max-w-[350px] min-w-[240px]")}>
       <CardContent className="flex flex-1 flex-col gap-12 p-4">
         <div className="flex flex-col gap-2">
           <Card className="w-3/4 p-2 bg-muted self-end">

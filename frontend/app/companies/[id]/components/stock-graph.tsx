@@ -32,6 +32,7 @@ import {
   fetchStockPrice,
 } from "../actions/fetch-company-data";
 import { TimeSeries, CompanyFull } from "@/types";
+import { useWindowSize } from 'react-use';
 
 interface TimeRangeOptionProps {
   label: string;
@@ -83,6 +84,15 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { width } = useWindowSize();
+
+  if (timeSeries && stockPrice !== null) {
+
+  const tickInterval = width < 768 
+    ? Math.floor(timeSeries[timeRangeOption].values.length / 3) 
+    : Math.floor(timeSeries[timeRangeOption].values.length / 5);
+  }
 
   useEffect(() => {
     const getTimeSeries = async () => {
@@ -150,21 +160,21 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-2xl">{ticker}</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">{ticker}</CardTitle>
             <CardDescription className="mt-1">
               {companyData?.exchange}
             </CardDescription>
           </div>
           {priceChange && priceChangePercent && (
             <div className="text-right">
-              <p className="text-2xl font-bold">
+              <p className="text-xl sm:text-2xl font-bold">
                 {stockPrice.toFixed(2)} {companyData?.currency}
               </p>
 
               <p
-                className={`text-md ${
+                className={`${
                   priceChange >= 0 ? "text-green-600" : "text-red-600"
-                }`}
+                } text-sm md:text-base lg:text-lg`}
               >
                 {priceChange >= 0 ? "+" : ""}
                 {priceChange.toFixed(2)} ({priceChangePercent.toFixed(2)}%)
@@ -202,9 +212,11 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                interval={Math.floor(
-                  timeSeries[timeRangeOption].values.length / 5
-                )}
+                interval={
+                  width < 768
+                    ? Math.floor(timeSeries[timeRangeOption].values.length / 3)
+                    : Math.floor(timeSeries[timeRangeOption].values.length / 5)
+                }
                 tickFormatter={(value) => value.split(" ")[0]}
               />
               <YAxis
@@ -215,7 +227,8 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(value) => `$${value.toFixed(2)}`}
+                tickFormatter={(value) => `$${value.toFixed(0)}`}
+                width={40}
               />
               <Tooltip
                 content={<CustomTooltip />}

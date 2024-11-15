@@ -15,11 +15,11 @@ export function Navbar() {
           <Link href="/">
             <p className="text-xl font-bold whitespace-nowrap">Market Sentry</p>
           </Link>
-          <div className="hidden ml-8 sm:block lg:w-[60%] md:w-[75%] w-[85%]">
+          <div className="hidden ml-8 sm:block lg:w-[60%] md:w-[75%] w-[85%] mr-4">
             <SearchBar />
           </div>
         </div>
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           {user && (
             <Link href="/chat">
               <Button>Chat</Button>

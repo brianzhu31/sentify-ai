@@ -24,7 +24,7 @@ export default function SummaryCard({ summarySection }: SumamryCardProps) {
       <CardContent>
         <div className="flex flex-col space-y-4">
           {summarySection.paragraphs.map((summaryPoint, index) => (
-            <p key={index}>{summaryPoint}</p>
+            <p className="text-sm lg:text-base" key={index}>{summaryPoint}</p>
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 mt-4 p-2 gap-4">
