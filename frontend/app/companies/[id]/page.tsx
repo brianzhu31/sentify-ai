@@ -87,12 +87,12 @@ export default function CompanyAnalyticsContent() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-screen justify-center items-center px-12">
+    <div className="flex flex-col w-full min-h-screen justify-center items-center px-8">
       <div className="flex flex-col max-w-[1300px] gap-8">
         <div className="flex flex-row gap-6 sm:gap-8">
           <div>
             <img
-              className="rounded-full min-w-[150px]"
+              className="rounded-full min-w-[100px]"
               src={`/icons/big/${companyData?.ticker}.svg`}
               alt={companyData?.ticker || ""}
               width="220"
@@ -117,11 +117,15 @@ export default function CompanyAnalyticsContent() {
                 </div>
               </div>
             </div>
-            <div className="md:ml-auto">
+            <div className="md:ml-auto hidden sm:block">
               <SentimentScoreCard score={companyAnalytics?.score || 3} />
             </div>
           </div>
+          
         </div>
+        <div className="md:ml-auto block sm:hidden">
+            <SentimentScoreCard score={companyAnalytics?.score || 3} />
+          </div>
         <StockGraph ticker={ticker} companyData={companyData} />
         {companyAnalytics?.summary_sections.map((summarySection, index) => (
           <SummaryCard summarySection={summarySection} key={index} />

@@ -32,7 +32,7 @@ import {
   fetchStockPrice,
 } from "../actions/fetch-company-data";
 import { TimeSeries, CompanyFull } from "@/types";
-import { useWindowSize } from 'react-use';
+import { useWindowSize } from "react-use";
 
 interface TimeRangeOptionProps {
   label: string;
@@ -86,13 +86,6 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { width } = useWindowSize();
-
-  if (timeSeries && stockPrice !== null) {
-
-  const tickInterval = width < 768 
-    ? Math.floor(timeSeries[timeRangeOption].values.length / 3) 
-    : Math.floor(timeSeries[timeRangeOption].values.length / 5);
-  }
 
   useEffect(() => {
     const getTimeSeries = async () => {
@@ -170,7 +163,6 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
               <p className="text-xl sm:text-2xl font-bold">
                 {stockPrice.toFixed(2)} {companyData?.currency}
               </p>
-
               <p
                 className={`${
                   priceChange >= 0 ? "text-green-600" : "text-red-600"
@@ -197,7 +189,7 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
           </div>
         </div>
         {timeSeries && (
-          <ChartContainer config={chartConfig}>
+          <ChartContainer config={chartConfig} className="max-h-[500px] w-full">
             <LineChart
               accessibilityLayer
               data={timeSeries[timeRangeOption].values}
