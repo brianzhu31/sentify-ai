@@ -24,7 +24,7 @@ export default function CompaniesPage() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
       <div className="p-16">
-        <p className="text-5xl font-bold">All Companies</p>
+        <p className="text-3xl md:text-4xl lg:text-5xl font-bold">All Companies</p>
       </div>
       <div className="w-full max-w-[1500px] px-8">
         <CompaniesTable companies={companies} setCompanies={setCompanies} />
