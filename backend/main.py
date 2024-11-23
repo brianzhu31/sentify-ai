@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from app.models import db
-from app.tasks.inference_tasks import full_update
+from app.tasks import full_update
 from app import app
 
 def create_app():
@@ -10,8 +10,8 @@ def create_app():
         year="*", 
         month="*", 
         day="*", 
-        hour="21", 
-        minute="50", 
+        hour="20", 
+        minute="0", 
         timezone="US/Eastern"
     )
     
