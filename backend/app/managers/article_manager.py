@@ -2,6 +2,7 @@ from app.models import db, Article as ArticleModel
 from app.exceptions.errors import DBCommitError
 from datetime import datetime, timedelta
 
+
 class Article:
     def __init__(self, article_model: ArticleModel):
         self.id = article_model.id
@@ -14,7 +15,7 @@ class Article:
         self.compressed_summary = article_model.compressed_summary
         self.sentiment = article_model.sentiment
         self.impact = article_model.impact
-    
+
     def to_json(self):
         return {
             "id": self.id,
@@ -26,7 +27,7 @@ class Article:
             "clean_url": self.clean_url,
             "compressed_summary": self.compressed_summary,
             "sentiment": self.sentiment,
-            "impact": self.impact
+            "impact": self.impact,
         }
 
 
@@ -52,26 +53,28 @@ class ArticleManager:
         article_queries = (
             ArticleModel.query.filter(
                 ArticleModel.ticker == ticker,
-                ArticleModel.published_date >= cutoff_date
+                ArticleModel.published_date >= cutoff_date,
             )
             .order_by(ArticleModel.published_date.desc())
             .limit(limit)
             .all()
         )
         return [Article(article) for article in article_queries]
-    
+
     @staticmethod
-    def get_articles_by_ticker_paginated(ticker: str, time_period: int, page: int, limit: int):
+    def get_articles_by_ticker_paginated(
+        ticker: str, time_period: int, page: int, limit: int
+    ):
         cutoff_date = datetime.now() - timedelta(days=time_period)
         article_queries = (
             ArticleModel.query.filter(
                 ArticleModel.ticker == ticker,
-                ArticleModel.published_date >= cutoff_date
+                ArticleModel.published_date >= cutoff_date,
             )
             .order_by(ArticleModel.published_date.desc())
             .paginate(page=page, per_page=limit)
         )
-        
+
         articles = [Article(article) for article in article_queries.items]
         return {"articles": articles, "has_more": article_queries.has_next}
 
@@ -105,3 +108,17 @@ class ArticleManager:
         except Exception as e:
             db.session.rollback()
             raise DBCommitError("Error saving article.")
+
+    @staticmethod
+    def delete_old_articles(days: int) -> int:
+        threshold_date = datetime.now() - timedelta(days=days)
+        try:
+            deleted_count = db.session.query(ArticleModel).filter(
+                ArticleModel.published_date < threshold_date
+            ).delete(synchronize_session=False)
+
+            db.session.commit()
+            return deleted_count
+        except Exception:
+            db.session.rollback()
+            raise DBCommitError("Error deleting articles")

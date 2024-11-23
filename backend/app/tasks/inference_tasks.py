@@ -4,7 +4,6 @@ from app.managers.company_manager import CompanyManager
 from itertools import islice
 from app.logger import logger
 from app import app
-import time
 
 def batch_iterable(iterable, batch_size):
     iterator = iter(iterable)
@@ -39,18 +38,3 @@ def update_company_analytics():
         companies_analyzer = CompanyAnalyticsEngine(tickers=tickers)
         companies_analyzer.generate_overall_summaries(time_period=14)
     logger.info("Updating company analytics task finished.")
-
-
-def full_update():
-    start_time = time.time()
-    logger.info("Daily update task triggered.")
-
-    process_articles()
-    update_company_analytics()
-
-    end_time = time.time()
-    duration = end_time - start_time
-    hours, remainder = divmod(duration, 3600)
-    minutes, seconds = divmod(remainder, 60)
-
-    logger.info(f"Daily update task finished in {int(hours)}:{int(minutes):02}:{int(seconds):02}")
