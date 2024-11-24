@@ -139,7 +139,7 @@ class RAGEngine:
 
         context_list = []
         for article in relevant_articles:
-            article_title = article["article_title"]
+            article_title = article["title"]
             article_content = article["text"]
             unix_timestamp = article["published_date"]
             article_published_date = unix_to_formatted_string_est(unix_timestamp) + " EST"

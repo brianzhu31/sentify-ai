@@ -31,14 +31,14 @@ export type ChatSession = {
 };
 
 export type ArticleFullSource = {
-  article_title: string;
+  title: string;
   clean_url: string;
   media: string;
   published_date: number;
   text: string;
   ticker: string;
   url: string;
-}
+};
 
 export type ArticleSourceMatch = {
   id: string;
@@ -205,7 +205,6 @@ const ChatPage = () => {
           }
 
           context = context.map((article: ArticleFullSource) => ({
-            title: article.article_title,
             ...(({ text, ticker, ...rest }) => rest)(article),
           }));
           setChatMessages((prevChatMessages: Message[]) => [
@@ -257,58 +256,56 @@ const ChatPage = () => {
   }, [responseData]);
 
   return (
-    <>
-      <div className="h-screen flex flex-col relative">
-        <div className="flex-1 overflow-y-auto">
-          <div
-            ref={containerRef}
-            className="flex flex-col w-full max-w-4xl mx-auto gap-6 p-6 rounded-lg bg-white"
-          >
-            {chatMessages &&
-              chatMessages.map((message: Message, index: number) => (
-                <div
-                  key={index}
-                  className="border-solid border-[1px] p-2 rounded-md"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
-                      {message.role}
-                    </p>
-                    <p className="text-base text-gray-800">{message.content}</p>
-                  </div>
-                  {message?.sources && message?.sources.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
-                      {message.sources?.map((article, index) => (
-                        <ArticleCard key={index} article={article} />
-                      ))}
-                    </div>
-                  )}
+    <div className="flex flex-col h-screen bg-background">
+      <div className="flex-1 overflow-y-auto">
+        <div
+          ref={containerRef}
+          className="flex flex-col w-full max-w-4xl mx-auto gap-6 p-6 rounded-lg bg-white"
+        >
+          {chatMessages &&
+            chatMessages.map((message: Message, index: number) => (
+              <div
+                key={index}
+                className="border-solid border-[1px] p-2 rounded-md"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                    {message.role}
+                  </p>
+                  <p className="text-base text-gray-800">{message.content}</p>
                 </div>
-              ))}
-            {responseData && (
-              <div className="border-solid border-[1px] p-2 rounded-md">
-                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
-                  assistant
-                </p>
-                <p className="text-base text-gray-800">{responseData}</p>
+                {message?.sources && message?.sources.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
+                    {message.sources?.map((article, index) => (
+                      <ArticleCard key={index} article={article} />
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-        <div className="pb-6">
-          <div className="max-w-4xl mx-auto">
-            <Input
-              className="w-full h-12 text-sm rounded-lg"
-              placeholder="Enter your message..."
-              value={message}
-              onChange={handleInputChange}
-              onKeyDown={handleSubmit}
-              disabled={isAssistantRunning}
-            />
-          </div>
+            ))}
+          {responseData && (
+            <div className="border-solid border-[1px] p-2 rounded-md">
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                assistant
+              </p>
+              <p className="text-base text-gray-800">{responseData}</p>
+            </div>
+          )}
         </div>
       </div>
-    </>
+      <div className="pb-6">
+        <div className="max-w-4xl mx-auto">
+          <Input
+            className="w-full h-12 text-sm rounded-lg"
+            placeholder="Enter your message..."
+            value={message}
+            onChange={handleInputChange}
+            onKeyDown={handleSubmit}
+            disabled={isAssistantRunning}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

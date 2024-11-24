@@ -306,7 +306,7 @@ class ArticleCollection:
                     "id": str(article.id),
                     "values": embedding,
                     "metadata": {
-                        "article_title": article.title,
+                        "title": article.title,
                         "ticker": article.ticker,
                         "media": article.media or "",
                         "published_date": datetime_to_unix(article.published_date) or "",

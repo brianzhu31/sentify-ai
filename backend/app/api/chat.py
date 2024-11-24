@@ -29,7 +29,7 @@ def get_chat(chat_id: UUID):
         if message.role == "assistant":
             message_data["sources"] = [
                 {
-                    "title": source["article_title"],
+                    "title": source["title"],
                     "clean_url": source["clean_url"],
                     "media": source["media"],
                     "published_date": source["published_date"],
