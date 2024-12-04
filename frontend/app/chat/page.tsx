@@ -59,9 +59,8 @@ export default function ChatPage() {
         setIsMessageSent(false);
         toast({
           variant: "error",
-          description: err.response.data.message,
+          description: err.message,
         });
-        console.error("Error processing message:", err);
       }
     }
   };

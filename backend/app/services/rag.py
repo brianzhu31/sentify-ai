@@ -4,6 +4,7 @@ from app.lib.inference.prompt import (
     query_validation_prompt_new,
     query_validation_prompt,
     query_to_date_range_prompt,
+    convert_to_standalone_query_prompt,
 )
 from app.lib.inference.embedding import embed_texts
 from app.lib.utils import (
@@ -59,10 +60,10 @@ class RAGEngine:
 
         return {"message": output, "status": 1}
 
-    def retrieve(self, query: str):
+    def _get_time_period_from_query(self, query: str):
         est = pytz.timezone("America/New_York")
         current_date_est = datetime.now(est)
-        earliest_date = current_date_est - timedelta(days=14)
+        earliest_date = current_date_est - timedelta(days=21)
         current_date_str = current_date_est.strftime("%Y-%m-%d %H:%M:%S")
         earliest_date_str = earliest_date.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -86,6 +87,32 @@ class RAGEngine:
         date_range = json.loads(inference_output)
         start_date = date_range["start"]
         end_date = date_range["end"]
+
+        return start_date, end_date
+
+    def _convert_to_standalone_query(self, chat_history: str, query: str):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "user",
+                    "content": convert_to_standalone_query_prompt(
+                        chat_session_history=chat_history, query=query
+                    ),
+                }
+            ],
+            temperature=0,
+        )
+
+        inference_output = response.choices[0].message.content
+        return inference_output
+
+
+    def retrieve(self, query: str, chat_session_history: str = None):
+        rag_query = self._convert_to_standalone_query(chat_history=chat_session_history, query=query)
+
+        start_date, end_date = self._get_time_period_from_query(query=rag_query)
+
         metadata_filter = None
         if start_date is not None and end_date is not None:
             start_date = convert_est_string_to_utc(start_date)
@@ -99,7 +126,7 @@ class RAGEngine:
                 ]
             }
 
-        query_embedding = embed_texts([query])[0]
+        query_embedding = embed_texts([rag_query])[0]
 
         index = pc.Index("company-info")
         query_params = {
@@ -130,7 +157,7 @@ class RAGEngine:
 
         return returned_context
 
-    def inference(
+    def stream(
         self, query: str, chat_session_history: str, relevant_articles: List[Dict]
     ):
         est = pytz.timezone("America/New_York")
@@ -142,7 +169,9 @@ class RAGEngine:
             article_title = article["title"]
             article_content = article["text"]
             unix_timestamp = article["published_date"]
-            article_published_date = unix_to_formatted_string_est(unix_timestamp) + " EST"
+            article_published_date = (
+                unix_to_formatted_string_est(unix_timestamp) + " EST"
+            )
 
             context_list.append(
                 f"Published date: {article_published_date}\nArticle title: {article_title}\nArticle summary:\n{article_content}\n"
@@ -167,7 +196,7 @@ class RAGEngine:
                 },
             ],
             temperature=0.7,
-            max_tokens=250,
+            max_tokens=400,
             stream=True,
         )
 

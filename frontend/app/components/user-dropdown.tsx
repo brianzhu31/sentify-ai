@@ -11,16 +11,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { logout } from "@/utils/auth";
+import { logout } from "@/utils/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function UserDropdown() {
-  const { user } = useUserSession();
+  const { user, setUser } = useUserSession();
   const router = useRouter();
 
   const handleLogout = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    await logout();
+    try {
+      await logout(setUser);
+      router.push("/")
+    } catch (err: any) {
+      router.push("/error");
+    }
   };
 
   if (!user) {

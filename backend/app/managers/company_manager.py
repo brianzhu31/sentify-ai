@@ -3,7 +3,7 @@ from app.models import (
     Company as CompanyModel,
     CompanyAnalytics as CompanyAnalyticsModel,
 )
-from app.exceptions.errors import NotFoundError
+from app.exceptions.errors import NotFoundError, DBCommitError
 from datetime import datetime
 from typing import Dict, List
 
@@ -137,7 +137,7 @@ class CompanyManager:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Exception(e)
+            raise DBCommitError(f"Error saving analysis data: {e}")
 
     @classmethod
     def get_analytics_json(cls, ticker: str):
@@ -198,7 +198,7 @@ class CompanyManager:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Exception(e)
+            raise DBCommitError(f"Error updating stock price: {e}")
 
     @staticmethod
     def update_time_series(ticker: str, time_series: Dict):
@@ -213,4 +213,4 @@ class CompanyManager:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Exception(e)
+            raise DBCommitError(f"Error updating time series: {e}")

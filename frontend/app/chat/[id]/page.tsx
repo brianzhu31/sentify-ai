@@ -53,6 +53,16 @@ export type SendMessageResponse = {
   chat_id?: string;
 };
 
+const formatContent = (content: string) => {
+  const parts = content.split(/(\*\*.*?\*\*)/);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 const ChatPage = () => {
   const { session } = useUserSession();
   const pathname = usePathname();
@@ -60,8 +70,7 @@ const ChatPage = () => {
   const [message, setMessage] = useState<string>("");
   const [isAssistantRunning, setIsAssistantRunning] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const chatID = pathname.split("/").pop() || "";
@@ -75,7 +84,6 @@ const ChatPage = () => {
         chatID,
         session?.access_token
       );
-      console.log(fetchedChatSessionData);
       setChatMessages(fetchedChatSessionData.messages);
     } catch (err: any) {
       toast({
@@ -133,6 +141,7 @@ const ChatPage = () => {
       setIsAssistantRunning(true);
       let context = await fetchRelevantArticles(
         firstMessage,
+        chatID,
         session?.access_token
       );
 
@@ -156,7 +165,6 @@ const ChatPage = () => {
         sources: context,
         chat_id: chatID,
       };
-      console.log(sendResponse);
       setIsAssistantRunning(false);
 
       await saveOutput(sendResponse, session?.access_token);
@@ -193,6 +201,7 @@ const ChatPage = () => {
         if (response.status === "ok") {
           let context = await fetchRelevantArticles(
             message,
+            chatID,
             session?.access_token
           );
 
@@ -221,18 +230,24 @@ const ChatPage = () => {
             sources: context,
             chat_id: chatID,
           };
-          console.log(sendResponse);
 
           await saveOutput(sendResponse, session?.access_token);
         } else if (response.status === "not accepted") {
           setResponseData(response.message);
         }
         setIsAssistantRunning(false);
-      } catch (error) {
+      } catch (err: any) {
         setIsAssistantRunning(false);
-        console.error("Error processing message:", error);
+        toast({
+          variant: "error",
+          description: err.message,
+        });
       }
     }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
   };
 
   useEffect(() => {
@@ -240,39 +255,32 @@ const ChatPage = () => {
   }, [session]);
 
   useEffect(() => {
-    console.log("chat session", chatMessages);
     if (chatMessages && chatMessages.length == 1) {
       loadUpFirstMessage();
-    }
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [chatMessages]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [responseData]);
+    scrollToBottom();
+  }, [chatMessages, responseData]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex-1 overflow-y-auto">
-        <div
-          ref={containerRef}
-          className="flex flex-col w-full max-w-4xl mx-auto gap-6 p-6 rounded-lg bg-white"
-        >
+        <div className="flex flex-col w-full max-w-4xl mx-auto gap-6 p-6 rounded-lg bg-white">
           {chatMessages &&
             chatMessages.map((message: Message, index: number) => (
               <div
                 key={index}
                 className="border-solid border-[1px] p-2 rounded-md"
               >
-                <div>
+                <div className="px-2">
                   <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
                     {message.role}
                   </p>
-                  <p className="text-base text-gray-800">{message.content}</p>
+                  <p className="text-base text-gray-800 whitespace-pre-wrap">
+                    {formatContent(message.content)}
+                  </p>
                 </div>
                 {message?.sources && message?.sources.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
@@ -285,12 +293,17 @@ const ChatPage = () => {
             ))}
           {responseData && (
             <div className="border-solid border-[1px] p-2 rounded-md">
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
-                assistant
-              </p>
-              <p className="text-base text-gray-800">{responseData}</p>
+              <div className="px-2">
+                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                  assistant
+                </p>
+                <p className="text-base text-gray-800 whitespace-pre-wrap">
+                  {formatContent(responseData)}
+                </p>
+              </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
       <div className="pb-6">

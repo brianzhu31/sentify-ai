@@ -6,6 +6,7 @@ import time
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 PUBLIC_SUPABASE_URL = os.getenv("PUBLIC_SUPABASE_URL")
+SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 
 def verify_jwt(token: str) -> dict:
@@ -57,3 +58,21 @@ def token_required(f):
         return f(*args, **kwargs)
 
     return decorated
+
+
+def service_role_key_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        auth_header = request.headers.get("Authorization")
+        
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Authorization token is missing or invalid"}), 401
+        
+        token = auth_header.split("Bearer ")[1]
+        
+        if token != SERVICE_ROLE_KEY:
+            return jsonify({"error": "Invalid authorization token"}), 403
+
+        return f(*args, **kwargs)
+    
+    return wrapper

@@ -22,3 +22,5 @@ class Config:
             "keepalives_count": 5,
         },
     }
+
+    PROPAGATE_EXCEPTIONS = True

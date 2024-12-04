@@ -107,7 +107,7 @@ class ArticleManager:
             return new_article
         except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error saving article.")
+            raise DBCommitError(f"Error saving article: {e}")
 
     @staticmethod
     def delete_old_articles(days: int) -> int:
@@ -119,6 +119,6 @@ class ArticleManager:
 
             db.session.commit()
             return deleted_count
-        except Exception:
+        except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error deleting articles")
+            raise DBCommitError(f"Error deleting articles: {e}")

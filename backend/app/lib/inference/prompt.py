@@ -95,7 +95,7 @@ def query_validation_prompt(query: str):
 You are a guardrail for a RAG chat bot.
 I will give you a user query.
 If the query is harmful or unethical, repond exactly with "error".
-Else, return only a short title that represents the query without any additional text.
+Else, return "ok".
 Query:
 {query}
 '''
@@ -103,28 +103,113 @@ Query:
 
 def query_to_date_range_prompt(current_date: str, earliest_date: str, query: str):
     return f'''
-I want you to convert a user query into a date range to fetch data from.
-Currently it is is {current_date}. I have data from {earliest_date} to {current_date}.
-Try to give some extra leeway after the end date.
-If the query does not specify a time frame, return exactly null for the start and end.
-The dates should be in %Y-%m-%d %H:%M:%S format.
+Given a user query, convert it into a date range, which will be used as a filter to fetch data from my database.
+The current date is: {current_date}
+My database has data from {earliest_date} to {current_date}.
+
+Follow these guidelines:
+- Give some extra leeway after the end date.
+- If the query does not specify a time frame, return exactly null for the start and end.
+- The dates should be in %Y-%m-%d %H:%M:%S format.
+
 Please output in valid JSON in the following format:
 {{
     "start": str,
     "end": str
 }}
-Query:
+
+Examples:
+
+Current date: 2024-11-25 17:00:00
+User query: "What happened to Apple the past week?"
+Output:
+{{
+    "start": "2024-11-18 00:00:00",
+    "end": "2024-11-25 23:59:59"
+}}
+
+Current date: 2024-11-25 17:00:00
+User query: "What happened to NVDA yesterday?"
+Output:
+{{
+    "start": "2024-11-24 00:00:00",
+    "end": "2024-11-24 23:59:59"
+}}
+
+Current date: 2024-11-25 17:00:00
+User query: "How is TSLA performing this month?"
+Output:
+{{
+    "start": "2024-11-01 00:00:00",
+    "end": "2024-11-25 23:59:59"
+}}
+
+Here is the user query:
+{query}
+'''
+
+
+def convert_to_standalone_query_prompt(chat_session_history: str, query: str):
+    return f'''
+You are given a chat history and the user's next query. Your task is to rephrase the user's query to be more detailed.
+You also have to detect if the user's query is a follow up to one of the previous messages in the chat history.
+If the user query is a follow-up to one of the messages in the chat history, rephrase it into an independent query that works as a standalone prompt.
+Make sure to include additional context and details to make the rephrased query more comprehensive.
+
+Output format:
+Only return the query with no accompanying text.
+
+Example:
+
+Chat history:
+User: Why did Company A's stock rise so much last week?
+
+Assistant: Company A's stock experienced a huge rise due to the excitement surrounding it's recent product launches.
+
+User query:
+What are the new product launches?
+
+Rephrased user query:
+What are some of Company A's new product launches?
+
+Heres the following inputs:
+
+Chat history:
+{chat_session_history}
+
+User query:
 {query}
 '''
 
 
 def rag_system_prompt():
-    return "You are a finance RAG chatbot. I will give you the chat history and extra context."
+    return '''
+You are a specialized financial RAG chatbot.
+Your role is to assist users with finance-related queries.
+
+You will be given:
+1. The current date.
+2. Chat history between you and the user.
+3. The user's query.
+4. News article summaries, fetched from the vector database, that will help you answer the user's query.
+
+The user's query will be either a new independent query or a follow up to previous messages.
+
+Answer the query using the provided information. You may choose to use the news article summaries or not, depending on their relevance to the query. However:
+If the query asks for present or real-time information, or any information outside the scope of what the LLM would know (e.g., past your knowledge cutoff), you must rely on the fetched news article summaries to provide an accurate response.
+If the news article summaries still do not help answer the query, output exactly "No relevant data found based on your query. Please try something else."
+
+Output format:
+- For straightforward answers to queries, use a short paragraph
+- For more detailed answers, combine short paragraphs with bullet points to improve readability
+- The only markdown symbol you are allowed to use are double asterisks (**). Use this to bold key terms
+
+'''
 
 
 def rag_chat_prompt(chat_session_history: str, context: str, current_date: str, query: str):
     return f'''
-Context:
+News article summaries:
 {context}
 
 Chat History:
@@ -132,8 +217,7 @@ Chat History:
 
 Current Date: {current_date}
 
-Respond to the following query by using the information in the context and chat history, in 1 to 5 sentences.
-If the query is a follow up to the messages in the chat history, provide an answer.
-Else, if the query is independent and the context or chat history provided do not help answer it, just output: "No relevant data found based on your query. Please try something else."
-Query: {query}
+Answer the following user query:
+User query:
+{query}
 '''

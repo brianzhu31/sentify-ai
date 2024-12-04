@@ -1,6 +1,6 @@
 from app.logger import logger
 from app.tasks.inference_tasks import process_articles, update_company_analytics
-from app.tasks.cleanup_tasks import delete_old_articles_in_postgres, delete_old_articles_in_vector_db
+from app.tasks.cleanup_tasks import delete_old_articles_in_postgres, delete_old_articles_in_vector_db, reset_user_message_counts
 import time
 
 def full_update():
@@ -11,6 +11,7 @@ def full_update():
     update_company_analytics()
     delete_old_articles_in_postgres()
     delete_old_articles_in_vector_db()
+    reset_user_message_counts()
 
     end_time = time.time()
     duration = end_time - start_time

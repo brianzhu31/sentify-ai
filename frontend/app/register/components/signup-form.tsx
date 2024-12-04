@@ -12,12 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { signUp } from "@/utils/auth";
+import { signUp } from "@/utils/auth-server";
 
 export default function SignUpForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [responseMessage, setResponseMessage] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,11 +26,16 @@ export default function SignUpForm() {
     formData.append("email", email);
     formData.append("password", password);
 
-    // await signUp(formData);
+    try {
+      const data = await signUp(formData);
+      setResponseMessage(data.message);
+    } catch (err: any) {
+      setResponseMessage(err.message);
+    }
   };
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm rounded-md">
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
@@ -62,15 +67,13 @@ export default function SignUpForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <div>
-            <Button className="w-full" type="submit" disabled>
+          <div className="w-full">
+            <Button className="w-full" type="submit">
               Sign Up
             </Button>
-            <p className="text-xs mt-2">
-              Our service is currently in beta, and public access is restricted.
-              If you&apos;d like access to chat feature, please contact the site
-              owner for permission.
-            </p>
+            {responseMessage && (
+              <p className="text-xs mt-2">{responseMessage}</p>
+            )}
           </div>
         </CardFooter>
       </form>

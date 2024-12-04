@@ -13,6 +13,7 @@ class User(db.Model):
     email = Column(String(254), unique=True, nullable=False)
     plan = Column(String(20), nullable=False, default="Basic")
     chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
+    daily_message_count = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 

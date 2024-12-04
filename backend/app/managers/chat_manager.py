@@ -1,4 +1,4 @@
-from app.models import db, Message as MessageModel, Chat as ChatModel
+from app.models import db, Message as MessageModel, Chat as ChatModel, User as UserModel
 from app.exceptions.errors import NotFoundError, DBCommitError, PermissionDeniedError
 from datetime import datetime
 from uuid import UUID
@@ -38,7 +38,7 @@ class ChatManager:
     @classmethod
     def get_all_chat_messages(cls, user_id: UUID, chat_id: UUID):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
-        messages = MessageModel.query.filter_by(chat_id=chat.id).all()
+        messages = MessageModel.query.filter_by(chat_id=chat.id).order_by(MessageModel.timestamp.asc()).all()
         return [Message(message) for message in messages]
 
     @staticmethod
@@ -48,9 +48,9 @@ class ChatManager:
             db.session.add(new_chat)
             db.session.commit()
             return Chat(new_chat)
-        except Exception:
+        except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error creating chat.")
+            raise DBCommitError(f"Error creating chat: {e}")
 
     @classmethod
     def delete_chat(cls, user_id: UUID, chat_id: UUID):
@@ -59,9 +59,9 @@ class ChatManager:
         try:
             db.session.delete(chat_query)
             db.session.commit()
-        except Exception:
+        except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error deleting chat")
+            raise DBCommitError(f"Error deleting chat: {e}")
 
     @classmethod
     def edit_chat_name(cls, user_id: UUID, chat_id: UUID, new_name: str):
@@ -70,23 +70,32 @@ class ChatManager:
         try:
             chat_query.name = new_name
             db.session.commit()
-        except:
+        except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error editing chat name")
+            raise DBCommitError(f"Error editing chat name: {e}")
 
     @classmethod
-    def create_message(cls, user_id: UUID, chat_id: UUID, role: str, content: str, sources: List = []):
+    def create_message(
+        cls, user_id: UUID, chat_id: UUID, role: str, content: str, sources: List = []
+    ):
         chat = cls.get_chat_by_id(user_id=user_id, chat_id=chat_id)
         chat_query = ChatModel.query.get(chat.id)
         chat_query.last_accessed = datetime.utcnow()
         try:
-            new_message = MessageModel(chat_id=chat.id, role=role, content=content, sources=sources)
+            new_message = MessageModel(
+                chat_id=chat.id, role=role, content=content, sources=sources
+            )
             db.session.add(new_message)
+
+            if role == "user":
+                user_query = UserModel.query.get(user_id)
+                user_query.daily_message_count = user_query.daily_message_count + 1
+
             db.session.commit()
             return Message(new_message)
-        except:
+        except Exception as e:
             db.session.rollback()
-            raise DBCommitError("Error creating message.")
+            raise DBCommitError(f"Error creating message: {e}")
 
     @staticmethod
     def get_chat_sessions(user_id: UUID, page: int, limit: int):

@@ -30,5 +30,10 @@ class InvalidRequestError(Exception):
 
 class PermissionDeniedError(Exception):
     def __init__(self, message):
-            self.message = message
-            super().__init__(self.message)
+        self.message = message
+        super().__init__(self.message)
+
+class DailyMessageCountExceededError(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)

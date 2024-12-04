@@ -1,6 +1,8 @@
 from app.services.rag import RAGEngine
 from app.managers.chat_manager import ChatManager
+from app.managers.user_manager import UserManager
 from app.lib.validation import token_required
+from app.exceptions.errors import DailyMessageCountExceededError
 from flask import jsonify, Blueprint, request, Response, g
 from uuid import UUID
 
@@ -101,6 +103,10 @@ def send():
     message_content = request.json.get("message")
     chat_id = request.json.get("chat_id")
 
+    can_send_message = UserManager.can_send_message(user_id=user_id)
+    if not can_send_message:
+        raise DailyMessageCountExceededError("You have exceeded the daily message limit.")
+
     rag_engine = RAGEngine()
     is_new_chat = True
     if chat_id is not None:
@@ -130,9 +136,20 @@ def send():
 @chat_bp.route("/retrieve", methods=["POST"])
 @token_required
 def retrieve():
+    user_id = UUID(g.user["sub"])
     message_content = request.json.get("message")
+    chat_id = request.json.get("chat_id")
+
+    messages = ChatManager.get_all_chat_messages(user_id=user_id, chat_id=chat_id)
+
+    chat_session_history_list = []
+    for message in messages[-7:-1]:
+        chat_session_history_list.append(f"{message.role}: {message.content}")
+    chat_session_history = "\n\n".join(chat_session_history_list)
+
+
     rag_engine = RAGEngine()
-    context = rag_engine.retrieve(query=message_content)
+    context = rag_engine.retrieve(query=message_content, chat_session_history=chat_session_history)
 
     return jsonify(context), 200
 
@@ -148,7 +165,7 @@ def inference():
     messages = ChatManager.get_all_chat_messages(user_id=user_id, chat_id=chat_id)
 
     chat_session_history_list = []
-    for message in messages[:-1]:
+    for message in messages[-7:-1]:
         chat_session_history_list.append(f"{message.role}: {message.content}")
 
     chat_session_history = "\n\n".join(chat_session_history_list)
@@ -156,7 +173,7 @@ def inference():
     rag_engine = RAGEngine()
 
     def generate():
-        for output in rag_engine.inference(query=query, chat_session_history=chat_session_history, relevant_articles=context):
+        for output in rag_engine.stream(query=query, chat_session_history=chat_session_history, relevant_articles=context):
             yield output
 
     return Response(generate(), content_type="text/plain")

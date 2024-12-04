@@ -1,5 +1,6 @@
 from app import app
 from app.managers.article_manager import ArticleManager
+from app.managers.user_manager import UserManager
 from app.logger import logger
 from pinecone import Pinecone
 import time
@@ -39,3 +40,7 @@ def delete_old_articles_in_vector_db():
         logger.info(f"Deleted batch of {len(batch_ids)} vectors.")
 
     logger.info(f"Deleted {num_vectors} vectors in total from the vector DB.")
+
+def reset_user_message_counts():
+    UserManager.reset_all_user_message_counts()
+    logger.info("Reset all user message counts to 0.")

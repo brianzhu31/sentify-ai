@@ -10,15 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { login } from "@/utils/auth";
+import { login } from "@/utils/auth-client";
+import { useUserSession } from "@/context/user-session-context";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { setUser } = useUserSession();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,15 +32,17 @@ export default function LoginForm() {
     formData.append("email", email);
     formData.append("password", password);
 
-    const loginError = await login(formData);
-
-    if (loginError) {
-      setError(loginError);
+    try {
+      const loginResponse = await login(formData, setUser);
+      router.push("/companies");
+    } catch (err: any) {
+      setError(err.message);
     }
+
   };
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm rounded-md">
       <form onSubmit={handleLogin}>
         <CardHeader>
           <CardTitle className="text-2xl">Sign In</CardTitle>

@@ -7,6 +7,8 @@ import { fetchUser, fetchSession } from "./actions/fetch-user-session";
 interface UserSessionContextProps {
   user: UserAuthData | undefined;
   session: SessionAuthData | undefined;
+  setUser: (user: UserAuthData | undefined) => void;
+  setSession: (session: SessionAuthData | undefined) => void;
 }
 
 const UserSessionContext = createContext<UserSessionContextProps | undefined>(
@@ -27,7 +29,6 @@ export const UserSessionProvider = ({
     const fetchUserAndSession = async () => {
       const userData = await fetchUser();
       const sessionData = await fetchSession();
-      console.log(sessionData);
       setUser(userData);
       setSession(sessionData);
     };
@@ -36,7 +37,7 @@ export const UserSessionProvider = ({
   }, []);
 
   return (
-    <UserSessionContext.Provider value={{ user, session }}>
+    <UserSessionContext.Provider value={{ user, session, setUser, setSession }}>
       {children}
     </UserSessionContext.Provider>
   );

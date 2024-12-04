@@ -126,6 +126,7 @@ export const fetchChatSession = async (chatID: string, accessToken: string) => {
 
 export const fetchRelevantArticles = async (
   message: string,
+  chatID: string,
   accessToken: string
 ) => {
   try {
@@ -133,6 +134,7 @@ export const fetchRelevantArticles = async (
       `${apiUrl}/api/chat/retrieve`,
       {
         message: message,
+        chat_id: chatID
       },
       {
         headers: {
