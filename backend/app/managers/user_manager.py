@@ -42,11 +42,10 @@ class UserManager:
         user = cls.get_user_by_id(user_id=user_id)
         if user is None:
             raise NotFoundError(f"User {user_id} not found.")
-        if user.plan == "Basic" and user.daily_message_count < 10:
-            return True
-        else:
+        if user.plan == "Basic" and user.daily_message_count >= 10:
             return False
-    
+        return True
+
     @staticmethod
     def reset_all_user_message_counts():
         try:
