@@ -18,11 +18,14 @@ export const login = async (formData: FormData, setUser: (user: UserAuthData | u
     setUser(fetchUserResponse.data);
   }
   if (error) {
-    throw new Error(error.message);
+    return {
+      success: false,
+      error: error.message
+    }
   }
 
   
-  return { message: "Login success" };
+  return { success: true, message: "Login success" };
 };
 
 export const logout = async (setUser: (user: UserAuthData | undefined) => void) => {
@@ -35,5 +38,5 @@ export const logout = async (setUser: (user: UserAuthData | undefined) => void) 
   }
 
   setUser(undefined);
-  return { message: "Logout success" };
+  return { success: true, message: "Logout success" };
 };

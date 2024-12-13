@@ -32,11 +32,12 @@ export default function LoginForm() {
     formData.append("email", email);
     formData.append("password", password);
 
-    try {
-      const loginResponse = await login(formData, setUser);
+    const loginResponse = await login(formData, setUser);
+    if (loginResponse.success) {
       router.push("/companies");
-    } catch (err: any) {
-      setError(err.message);
+    }
+    else {
+      setError(loginResponse.error || "An error occurred.");
     }
 
   };
