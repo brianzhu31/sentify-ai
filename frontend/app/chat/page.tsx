@@ -33,33 +33,42 @@ export default function ChatPage() {
       try {
         setIsMessageSent(true);
         setMessage("");
-        const response = await processMessage(message, session?.access_token);
+        const processMessageResponse = await processMessage(message, session?.access_token);
 
-        if (response.status === "ok") {
-          setMessage("");
-          const newChatSession: ChatItem = {
-            chat_id: response.chat_id,
-            name: response.chat_name,
-            href: `/chat/${response.chat_id}`,
-            last_accessed: response.timestamp,
-          };
-          setChatHistory({
-            ...chatHistory,
-            chats: [newChatSession, ...chatHistory.chats],
-          });
-          router.push(`/chat/${response.chat_id}`);
-        } else {
+        if (processMessageResponse.success) {
+          if (processMessageResponse.data.status === "ok") {
+            setMessage("");
+            const newChatSession: ChatItem = {
+              chat_id: processMessageResponse.data.chat_id,
+              name: processMessageResponse.data.chat_name,
+              href: `/chat/${processMessageResponse.data.chat_id}`,
+              last_accessed: processMessageResponse.data.timestamp,
+            };
+            setChatHistory({
+              ...chatHistory,
+              chats: [newChatSession, ...chatHistory.chats],
+            });
+            router.push(`/chat/${processMessageResponse.data.chat_id}`);
+          } else {
+            toast({
+              variant: "error",
+              description: processMessageResponse.data.message,
+            });
+            setIsMessageSent(false);
+          }
+        }
+        else {
+          setIsMessageSent(false);
           toast({
             variant: "error",
-            description: response.message,
+            description: processMessageResponse.error,
           });
-          setIsMessageSent(false);
         }
       } catch (err: any) {
         setIsMessageSent(false);
         toast({
           variant: "error",
-          description: err.message,
+          description: "An unexpected error occurred.",
         });
       }
     }

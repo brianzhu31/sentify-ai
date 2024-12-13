@@ -25,13 +25,15 @@ export const CompaniesProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const getCompanies = async () => {
-      try {
-        const data = await fetchAllCompaniesPartial();
-        setCompanies(data);
-      } catch (err: any) {
+      const fetchAllCompaniesPartialResponse = await fetchAllCompaniesPartial();
+      if (fetchAllCompaniesPartialResponse.success) {
+        if (fetchAllCompaniesPartialResponse.data) {
+          setCompanies(fetchAllCompaniesPartialResponse.data);
+        }
+      } else {
         toast({
           variant: "error",
-          description: err.message || "An unexpected error occurred",
+          description: fetchAllCompaniesPartialResponse.error,
         });
       }
     };

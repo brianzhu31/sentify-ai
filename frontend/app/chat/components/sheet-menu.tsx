@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useUserSession } from "@/context/user-session-context";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -17,7 +16,6 @@ import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { MenuIcon } from "lucide-react";
 
 export function SheetMenu() {
-  const { user } = useUserSession();
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -34,9 +32,11 @@ export function SheetMenu() {
       </SheetTrigger>
       <SheetContent className="sm:w-72 px-3 h-full flex flex-col" side="left">
         <SheetHeader className="flex items-center justify-center">
-          <SheetTitle className="text-base font-semibold text-center">
-            Market Sentry
-          </SheetTitle>
+          <Link href="/">
+            <SheetTitle className="text-base font-semibold text-center">
+              Market Sentry
+            </SheetTitle>
+          </Link>
         </SheetHeader>
         <SheetDescription></SheetDescription>
         <ChatHistoryContent />

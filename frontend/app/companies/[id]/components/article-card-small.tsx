@@ -1,10 +1,8 @@
 "use client";
 
 import { Article } from "@/types";
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { Newspaper } from "lucide-react";
 import { timeAgo } from "../actions/time";
 
 interface ArticleCardSmallProps {

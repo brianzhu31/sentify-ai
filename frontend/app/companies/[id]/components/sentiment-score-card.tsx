@@ -1,13 +1,10 @@
 "use client";
 
-import { Article } from "@/types";
-import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 

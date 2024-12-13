@@ -21,16 +21,18 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setResponseMessage("");
 
     const formData = new FormData();
     formData.append("email", email);
     formData.append("password", password);
 
-    try {
-      const data = await signUp(formData);
-      setResponseMessage(data.message);
-    } catch (err: any) {
-      setResponseMessage(err.message);
+    const signUpResponse = await signUp(formData);
+    if (signUpResponse.success) {
+      setResponseMessage(signUpResponse.message ?? "");
+    }
+    else {
+      setResponseMessage(signUpResponse.error);
     }
   };
 

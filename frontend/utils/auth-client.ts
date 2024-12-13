@@ -13,9 +13,10 @@ export const login = async (formData: FormData, setUser: (user: UserAuthData | u
   };
 
   const { error } = await supabase.auth.signInWithPassword(loginData);
-  const user = await fetchUser();
-  setUser(user);
-
+  const fetchUserResponse = await fetchUser();
+  if (fetchUserResponse && fetchUserResponse.data) {
+    setUser(fetchUserResponse.data);
+  }
   if (error) {
     throw new Error(error.message);
   }

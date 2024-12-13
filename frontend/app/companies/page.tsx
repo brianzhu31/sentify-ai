@@ -10,8 +10,10 @@ export default function CompaniesPage() {
 
   useEffect(() => {
     const getAllCompanies = async () => {
-      const response = await fetchAllCompaniesWithScore();
-      setCompanies(response);
+      const fetchAllCompaniesWithScoreResponse = await fetchAllCompaniesWithScore();
+      if (fetchAllCompaniesWithScoreResponse.data) {
+        setCompanies(fetchAllCompaniesWithScoreResponse.data);
+      }
     };
     getAllCompanies();
   }, []);

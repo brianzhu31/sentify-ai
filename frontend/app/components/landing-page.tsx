@@ -1,7 +1,6 @@
 "use server";
 
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ChevronRight } from "lucide-react";
 import { MainGraph } from "./main-graph";
 import { StocksCard } from "./stocks-card";
 import { SentimentCard } from "./sentiment-card";

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useUserSession } from "@/context/user-session-context";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/useStore";
 import { ChatHistoryContent } from "./chat-history";
@@ -14,7 +13,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { ChatBubbleIcon, HomeIcon } from "@radix-ui/react-icons";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
 
 export function Sidebar() {
   const sidebar = useStore(useSidebarToggle, (state) => state);

@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { UserAuthData, SessionAuthData } from "@/types";
 
-export const fetchUser = async (): Promise<UserAuthData | undefined> => {
+export const fetchUser = async () => {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.auth.getUser();
@@ -19,17 +19,26 @@ export const fetchUser = async (): Promise<UserAuthData | undefined> => {
       phone_verified: user.user_metadata.phone_verified ?? false,
       sub: user.id ?? "",
     };
-    return userData;
+    return {
+      success: true,
+      data: userData
+    }
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
 
-export const fetchSession = async (): Promise<SessionAuthData | undefined> => {
+export const fetchSession = async () => {
   const supabase = createClient();
   try {
     const { data, error } = await supabase.auth.getSession();
@@ -43,12 +52,21 @@ export const fetchSession = async (): Promise<SessionAuthData | undefined> => {
       access_token: session?.access_token ?? "",
       refresh_token: session?.refresh_token ?? "",
     };
-    return sessionData;
+    return {
+      success: true,
+      data: sessionData
+    }
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };

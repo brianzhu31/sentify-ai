@@ -27,10 +27,14 @@ export const UserSessionProvider = ({
 
   useEffect(() => {
     const fetchUserAndSession = async () => {
-      const userData = await fetchUser();
-      const sessionData = await fetchSession();
-      setUser(userData);
-      setSession(sessionData);
+      const fetchUserResponse = await fetchUser();
+      if (fetchUserResponse && fetchUserResponse.data) {
+        setUser(fetchUserResponse.data);
+      }
+      const fetchSessionResponse = await fetchSession();
+      if (fetchSessionResponse && fetchSessionResponse.data) {
+        setSession(fetchSessionResponse.data)
+      }
     };
 
     fetchUserAndSession();

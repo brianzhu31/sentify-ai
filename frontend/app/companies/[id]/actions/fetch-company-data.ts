@@ -7,62 +7,98 @@ const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
 export const fetchCompanyData = async (
   ticker: string
-): Promise<CompanyFull> => {
+) => {
   try {
     const response = await axios.get(`${apiUrl}/api/company/${ticker}`);
-    return response.data;
+    return {
+      success: true,
+      data: response.data as CompanyFull
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
 
 export const fetchAnalytics = async (
   ticker: string
-): Promise<CompanyAnalytics> => {
+) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/company/analytics/${ticker}`
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data as CompanyAnalytics
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
 
-export const fetchTimeSeries = async (ticker: string): Promise<TimeSeries> => {
+export const fetchTimeSeries = async (ticker: string) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/company/stock/time_series/${ticker}`
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data as TimeSeries
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
 
-export const fetchStockPrice = async (ticker: string): Promise<StockPriceData> => {
+export const fetchStockPrice = async (ticker: string) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/company/stock/price/${ticker}`
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data as StockPriceData
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -71,17 +107,26 @@ export const fetchArticles = async (
   ticker: string,
   page: number,
   limit: number
-): Promise<PaginatedArticlesData> => {
+) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/article/${ticker}?page=${page}&limit=${limit}`
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data as PaginatedArticlesData
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };

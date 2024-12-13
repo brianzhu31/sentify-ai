@@ -37,8 +37,10 @@ export default function CompanyAnalyticsContent() {
 
   const handlePreviousPage = async () => {
     const previousPage = Math.max(1, articlePage - 1);
-    const articlesData = await fetchArticles(ticker, previousPage, 10);
-    setPaginatedArticles(articlesData);
+    const fetchArticlesResponse = await fetchArticles(ticker, previousPage, 10);
+    if (fetchArticlesResponse.data) {
+      setPaginatedArticles(fetchArticlesResponse.data);
+    }
     setArticlePage(previousPage);
   };
 
@@ -47,34 +49,34 @@ export default function CompanyAnalyticsContent() {
       return;
     }
     const nextPage = articlePage + 1;
-    const articlesData = await fetchArticles(ticker, nextPage, 10);
-    setPaginatedArticles(articlesData);
+    const fetchArticlesResponse = await fetchArticles(ticker, nextPage, 10);
+    if (fetchArticlesResponse.data) {
+      setPaginatedArticles(fetchArticlesResponse.data);
+    }
     setArticlePage(nextPage);
   };
 
   useEffect(() => {
     const getAllCompanyData = async () => {
-      try {
-        if (ticker) {
-          const analyticsData = await fetchAnalytics(ticker);
-          setCompanyAnalytics(analyticsData);
-
-          const companyData = await fetchCompanyData(ticker);
-          setCompanyData(companyData);
-
-          const articlesData = await fetchArticles(ticker, articlePage, 10);
-          setPaginatedArticles(articlesData);
-        } else {
-          toast({
-            variant: "error",
-            description: `Company ${ticker} not found!`,
-          });
+      if (ticker) {
+        const fetchAnalyticsResponse = await fetchAnalytics(ticker);
+        if (fetchAnalyticsResponse.data) {
+          setCompanyAnalytics(fetchAnalyticsResponse.data);
         }
-      } catch (err: any) {
-        router.push("/companies");
+
+        const fetchCompanyDataResponse = await fetchCompanyData(ticker);
+        if (fetchCompanyDataResponse.data) {
+          setCompanyData(fetchCompanyDataResponse.data);
+        }
+
+        const fetchArticlesData = await fetchArticles(ticker, articlePage, 10);
+        if (fetchArticlesData.data) {
+          setPaginatedArticles(fetchArticlesData.data);
+        }
+      } else {
         toast({
           variant: "error",
-          description: err.message || "An unexpected error occurred",
+          description: `Company ${ticker} not found!`,
         });
       }
     };

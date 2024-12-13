@@ -17,15 +17,12 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   fetchTimeSeries,
@@ -89,13 +86,17 @@ export function StockGraph({ ticker, companyData }: StockGraphProps) {
 
   useEffect(() => {
     const getTimeSeries = async () => {
-      const fetchedTimeSeries = await fetchTimeSeries(ticker);
-      setTimeSeries(fetchedTimeSeries);
+      const fetchTimeSeriesResponse = await fetchTimeSeries(ticker);
+      if (fetchTimeSeriesResponse.data) {
+        setTimeSeries(fetchTimeSeriesResponse.data);
+      }
     };
 
     const getStockPrice = async () => {
-      const fetchedStockPrice = await fetchStockPrice(ticker);
-      setStockPrice(fetchedStockPrice.price);
+      const fetchStockPriceResponse = await fetchStockPrice(ticker);
+      if (fetchStockPriceResponse.data) {
+        setStockPrice(fetchStockPriceResponse.data.price);
+      }
     };
 
     Promise.all([getTimeSeries(), getStockPrice()]).then(() =>

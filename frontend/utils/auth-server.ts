@@ -17,7 +17,10 @@ export const signUp = async (formData: FormData) => {
   const { data, error } = await supabase.auth.signUp(signUpData);
 
   if (error) {
-    throw new Error(error.message);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 
   const userID = data?.user?.id;
@@ -37,19 +40,26 @@ export const signUp = async (formData: FormData) => {
       }
     );
     return {
+      success: true,
       message: "Registration successful! Please check your email inbox for a verification link to activate your account."
     }
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 }
 
-const deleteUser = async (userId: string) => {
+const deleteUser = async (userID: string) => {
   const supabase = createServiceClient();
 
-  await supabase.auth.admin.deleteUser(userId);
+  await supabase.auth.admin.deleteUser(userID);
 }

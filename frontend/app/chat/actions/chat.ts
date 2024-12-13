@@ -9,7 +9,7 @@ const apiUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 export const fetchChats = async (
   accessToken: string,
   pageNumber?: number
-): Promise<PaginatedChatHistoryData> => {
+) => {
   try {
     const response = await axios.get(
       `${apiUrl}/api/chat/get_chats?page=${pageNumber}`,
@@ -19,13 +19,21 @@ export const fetchChats = async (
         },
       }
     );
-
-    return response.data;
+    return {
+      success: true,
+      data: response.data as PaginatedChatHistoryData
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -37,12 +45,21 @@ export const deleteChat = async (accessToken: string, chatID: string) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -64,12 +81,21 @@ export const updateChatName = async (
         },
       }
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -92,12 +118,21 @@ export const processMessage = async (
         },
       }
     );
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -114,12 +149,21 @@ export const fetchChatSession = async (chatID: string, accessToken: string) => {
       }
     );
 
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -143,12 +187,21 @@ export const fetchRelevantArticles = async (
       }
     );
 
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };
@@ -168,12 +221,21 @@ export const saveOutput = async (
       }
     );
 
-    return response.data;
+    return {
+      success: true,
+      data: response.data
+    };
   } catch (err: any) {
     if (err.response && err.response.data && err.response.data.message) {
-      throw new Error(err.response.data.message);
+      return {
+        success: false,
+        error: err.response.data.message
+      };
     } else {
-      throw new Error("An unexpected error occurred");
+      return {
+        success: false,
+        error: "An unexpected error occurred"
+      };
     }
   }
 };

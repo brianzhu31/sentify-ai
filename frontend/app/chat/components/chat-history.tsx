@@ -1,19 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUserSession } from "@/context/user-session-context";
 import { useChatHistory } from "@/context/chat-history-context";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import InfiniteScroll from "./infinite-scroll";
 import { Loader2 } from "lucide-react";
 import { ChatHistorySublist } from "./chat-history-sublist";
 import { fetchChats } from "../actions/chat";
-import { ChatLink } from "./chat-history-sublist";
-import { ChatEditDropdown } from "./chat-edit-dropdown";
 import { ChatItem } from "@/types";
 import { isToday, isWithinInterval, subDays } from "date-fns";
 
@@ -40,14 +36,17 @@ export function ChatHistoryContent() {
       setLoadingMore(true);
 
       setTimeout(async () => {
-        const data = await fetchChats(session.access_token, pageNumber);
-        setChatHistory({
-          label: data.label,
-          chats: [...chatHistory.chats, ...data.chats],
-          has_more: data.has_more,
-        });
-        setPageNumber(pageNumber + 1);
-        setLoadingMore(false);
+        const fetchChatsResponse = await fetchChats(session.access_token, pageNumber);
+        if (fetchChatsResponse.success && fetchChatsResponse.data) {
+          const data = fetchChatsResponse.data;
+          setChatHistory({
+            label: data.label,
+            chats: [...chatHistory.chats, ...data.chats],
+            has_more: data.has_more,
+          });
+          setPageNumber(pageNumber + 1);
+          setLoadingMore(false);
+        }
       }, 500);
     }
   };
@@ -104,11 +103,6 @@ export function ChatHistoryContent() {
       categorizeChats();
     }
   }, [chatHistory])
-
-  // const { today, yesterday, last7Days, last30Days, older } = categorizeChats(
-  //   chatHistory?.chats || []
-  // );
-
 
   if (!session) {
     return null;

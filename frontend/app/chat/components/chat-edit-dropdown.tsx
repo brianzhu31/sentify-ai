@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
@@ -26,10 +26,7 @@ interface ChatEditDropdownProps {
   name: string;
 }
 
-export function ChatEditDropdown({
-  chatID,
-  name,
-}: ChatEditDropdownProps) {
+export function ChatEditDropdown({ chatID, name }: ChatEditDropdownProps) {
   const { session } = useUserSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { chatHistory, setChatHistory } = useChatHistory();
@@ -42,10 +39,10 @@ export function ChatEditDropdown({
   }
 
   const handleDelete = async () => {
-    try {
-      const response = await deleteChat(session.access_token, chatID);
+    const deleteChatResponse = await deleteChat(session.access_token, chatID);
+    if (deleteChatResponse.success) {
       toast({
-        description: response.message,
+        description: deleteChatResponse.data.message,
       });
 
       const updatedChats = chatHistory.chats.filter(
@@ -58,40 +55,44 @@ export function ChatEditDropdown({
       } else {
         router.refresh();
       }
-    } catch (err: any) {
+    } else {
       toast({
         variant: "error",
-        description: err.message || "An unexpected error occurred",
+        description: deleteChatResponse.error || "An unexpected error occurred",
       });
     }
   };
 
   const handleRename = async (newName: string) => {
-    try {
-      const response = await updateChatName(
-        session.access_token,
-        chatID,
-        newName
-      );
+    const updateChatNameResponse = await updateChatName(
+      session.access_token,
+      chatID,
+      newName
+    );
 
+    if (updateChatNameResponse.success) {
       const updatedChats = chatHistory.chats.map((chat) =>
         chat.chat_id === chatID ? { ...chat, name: newName } : chat
       );
       setChatHistory({ ...chatHistory, chats: updatedChats });
 
       toast({
-        description: response.message,
+        description: updateChatNameResponse.data.message,
       });
-    } catch (err: any) {
+    }
+    else {
       toast({
         variant: "error",
-        description: err.message || "Failed to rename chat",
+        description: updateChatNameResponse.error,
       });
     }
   };
 
   return (
-    <DropdownMenu open={isMenuOpen} onOpenChange={(open) => setIsMenuOpen(open)}>
+    <DropdownMenu
+      open={isMenuOpen}
+      onOpenChange={(open) => setIsMenuOpen(open)}
+    >
       <DropdownMenuTrigger asChild>
         <div className="flex absolute right-2">
           <TooltipProvider delayDuration={300}>
@@ -125,7 +126,11 @@ export function ChatEditDropdown({
               <p>Share</p>
             </div>
           </DropdownMenuItem>
-          <RenameDialog prevName={name} onRenameSubmit={handleRename} onClose={() => setIsMenuOpen(false)}>
+          <RenameDialog
+            prevName={name}
+            onRenameSubmit={handleRename}
+            onClose={() => setIsMenuOpen(false)}
+          >
             <DropdownMenuItem
               className="cursor-pointer"
               onSelect={(e) => e.preventDefault()}

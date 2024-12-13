@@ -79,16 +79,16 @@ const ChatPage = () => {
     if (!session?.access_token) {
       return null;
     }
-    try {
-      const fetchedChatSessionData = await fetchChatSession(
-        chatID,
-        session?.access_token
-      );
-      setChatMessages(fetchedChatSessionData.messages);
-    } catch (err: any) {
+    const fetchChatSessionResponse = await fetchChatSession(
+      chatID,
+      session?.access_token
+    );
+    if (fetchChatSessionResponse.success) {
+      setChatMessages(fetchChatSessionResponse.data.messages);
+    } else {
       toast({
         variant: "error",
-        description: err.message,
+        description: fetchChatSessionResponse.error,
       });
     }
   };
@@ -139,11 +139,13 @@ const ChatPage = () => {
 
     if (firstMessage) {
       setIsAssistantRunning(true);
-      let context = await fetchRelevantArticles(
+      const fetchRelevantArticlesResponse = await fetchRelevantArticles(
         firstMessage,
         chatID,
         session?.access_token
       );
+
+      let context = fetchRelevantArticlesResponse.data;
 
       const streamedOutput = await getStream(firstMessage, context);
       if (streamedOutput?.toLowerCase().startsWith("no relevant data")) {
@@ -184,63 +186,90 @@ const ChatPage = () => {
       setResponseData("");
       setIsAssistantRunning(true);
       try {
-        const response = await processMessage(
+        const processMessageResponse = await processMessage(
           message,
           session?.access_token,
           chatID
         );
 
-        setChatMessages((prevChatMessages: Message[]) => [
-          ...prevChatMessages,
-          {
-            content: message,
-            role: "user",
-          },
-        ]);
-
-        if (response.status === "ok") {
-          let context = await fetchRelevantArticles(
-            message,
-            chatID,
-            session?.access_token
-          );
-
-          const streamedOutput = await getStream(message, context);
-
-          setResponseData("");
-
-          if (streamedOutput?.toLowerCase().startsWith("no relevant data")) {
-            context = [];
-          }
-
-          context = context.map((article: ArticleFullSource) => ({
-            ...(({ text, ticker, ...rest }) => rest)(article),
-          }));
+        if (processMessageResponse.success) {
           setChatMessages((prevChatMessages: Message[]) => [
             ...prevChatMessages,
             {
-              content: streamedOutput || "",
-              role: "assistant",
-              sources: context,
+              content: message,
+              role: "user",
             },
           ]);
 
-          const sendResponse: SendMessageResponse = {
-            message: streamedOutput || "",
-            sources: context,
-            chat_id: chatID,
-          };
+          if (processMessageResponse.data.status === "ok") {
+            const fetchRelevantArticlesResponse = await fetchRelevantArticles(
+              message,
+              chatID,
+              session?.access_token
+            );
 
-          await saveOutput(sendResponse, session?.access_token);
-        } else if (response.status === "not accepted") {
-          setResponseData(response.message);
+            if (fetchRelevantArticlesResponse.success) {
+              let context = fetchRelevantArticlesResponse.data;
+
+              const streamedOutput = await getStream(message, context);
+
+              setResponseData("");
+
+              if (
+                streamedOutput?.toLowerCase().startsWith("no relevant data")
+              ) {
+                context = [];
+              }
+
+              context = context.map((article: ArticleFullSource) => ({
+                ...(({ text, ticker, ...rest }) => rest)(article),
+              }));
+              setChatMessages((prevChatMessages: Message[]) => [
+                ...prevChatMessages,
+                {
+                  content: streamedOutput || "",
+                  role: "assistant",
+                  sources: context,
+                },
+              ]);
+
+              const sendResponse: SendMessageResponse = {
+                message: streamedOutput || "",
+                sources: context,
+                chat_id: chatID,
+              };
+
+              const saveOutputResponse = await saveOutput(
+                sendResponse,
+                session?.access_token
+              );
+              if (!saveOutputResponse.success) {
+                toast({
+                  variant: "error",
+                  description: saveOutputResponse.error,
+                });
+              }
+            } else {
+              toast({
+                variant: "error",
+                description: fetchRelevantArticlesResponse.error,
+              });
+            }
+          } else if (processMessageResponse.data.status === "not accepted") {
+            setResponseData(processMessageResponse.data.message);
+          }
+        } else {
+          toast({
+            variant: "error",
+            description: processMessageResponse.error,
+          });
         }
         setIsAssistantRunning(false);
       } catch (err: any) {
         setIsAssistantRunning(false);
         toast({
           variant: "error",
-          description: err.message,
+          description: "An unexpected error occurred.",
         });
       }
     }
@@ -278,7 +307,7 @@ const ChatPage = () => {
                   <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
                     {message.role}
                   </p>
-                  <p className="text-base text-gray-800 whitespace-pre-wrap">
+                  <p className="text-base text-gray-800 whitespace-pre-wrap break-words">
                     {formatContent(message.content)}
                   </p>
                 </div>
