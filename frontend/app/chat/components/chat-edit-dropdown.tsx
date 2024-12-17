@@ -120,12 +120,12 @@ export function ChatEditDropdown({ chatID, name }: ChatEditDropdownProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">
+          {/* <DropdownMenuItem className="cursor-pointer">
             <div className="flex items-center gap-3">
               <Share2Icon />
               <p>Share</p>
             </div>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <RenameDialog
             prevName={name}
             onRenameSubmit={handleRename}
