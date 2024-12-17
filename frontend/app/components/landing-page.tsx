@@ -1,21 +1,17 @@
 "use server";
 
-import { Button } from "@/components/ui/button";
 import { MainGraph } from "./main-graph";
-import { StocksCard } from "./stocks-card";
-import { SentimentCard } from "./sentiment-card";
-import { ChatCard } from "./chat-card";
 import { SearchBar } from "./search-bar";
-import { Building2, MessageSquare } from "lucide-react";
-import Link from "next/link";
+import { LearnMoreText } from "./learn-more";
+import { DemoSection } from "./demo-section";
 
 export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <section className="h-screen">
         <div className="flex flex-col-reverse h-full lg:flex-row justify-center items-center text-center px-4">
-          <div className="flex flex-col gap-4 animate-fade-up w-full max-w-[550px] mb-[30%] lg:mb-0">
-            <div>
+          <div className="flex flex-col gap-4 animate-fade-up w-full max-w-[550px] mb-[50%] lg:mb-0">
+            <div className="flex flex-col gap-2">
               <p className="font-bold text-5xl">Market Sentry</p>
               <p className="text-slate-500 text-xl">
                 AI-powered financial companion
@@ -25,38 +21,24 @@ export default async function LandingPage() {
           </div>
           <MainGraph />
         </div>
-      </section>
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-            Key Features
-          </h2>
-          <div className="flex flex-wrap gap-8 justify-center">
-            <StocksCard />
-            <SentimentCard />
-            <ChatCard />
-          </div>
+        <div className="flex w-full justify-center align-center">
+          <LearnMoreText />
         </div>
       </section>
-      <section className="py-20 px-4 bg-muted/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
-            Explore
-          </h2>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
-            <Button asChild size="lg" className="w-72">
-              <Link href="/companies">
-                <Building2 className="mr-2 h-5 w-5" />
-                View Companies
-              </Link>
-            </Button>
-            <Button asChild size="lg" className="w-72">
-              <Link href="/chat">
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Chat with Finance Assistant
-              </Link>
-            </Button>
-          </div>
+      <section>
+        <div className="flex flex-col gap-16 px-4 py-24">
+          <DemoSection
+            header="Company Insights"
+            description="Get valuable insights and summaries about top companies across the world. Discover trends and market sentiment from recent financial news and stories."
+            redirect="/companies"
+            videoUrl="https://player.vimeo.com/video/1040198203?autoplay=1&loop=1&muted=1&playsinline=1&controls=0&dnt=1"
+          />
+          <DemoSection
+            header="AI Finance Assistant"
+            description="Ask any finance-related question and receive valuable, real-time insights backed by reliable sources."
+            redirect="/chat"
+            videoUrl="https://player.vimeo.com/video/1040161670?autoplay=1&loop=1&muted=1&playsinline=1&controls=0&dnt=1"
+          />
         </div>
       </section>
       <footer className="bg-background py-8 px-4 border-t">

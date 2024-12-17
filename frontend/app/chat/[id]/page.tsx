@@ -335,7 +335,7 @@ const ChatPage = () => {
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="pb-6">
+      <div className="pb-4 px-4">
         <div className="max-w-4xl mx-auto">
           <Input
             className="w-full h-12 text-sm rounded-lg"
