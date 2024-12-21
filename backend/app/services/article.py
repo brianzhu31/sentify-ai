@@ -110,7 +110,7 @@ class ArticleCollection:
                     break
 
                 page += 1
-                time.sleep(1)
+                time.sleep(2)
 
         article_texts = []
         for article in articles:
